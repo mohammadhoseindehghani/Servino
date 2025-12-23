@@ -6,4 +6,41 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="CategoryAgg\Contracts\AppService\" />
+    <Folder Include="CategoryAgg\Contracts\Data\" />
+    <Folder Include="CategoryAgg\Contracts\Service\" />
+    <Folder Include="CategoryAgg\Dtos\" />
+    <Folder Include="CategoryAgg\Enum\" />
+    <Folder Include="CommentAgg\Contracts\AppService\" />
+    <Folder Include="CommentAgg\Contracts\Data\" />
+    <Folder Include="CommentAgg\Contracts\Service\" />
+    <Folder Include="CommentAgg\Dtos\" />
+    <Folder Include="CommentAgg\Enum\" />
+    <Folder Include="ExpertSkillAgg\Contracts\AppService\" />
+    <Folder Include="ExpertSkillAgg\Contracts\Data\" />
+    <Folder Include="ExpertSkillAgg\Contracts\Service\" />
+    <Folder Include="ExpertSkillAgg\Dtos\" />
+    <Folder Include="ExpertSkillAgg\Enum\" />
+    <Folder Include="HomeServiceAgg\Contracts\AppService\" />
+    <Folder Include="HomeServiceAgg\Contracts\Data\" />
+    <Folder Include="HomeServiceAgg\Contracts\Service\" />
+    <Folder Include="HomeServiceAgg\Dtos\" />
+    <Folder Include="HomeServiceAgg\Enum\" />
+    <Folder Include="RequestAgg\Contracts\AppService\" />
+    <Folder Include="RequestAgg\Contracts\Data\" />
+    <Folder Include="RequestAgg\Contracts\Service\" />
+    <Folder Include="RequestAgg\Dtos\" />
+    <Folder Include="SuggestionAgg\Contracts\AppService\" />
+    <Folder Include="SuggestionAgg\Contracts\Data\" />
+    <Folder Include="SuggestionAgg\Contracts\Service\" />
+    <Folder Include="SuggestionAgg\Dtos\" />
+    <Folder Include="UserAgg\Enum\" />
+    <Folder Include="UserAgg\Dtos\" />
+    <Folder Include="UserAgg\Contracts\Data\" />
+    <Folder Include="UserAgg\Contracts\AppService\" />
+    <Folder Include="UserAgg\Contracts\" />
+    <Folder Include="UserAgg\Contracts\Service\" />
+  </ItemGroup>
+
 </Project>
