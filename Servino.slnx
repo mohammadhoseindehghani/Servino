@@ -1,1 +1,26 @@
-<Solution />
+<Solution>
+  <Folder Name="/framework/">
+    <Project Path="framework/Servino.Framework/Servino.Framework.csproj" Id="903ec914-8adb-47c2-b3b0-1e337002e674" />
+  </Folder>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Domain/" />
+  <Folder Name="/src/Domain/AppService/">
+    <Project Path="src/Domain/AppService/Servino.Domain.AppService/Servino.Domain.AppService.csproj" Id="b95bfc18-292a-4fb9-97f4-48f9eaf3cac7" />
+  </Folder>
+  <Folder Name="/src/Domain/Core/">
+    <Project Path="src/Domain/Core/Servino.Domain.Core/Servino.Domain.Core.csproj" Id="11f991ed-5e71-4629-989e-502abaad8b3d" />
+  </Folder>
+  <Folder Name="/src/Domain/Service/">
+    <Project Path="src/Domain/Service/Servino.Domain.Servcie/Servino.Domain.Servcie.csproj" Id="190fb836-cfb4-4c9c-899a-509df4e04f63" />
+  </Folder>
+  <Folder Name="/src/Infrastructure/" />
+  <Folder Name="/src/Infrastructure/DataAccess/">
+    <Project Path="src/Infrastrucure/DataAccess/Servino.Infa.DataAccess.Repo.EfCore/Servino.Infa.DataAccess.Repo.EfCore.csproj" Id="5e3e11a6-f55b-4694-b1b5-326db7650229" />
+  </Folder>
+  <Folder Name="/src/Infrastructure/Db/">
+    <Project Path="src/Infrastrucure/Db/Servino.Infa.Db.SqlServer.EfCore/Servino.Infa.Db.SqlServer.EfCore.csproj" Id="0f781f93-f4ee-4c59-a8c2-74e7341903ab" />
+  </Folder>
+  <Folder Name="/src/Presentation/">
+    <Project Path="src/Presentation/Servino.Presentation.RazorPagesUI/Servino.Presentation.RazorPagesUI.csproj" Id="add3cde9-a56c-4eaa-9ff8-2292d3e84317" />
+  </Folder>
+</Solution>
