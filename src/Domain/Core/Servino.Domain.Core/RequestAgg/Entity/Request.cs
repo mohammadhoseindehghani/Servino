@@ -1,4 +1,5 @@
 ﻿using Servino.Domain.Core.HomeServiceAgg.Entity;
+using Servino.Domain.Core.LocationAgg.Entity;
 using Servino.Domain.Core.RequestAgg.Enum;
 using Servino.Domain.Core.SuggestionAgg.Entity;
 using Servino.Domain.Core.UserAgg.Entity;
@@ -10,6 +11,8 @@ public class Request
     public string Title { get; set; } 
     public string Description { get; set; }
     public string Address { get; set; }
+    public int CityId { get; set; }
+    public City City { get; set; }
     public DateTime DateRequired { get; set; } 
     public DateTime? DateDone { get; set; } 
     public RequestStatus Status { get; set; }

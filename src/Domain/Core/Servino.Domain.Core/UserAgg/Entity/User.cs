@@ -1,4 +1,5 @@
 ﻿using Servino.Domain.Core._common;
+using Servino.Domain.Core.LocationAgg.Entity;
 
 namespace Servino.Domain.Core.UserAgg.Entity;
 
@@ -8,6 +9,8 @@ public class User : BaseEntity
     public string LastName { get; set; }
     public string Email { get; set; }
     public string MobileNumber { get; set; }
+    public int? CityId { get; set; }
+    public City? City { get; set; }
     public string? ProfileImagePath { get; set; } 
     public decimal Balance { get; set; } 
     public bool IsActive { get; set; }
