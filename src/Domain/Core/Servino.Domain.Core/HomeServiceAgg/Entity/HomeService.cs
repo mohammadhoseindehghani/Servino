@@ -12,7 +12,7 @@ public class HomeService : BaseEntity
     public decimal BasePrice { get; set; } 
     public string? ImagePath { get; set; }
     public bool IsActive { get; set; }
-    public long VisitCount { get; set; } 
+    public int VisitCount { get; set; } 
 
     public int CategoryId { get; set; }
 

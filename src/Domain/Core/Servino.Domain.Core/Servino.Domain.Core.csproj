@@ -16,7 +16,6 @@
     <Folder Include="CommentAgg\Contracts\Data\" />
     <Folder Include="CommentAgg\Contracts\Service\" />
     <Folder Include="CommentAgg\Dtos\" />
-    <Folder Include="CommentAgg\Enum\" />
     <Folder Include="ExpertSkillAgg\Contracts\AppService\" />
     <Folder Include="ExpertSkillAgg\Contracts\Data\" />
     <Folder Include="ExpertSkillAgg\Contracts\Service\" />
