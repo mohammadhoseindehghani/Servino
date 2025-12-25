@@ -17,7 +17,7 @@ public class SuggestionConfigs : IEntityTypeConfiguration<Suggestion>
 
         builder.Property(s => s.SuggestedPrice)
             .IsRequired()
-            .HasPrecision(18, 2);
+            .HasPrecision(18, 0);
 
         builder.Property(s => s.SuggestedDate)
             .IsRequired()

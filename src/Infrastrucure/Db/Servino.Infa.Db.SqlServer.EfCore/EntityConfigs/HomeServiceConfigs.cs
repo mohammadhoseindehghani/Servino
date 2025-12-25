@@ -24,7 +24,7 @@ public class HomeServiceConfigs : IEntityTypeConfiguration<HomeService>
 
         builder.Property(hs => hs.BasePrice)
             .IsRequired()
-            .HasPrecision(18, 2);
+            .HasPrecision(18, 0);
 
         builder.Property(hs => hs.IsActive)
             .HasDefaultValue(true);
