@@ -41,7 +41,7 @@ public class HomeServiceConfigs : IEntityTypeConfiguration<HomeService>
             .HasForeignKey(hs => hs.CategoryId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasMany(hs => hs.ExpertSkills)
+        builder.HasMany(hs => hs.ExpertHomeServices)
             .WithOne(es => es.HomeService)
             .HasForeignKey(es => es.HomeServiceId)
             .OnDelete(DeleteBehavior.Restrict);

@@ -1,14 +1,14 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Servino.Domain.Core.ExpertSkillAgg.Entity;
+using Servino.Domain.Core.ExpertHomeServiceAgg.Entity;
 
 namespace Servino.Infa.Db.SqlServer.EfCore.EntityConfigs;
 
-public class ExpertSkillConfigs : IEntityTypeConfiguration<ExpertSkill>
+public class ExpertHomeServiceConfigs : IEntityTypeConfiguration<ExpertHomeService>
 {
-    public void Configure(EntityTypeBuilder<ExpertSkill> builder)
+    public void Configure(EntityTypeBuilder<ExpertHomeService> builder)
     {
-        builder.ToTable("ExpertSkills");
+        builder.ToTable("ExpertHomeServices");
 
         builder.HasKey(es => new { es.ExpertId, es.HomeServiceId });
 
@@ -17,12 +17,12 @@ public class ExpertSkillConfigs : IEntityTypeConfiguration<ExpertSkill>
             .HasDefaultValueSql("GETDATE()");
 
         builder.HasOne(es => es.Expert)
-            .WithMany(e => e.Skills)
+            .WithMany(e => e.ExpertHomeServices)
             .HasForeignKey(es => es.ExpertId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(es => es.HomeService)
-            .WithMany(h => h.ExpertSkills)
+            .WithMany(h => h.ExpertHomeServices)
             .HasForeignKey(es => es.HomeServiceId)
             .OnDelete(DeleteBehavior.Restrict);
 
