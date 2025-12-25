@@ -12,4 +12,10 @@ public class City : BaseEntity
     public Province Province { get; set; }
     public ICollection<User> Users { get; set; }
     public ICollection<Request> Requests { get; set; }
+
+    public City()
+    {
+        Users = new List<User>();
+        Requests = new List<Request>();
+    }
 }

@@ -17,6 +17,13 @@ public class HomeService : BaseEntity
     public int CategoryId { get; set; }
 
     public Category Category { get; set; }
-    public ICollection<ExpertHomeService> ExpertHomeServices { get; set; } 
-    public ICollection<Request> Requests { get; set; } 
-}
+    public ICollection<ExpertHomeService> ExpertHomeServices { get; set; }
+    public ICollection<Request> Requests { get; set; }
+
+    public HomeService()
+    {
+        Requests = new List<Request>();
+        ExpertHomeServices = new List<ExpertHomeService>();
+    }
+
+    }

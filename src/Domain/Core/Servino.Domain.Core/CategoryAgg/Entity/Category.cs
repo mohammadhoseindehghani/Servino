@@ -13,5 +13,11 @@ public class Category : BaseEntity
 
     public Category? Parent { get; set; }
     public ICollection<Category> SubCategories { get; set; } 
-    public ICollection<HomeService> Services { get; set; } 
+    public ICollection<HomeService> Services { get; set; }
+
+    public Category()
+    {
+        SubCategories = new List<Category>();
+        Services = new List<HomeService>();
+    }
 }

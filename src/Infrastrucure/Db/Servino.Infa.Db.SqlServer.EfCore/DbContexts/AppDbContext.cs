@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Servino.Domain.Core._common;
+using Servino.Domain.Core._common.Base;
 using Servino.Domain.Core.CategoryAgg.Entity;
 using Servino.Domain.Core.CommentAgg.Entity;
 using Servino.Domain.Core.ExpertHomeServiceAgg.Entity;
@@ -28,10 +29,22 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<Category> Categories { get; set; }
     public DbSet<ExpertHomeService> ExpertHomeServices { get; set; }
 
+
+    public DbSet<RequestStatusLookup> RequestStatuses { get; set; }
+    public DbSet<SuggestionStatusLookup> SuggestionStatuses { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
+        builder.Entity<RequestStatusLookup>()
+            .Property(x => x.Id)
+            .ValueGeneratedNever(); 
+
+        builder.Entity<SuggestionStatusLookup>()
+            .Property(x => x.Id)
+            .ValueGeneratedNever();
     }
 
     public override int SaveChanges()
