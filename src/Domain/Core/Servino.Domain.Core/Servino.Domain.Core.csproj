@@ -8,9 +8,7 @@
 
   <ItemGroup>
     <Folder Include="CategoryAgg\Contracts\AppService\" />
-    <Folder Include="CategoryAgg\Contracts\Data\" />
     <Folder Include="CategoryAgg\Contracts\Service\" />
-    <Folder Include="CategoryAgg\Dtos\" />
     <Folder Include="CategoryAgg\Enum\" />
     <Folder Include="CommentAgg\Contracts\AppService\" />
     <Folder Include="CommentAgg\Contracts\Data\" />
@@ -22,7 +20,6 @@
     <Folder Include="ExpertHomeServiceAgg\Dtos\" />
     <Folder Include="ExpertHomeServiceAgg\Enum\" />
     <Folder Include="HomeServiceAgg\Contracts\AppService\" />
-    <Folder Include="HomeServiceAgg\Contracts\Data\" />
     <Folder Include="HomeServiceAgg\Contracts\Service\" />
     <Folder Include="HomeServiceAgg\Dtos\" />
     <Folder Include="HomeServiceAgg\Enum\" />
