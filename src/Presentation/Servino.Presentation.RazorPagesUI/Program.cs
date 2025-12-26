@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Servino.Infa.Db.SqlServer.EfCore.DataSeed;
 using Servino.Infa.Db.SqlServer.EfCore.DbContexts;
 
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddScoped<DbInitializer>();
 
 
 builder.Services.AddRazorPages();
@@ -27,22 +26,22 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 
 var app = builder.Build();
 
+var initializer2 = app.Services.GetRequiredService<DbInitializer>(); 
 using (var scope = app.Services.CreateScope())
 {
+    var services = scope.ServiceProvider;
     try
     {
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var initializer = services.GetRequiredService<DbInitializer>();
+        await initializer.SeedAsync(); 
 
-        var initializer = new DbInitializer(userManager, roleManager, context);
-        initializer.Seed();
-
-        Console.WriteLine("--- Database Init Done Successfully ---");
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogInformation("Database initialization completed successfully.");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"--- Error in DB Init: {ex.Message} ---");
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding the database.");
     }
 }
 

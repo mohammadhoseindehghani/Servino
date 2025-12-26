@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Servino.Domain.Core.CategoryAgg.Entity;
-using Servino.Domain.Core.ExpertHomeServiceAgg.Entity;
-using Servino.Domain.Core.HomeServiceAgg.Entity;
+using Microsoft.Extensions.Logging;
 using Servino.Domain.Core.LocationAgg.Entity;
 using Servino.Domain.Core.RequestAgg.Enum;
 using Servino.Domain.Core.SuggestionAgg.Enum;
@@ -15,155 +13,224 @@ namespace Servino.Infa.Db.SqlServer.EfCore.DataSeed;
 public class DbInitializer(
     UserManager<IdentityUser> userManager,
     RoleManager<IdentityRole> roleManager,
-    AppDbContext context)
+    AppDbContext context,
+    ILogger<DbInitializer> logger)
 {
-    private readonly UserManager<IdentityUser> _userManager = userManager;
-    private readonly RoleManager<IdentityRole> _roleManager = roleManager;
-    private readonly AppDbContext _context = context;
 
-    public void Seed()
+    public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
-        _context.Database.Migrate();
+        try
+        {
+            logger.LogInformation("Starting database initialization...");
 
-        SeedEnums();
-        SeedRoles();
-        SeedLocations();
-        SeedServices();
-        SeedUsers();
+            await context.Database.MigrateAsync(cancellationToken);
+
+            await SeedEnumsAsync(cancellationToken);
+            await SeedRolesAsync(cancellationToken);
+            await SeedLocationsAsync(cancellationToken);
+            await SeedServicesAsync(cancellationToken);
+            await SeedUsersAsync(cancellationToken);
+
+            logger.LogInformation("Database initialization completed successfully.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "An error occurred during database initialization.");
+            throw; 
+        }
     }
 
-    private void SeedEnums()
+    private async Task SeedEnumsAsync(CancellationToken ct)
     {
-        if (!_context.RequestStatuses.Any())
+        if (!await context.RequestStatuses.AnyAsync(ct))
         {
-            foreach (var item in Enum.GetValues(typeof(RequestStatus)))
+            foreach (var item in Enum.GetValues<RequestStatus>())
             {
-                _context.RequestStatuses.Add(new RequestStatusLookup { Id = (int)item, Title = item.ToString() });
+                context.RequestStatuses.Add(new RequestStatusLookup
+                {
+                    Id = (int)item,
+                    Title = item.ToString() 
+                });
             }
         }
-        if (!_context.SuggestionStatuses.Any())
+
+        if (!await context.SuggestionStatuses.AnyAsync(ct))
         {
-            foreach (var item in Enum.GetValues(typeof(SuggestionStatus)))
+            foreach (var item in Enum.GetValues<SuggestionStatus>())
             {
-                _context.SuggestionStatuses.Add(new SuggestionStatusLookup { Id = (int)item, Title = item.ToString() });
+                context.SuggestionStatuses.Add(new SuggestionStatusLookup
+                {
+                    Id = (int)item,
+                    Title = item.ToString()
+                });
             }
         }
-        _context.SaveChanges();
+
+        await context.SaveChangesAsync(ct);
     }
 
-    private void SeedRoles()
+    private async Task SeedRolesAsync(CancellationToken ct)
     {
-        if (!_roleManager.RoleExistsAsync("Admin").Result) _roleManager.CreateAsync(new IdentityRole("Admin")).Wait();
-        if (!_roleManager.RoleExistsAsync("Expert").Result) _roleManager.CreateAsync(new IdentityRole("Expert")).Wait();
-        if (!_roleManager.RoleExistsAsync("Customer").Result) _roleManager.CreateAsync(new IdentityRole("Customer")).Wait();
-    }
+        string[] roles = { "Admin", "Expert", "Customer" };
 
-    private void SeedLocations()
-    {
-        if (!_context.Provinces.Any())
+        foreach (var role in roles)
         {
-            foreach (var provinceData in IranLocationData.Provinces)
+            if (!await roleManager.RoleExistsAsync(role))
             {
-                var province = new Province
-                {
-                    Title = provinceData.Key
-  
-                };
+                await roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
+    }
 
-                foreach (var cityTitle in provinceData.Value)
+    private async Task SeedLocationsAsync(CancellationToken ct)
+    {
+        if (await context.Provinces.AnyAsync(ct))
+            return;
+
+        foreach (var provinceData in IranLocationData.Provinces)
+        {
+            var province = new Province { Title = provinceData.Key };
+
+            foreach (var cityTitle in provinceData.Value)
+            {
+                province.Cities.Add(new City { Title = cityTitle });
+            }
+
+            context.Provinces.Add(province);
+        }
+
+        await context.SaveChangesAsync(ct);
+    }
+
+    private async Task SeedServicesAsync(CancellationToken ct)
+    {
+        if (await context.Categories.AnyAsync(ct))
+            return;
+
+        var allCategories = ServiceData.GetCategories();
+        context.Categories.AddRange(allCategories);
+        await context.SaveChangesAsync(ct);
+    }
+
+    private async Task SeedUsersAsync(CancellationToken ct)
+    {
+        await CreateAdminAsync("admin@servino.com", "مدیر", "سیستم", "09120000000", ct);
+        await CreateExpertAsync("expert@servino.com", "اکسپرت", "سیستم", "09130000000", ct);
+        await CreateCustomerAsync("customer@servino.com", "علی", "مشتری", "09121111111", ct);
+    }
+
+    private async Task CreateAdminAsync(string email, string firstName, string lastName, string mobile, CancellationToken ct)
+    {
+        if (await userManager.Users.AnyAsync(u => u.Email == email, ct))
+            return;
+
+        var identityUser = new IdentityUser
+        {
+            UserName = email,
+            Email = email,
+            EmailConfirmed = true
+        };
+
+        var result = await userManager.CreateAsync(identityUser, "123456");
+
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(identityUser, "Admin");
+
+            var admin = new Admin
+            {
+                User = new User
                 {
-                    province.Cities.Add(new City { Title = cityTitle });
+                    IdentityId = identityUser.Id,
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Email = email,
+                    MobileNumber = mobile,
+                    IsActive = true,
+                    CreatedAt = DateTime.Now
                 }
-                _context.Provinces.Add(province);
-            }
+            };
 
-            _context.SaveChanges();
+            context.Admins.Add(admin);
+            await context.SaveChangesAsync(ct);
         }
     }
 
-    private void SeedServices()
+    private async Task CreateExpertAsync(string email, string firstName, string lastName, string mobile, CancellationToken ct)
     {
-        if (!_context.Categories.Any())
+        if (await userManager.Users.AnyAsync(u => u.Email == email, ct))
+            return;
+
+        var identityUser = new IdentityUser
         {
-            var allCategories = ServiceData.GetCategories();
-            _context.Categories.AddRange(allCategories);
-            _context.SaveChanges();
+            UserName = email,
+            Email = email,
+            EmailConfirmed = true
+        };
+
+        var result = await userManager.CreateAsync(identityUser, "123456");
+
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(identityUser, "Expert");
+
+            var expert = new Expert
+            {
+                User = new User
+                {
+                    IdentityId = identityUser.Id,
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Email = email,
+                    MobileNumber = mobile,
+                    IsActive = true,
+                    CreatedAt = DateTime.Now
+                }
+            };
+
+            context.Experts.Add(expert);
+            await context.SaveChangesAsync(ct);
         }
     }
 
-    private void SeedUsers()
+    private async Task CreateCustomerAsync(string email, string firstName, string lastName, string mobile, CancellationToken ct)
     {
-        if (!_userManager.Users.Any(u => u.Email == "admin@servino.com"))
-        {
-            var user = new IdentityUser { UserName = "admin@servino.com", Email = "admin@servino.com", EmailConfirmed = true };
-            var result = _userManager.CreateAsync(user, "123456").Result;
-            if (result.Succeeded)
-            {
-                _userManager.AddToRoleAsync(user, "Admin").Wait();
-                _context.Admins.Add(new Admin
-                {
-                    User = new User
-                    {
-                        IdentityId = user.Id,
-                        FirstName = "مدیر",
-                        LastName = "سیستم",
-                        Email = "admin@servino.com",
-                        MobileNumber = "09120000000",
-                        IsActive = true,
-                        CreatedAt = DateTime.Now
-                    }
-                });
-            }
-        }
+        if (await userManager.Users.AnyAsync(u => u.Email == email, ct))
+            return;
 
-        if (!_userManager.Users.Any(u => u.Email == "expert@servino.com"))
+        var identityUser = new IdentityUser
         {
-            var user = new IdentityUser { UserName = "expert@servino.com", Email = "expert@servino.com", EmailConfirmed = true };
-            var result = _userManager.CreateAsync(user, "123456").Result;
-            if (result.Succeeded)
-            {
-                _userManager.AddToRoleAsync(user, "expert").Wait();
-                _context.Admins.Add(new Admin
-                {
-                    User = new User
-                    {
-                        IdentityId = user.Id,
-                        FirstName = "اکسپرت",
-                        LastName = "سیستم",
-                        Email = "expert@servino.com",
-                        MobileNumber = "09130000000",
-                        IsActive = true,
-                        CreatedAt = DateTime.Now
-                    }
-                });
-            }
-        }
+            UserName = email,
+            Email = email,
+            EmailConfirmed = true
+        };
 
-        if (!_userManager.Users.Any(u => u.Email == "customer@servino.com"))
+        var result = await userManager.CreateAsync(identityUser, "123456");
+
+        if (result.Succeeded)
         {
-            var user = new IdentityUser { UserName = "customer@servino.com", Email = "customer@servino.com", EmailConfirmed = true };
-            var result = _userManager.CreateAsync(user, "123456").Result;
-            if (result.Succeeded)
+            await userManager.AddToRoleAsync(identityUser, "Customer");
+
+            var cityId = await context.Cities.OrderBy(c => c.Id).Select(c => c.Id).FirstAsync(ct);
+
+            var customer = new Customer
             {
-                _userManager.AddToRoleAsync(user, "Customer").Wait();
-                var cityId = _context.Cities.First().Id;
-                _context.Customers.Add(new Customer
+                User = new User
                 {
-                    User = new User
-                    {
-                        IdentityId = user.Id,
-                        FirstName = "علی",
-                        LastName = "مشتری",
-                        Email = "customer@servino.com",
-                        MobileNumber = "09121111111",
-                        CityId = cityId,
-                        IsActive = true,
-                        Balance = 500000,
-                        CreatedAt = DateTime.Now
-                    }
-                });
-            }
+                    IdentityId = identityUser.Id,
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Email = email,
+                    MobileNumber = mobile,
+                    CityId = cityId,
+                    IsActive = true,
+                    Balance = 500000,
+                    CreatedAt = DateTime.Now
+                }
+            };
+
+            context.Customers.Add(customer);
+            await context.SaveChangesAsync(ct);
         }
-        _context.SaveChanges();
     }
 }

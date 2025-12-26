@@ -10,6 +10,7 @@ namespace Servino.Domain.Core.RequestAgg.Entity;
 
 public class Request : BaseEntity
 {
+    public int Id { get; set; }
     public string Title { get; set; } 
     public string Description { get; set; }
     public string Address { get; set; }
