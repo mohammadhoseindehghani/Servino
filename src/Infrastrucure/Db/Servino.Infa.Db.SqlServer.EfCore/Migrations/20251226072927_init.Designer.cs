@@ -12,7 +12,7 @@ using Servino.Infa.Db.SqlServer.EfCore.DbContexts;
 namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251225164212_init")]
+    [Migration("20251226072927_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -989,7 +989,7 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("Servino.Domain.Core._common.Base.RequestStatusLookup", b =>
+            modelBuilder.Entity("Servino.Infa.Db.SqlServer.EfCore.LookUps.RequestStatusLookup", b =>
                 {
                     b.Property<int>("Id")
                         .HasColumnType("int");
@@ -1002,7 +1002,7 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                     b.ToTable("RequestStatuses");
                 });
 
-            modelBuilder.Entity("Servino.Domain.Core._common.Base.SuggestionStatusLookup", b =>
+            modelBuilder.Entity("Servino.Infa.Db.SqlServer.EfCore.LookUps.SuggestionStatusLookup", b =>
                 {
                     b.Property<int>("Id")
                         .HasColumnType("int");

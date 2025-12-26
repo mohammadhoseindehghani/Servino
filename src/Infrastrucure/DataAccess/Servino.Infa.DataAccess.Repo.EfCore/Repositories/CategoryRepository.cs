@@ -26,7 +26,7 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
     public async Task<bool> UpdateAsync(CategoryDto command, CancellationToken ct)
     {
         var affectedRows = await context.Categories
-            .Where(c => c.Id == command.Id)
+            .Where(c => c.Id == command.Id && !c.IsDeleted)
             .ExecuteUpdateAsync(setters => setters
                     .SetProperty(c => c.Title, command.Title)
                     .SetProperty(c => c.ParentId, command.ParentId)

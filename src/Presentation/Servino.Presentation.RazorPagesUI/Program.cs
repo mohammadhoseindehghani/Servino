@@ -26,7 +26,6 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 
 var app = builder.Build();
 
-var initializer2 = app.Services.GetRequiredService<DbInitializer>(); 
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;

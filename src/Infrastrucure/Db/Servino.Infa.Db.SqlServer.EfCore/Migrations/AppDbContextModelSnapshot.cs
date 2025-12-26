@@ -986,7 +986,7 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("Servino.Domain.Core._common.Base.RequestStatusLookup", b =>
+            modelBuilder.Entity("Servino.Infa.Db.SqlServer.EfCore.LookUps.RequestStatusLookup", b =>
                 {
                     b.Property<int>("Id")
                         .HasColumnType("int");
@@ -999,7 +999,7 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                     b.ToTable("RequestStatuses");
                 });
 
-            modelBuilder.Entity("Servino.Domain.Core._common.Base.SuggestionStatusLookup", b =>
+            modelBuilder.Entity("Servino.Infa.Db.SqlServer.EfCore.LookUps.SuggestionStatusLookup", b =>
                 {
                     b.Property<int>("Id")
                         .HasColumnType("int");

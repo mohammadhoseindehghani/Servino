@@ -29,15 +29,15 @@ public class HomeServiceRepository(AppDbContext context) : IHomeServiceRepositor
     {
 
         var affectedRows = await context.HomeServices
-            .Where(x => x.Id == command.Id)
+            .Where(hs => hs.Id == command.Id && !hs.IsDeleted)
             .ExecuteUpdateAsync(setters => setters
-                .SetProperty(x => x.Title, command.Title)
-                .SetProperty(x => x.BasePrice, command.BasePrice)
-                .SetProperty(x => x.CategoryId, command.CategoryId)
-                .SetProperty(x => x.ShortDescription, command.ShortDescription)
-                .SetProperty(x => x.ImagePath, command.ImagePath) 
+                .SetProperty(hs => hs.Title, command.Title)
+                .SetProperty(hs => hs.BasePrice, command.BasePrice)
+                .SetProperty(hs => hs.CategoryId, command.CategoryId)
+                .SetProperty(hs => hs.ShortDescription, command.ShortDescription)
+                .SetProperty(hs => hs.ImagePath, command.ImagePath) 
                                                                  
-                .SetProperty(x => x.UpdatedAt, DateTime.Now),
+                .SetProperty(hs => hs.UpdatedAt, DateTime.Now),
                 ct);
 
         return affectedRows > 0;
@@ -46,10 +46,10 @@ public class HomeServiceRepository(AppDbContext context) : IHomeServiceRepositor
     public async Task<bool> DeleteAsync(int id, CancellationToken ct)
     {
         var affectedRows = await context.HomeServices
-            .Where(x => x.Id == id)
+            .Where(hs => hs.Id == id)
             .ExecuteUpdateAsync(setters => setters
-                .SetProperty(x => x.IsDeleted, true)
-                .SetProperty(x => x.DeletedAt, DateTime.Now), 
+                .SetProperty(hs => hs.IsDeleted, true)
+                .SetProperty(hs => hs.DeletedAt, DateTime.Now), 
                 ct);
 
         return affectedRows > 0;
