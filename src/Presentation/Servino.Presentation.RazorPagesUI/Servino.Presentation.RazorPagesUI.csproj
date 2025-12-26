@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Infrastrucure\DataAccess\Servino.Infa.DataAccess.Repo.EfCore\Servino.Infa.DataAccess.Repo.EfCore.csproj" />
     <ProjectReference Include="..\..\Infrastrucure\Db\Servino.Infa.Db.SqlServer.EfCore\Servino.Infa.Db.SqlServer.EfCore.csproj" />
   </ItemGroup>
 

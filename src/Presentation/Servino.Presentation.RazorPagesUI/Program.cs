@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Servino.Domain.Core.CategoryAgg.Contracts.Data;
+using Servino.Domain.Core.HomeServiceAgg.Contracts.Data;
+using Servino.Infa.DataAccess.Repo.EfCore.Repositories;
 using Servino.Infa.Db.SqlServer.EfCore.DataSeed;
 using Servino.Infa.Db.SqlServer.EfCore.DbContexts;
 
@@ -23,6 +26,10 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
     })
     .AddEntityFrameworkStores<AppDbContext>() 
     .AddDefaultTokenProviders();
+
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IHomeServiceRepository, HomeServiceRepository>();
+
 
 var app = builder.Build();
 
