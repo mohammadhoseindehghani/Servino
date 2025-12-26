@@ -46,34 +46,4 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
             .Property(x => x.Id)
             .ValueGeneratedNever();
     }
-
-    public override int SaveChanges()
-    {
-        SetAuditDates();
-        return base.SaveChanges();
-    }
-
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
-    {
-        SetAuditDates();
-        return base.SaveChangesAsync(cancellationToken);
-    }
-
-    private void SetAuditDates()
-    {
-        var entries = ChangeTracker.Entries<BaseEntity>();
-
-        foreach (var entry in entries)
-        {
-            if (entry.State == EntityState.Added)
-            {
-                if (entry.Entity.CreatedAt == default)
-                    entry.Entity.CreatedAt = DateTime.Now;
-            }
-            else if (entry.State == EntityState.Modified)
-            {
-                entry.Entity.UpdatedAt = DateTime.Now;
-            }
-        }
-    }
 }
