@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Servino.Domain.Core._common;
-using Servino.Domain.Core._common.Base;
 using Servino.Domain.Core.CategoryAgg.Entity;
 using Servino.Domain.Core.CommentAgg.Entity;
 using Servino.Domain.Core.ExpertHomeServiceAgg.Entity;
@@ -10,6 +9,7 @@ using Servino.Domain.Core.LocationAgg.Entity;
 using Servino.Domain.Core.RequestAgg.Entity;
 using Servino.Domain.Core.SuggestionAgg.Entity;
 using Servino.Domain.Core.UserAgg.Entity;
+using Servino.Infa.Db.SqlServer.EfCore.LookUps;
 
 namespace Servino.Infa.Db.SqlServer.EfCore.DbContexts;
 

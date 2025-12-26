@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Servino.Domain.Core._common.Base;
 using Servino.Domain.Core.CategoryAgg.Entity;
 using Servino.Domain.Core.ExpertHomeServiceAgg.Entity;
 using Servino.Domain.Core.HomeServiceAgg.Entity;
@@ -9,6 +8,7 @@ using Servino.Domain.Core.RequestAgg.Enum;
 using Servino.Domain.Core.SuggestionAgg.Enum;
 using Servino.Domain.Core.UserAgg.Entity;
 using Servino.Infa.Db.SqlServer.EfCore.DbContexts;
+using Servino.Infa.Db.SqlServer.EfCore.LookUps;
 
 namespace Servino.Infa.Db.SqlServer.EfCore.DataSeed;
 

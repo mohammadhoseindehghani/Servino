@@ -1,4 +1,4 @@
-﻿namespace Servino.Domain.Core._common.Base;
+﻿namespace Servino.Infa.Db.SqlServer.EfCore.LookUps;
 
 public class RequestStatusLookup
 {

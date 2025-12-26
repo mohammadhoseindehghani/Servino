@@ -2,7 +2,7 @@
 
 public enum SuggestionStatus
 {
-    Pending, 
-    Accepted, 
-    Rejected 
+    Pending = 1, 
+    Accepted = 2, 
+    Rejected =3
 }
