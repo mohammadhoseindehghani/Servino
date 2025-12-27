@@ -9,6 +9,7 @@ using Servino.Infa.Db.SqlServer.EfCore.DbContexts;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<DbInitializer>();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 
 builder.Services.AddRazorPages();
@@ -58,6 +59,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
 app.UseRouting();
 
