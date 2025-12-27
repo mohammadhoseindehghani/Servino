@@ -1,0 +1,275 @@
+﻿@page
+@model Servino.Presentation.RazorPagesUI.Areas.Admin.Pages.HomeServiceManagerModel
+@{
+    Layout = "Layouts/_ContentNavbarLayout";
+    ViewData["Title"] = "مدیریت خدمات خانگی";
+}
+
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.dist.css">
+    <link rel="stylesheet" href="~/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.dist.css">
+    <link rel="stylesheet" href="~/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.dist.css">
+    <link rel="stylesheet" href="~/vendor/libs/sweetalert2/sweetalert2.dist.css">
+}
+
+@section VendorScripts {
+    <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.dist.js"></script>
+    <script src="~/vendor/libs/datatables-bs5/i18n/fa.dist.js"></script>
+    <script src="~/vendor/libs/sweetalert2/sweetalert2.dist.js"></script>
+}
+
+<h4 class="py-3 mb-4">
+    <span class="text-muted fw-light">مدیریت محتوا /</span> خدمات خانگی
+</h4>
+
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="content-left">
+                        <span>کل خدمات</span>
+                        <h3 class="mb-0 me-2">156</h3>
+                    </div>
+                    <div class="avatar">
+                        <span class="avatar-initial rounded bg-label-primary">
+                            <i class="ti ti-tool ti-sm"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="content-left">
+                        <span>خدمات فعال</span>
+                        <h3 class="mb-0 me-2 text-success">142</h3>
+                    </div>
+                    <div class="avatar">
+                        <span class="avatar-initial rounded bg-label-success">
+                            <i class="ti ti-check ti-sm"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="content-left">
+                        <span>کل بازدیدها</span>
+                        <h3 class="mb-0 me-2">48,920</h3>
+                    </div>
+                    <div class="avatar">
+                        <span class="avatar-initial rounded bg-label-info">
+                            <i class="ti ti-eye ti-sm"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="content-left">
+                        <span>کل درخواست‌ها</span>
+                        <h3 class="mb-0 me-2">3,847</h3>
+                    </div>
+                    <div class="avatar">
+                        <span class="avatar-initial rounded bg-label-warning">
+                            <i class="ti ti-file-description ti-sm"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="card-title mb-0">لیست خدمات خانگی</h5>
+        <button type="button" class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#addServiceOffcanvas">
+            <i class="ti ti-plus me-1"></i> افزودن خدمت جدید
+        </button>
+    </div>
+
+    <div class="card-datatable table-responsive">
+        <table id="servicesTable" class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th></th>
+                    <th>تصویر</th>
+                    <th>عنوان خدمت</th>
+                    <th>دسته‌بندی</th>
+                    <th>قیمت پایه</th>
+                    <th>تعداد کارشناسان</th>
+                    <th>تعداد درخواست</th>
+                    <th>بازدید</th>
+                    <th>وضعیت</th>
+                    <th>تاریخ ایجاد</th>
+                    <th>عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td></td>
+                    <td>
+                        <img src="~/img/services/plumbing.png" class="rounded" width="50" height="50" alt="لوله‌کشی">
+                    </td>
+                    <td>
+                        <div>
+                            <strong>لوله‌کشی و تعمیر تأسیسات</strong>
+                            <small class="text-muted d-block">تعمیر شیرآلات، لوله، پکیج و ...</small>
+                        </div>
+                    </td>
+                    <td>تأسیسات و لوله‌کشی</td>
+                    <td><strong>150,000</strong> ریال</td>
+                    <td><span class="badge bg-label-info">28</span></td>
+                    <td><span class="badge bg-label-primary">312</span></td>
+                    <td>5,420</td>
+                    <td><span class="badge bg-label-success">فعال</span></td>
+                    <td>۱۴۰۳/۰۸/۲۰</td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-icon btn-sm btn-warning" title="ویرایش"
+                                    data-bs-toggle="offcanvas" data-bs-target="#editServiceOffcanvas" data-id="12">
+                                <i class="ti ti-edit"></i>
+                            </button>
+                            <button class="btn btn-icon btn-sm btn-info" title="تغییر وضعیت">
+                                <i class="ti ti-toggle-left"></i>
+                            </button>
+                            <button class="btn btn-icon btn-sm btn-danger" title="حذف"
+                                    onclick="confirmServiceDelete(12, 'لوله‌کشی و تعمیر تأسیسات')">
+                                <i class="ti ti-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td></td>
+                    <td>
+                        <img src="~/img/services/cleaning.png" class="rounded" width="50" height="50" alt="نظافت">
+                    </td>
+                    <td>
+                        <div>
+                            <strong>نظافت منزل و راه‌پله</strong>
+                            <small class="text-muted d-block">شستشو، جارو، گردگیری کامل</small>
+                        </div>
+                    </td>
+                    <td>نظافت و خانه‌داری</td>
+                    <td><strong>280,000</strong> ریال</td>
+                    <td><span class="badge bg-label-info">45</span></td>
+                    <td><span class="badge bg-label-primary">589</span></td>
+                    <td>12,850</td>
+                    <td><span class="badge bg-label-success">فعال</span></td>
+                    <td>۱۴۰۳/۰۶/۱۵</td>
+                    <td><!-- همان دکمه‌ها --></td>
+                </tr>
+
+                <tr>
+                    <td></td>
+                    <td>
+                        <img src="~/img/services/repair.png" class="rounded" width="50" height="50" alt="تعمیرات">
+                    </td>
+                    <td>
+                        <div>
+                            <strong>تعمیر یخچال و فریزر</strong>
+                        </div>
+                    </td>
+                    <td>تعمیر لوازم خانگی</td>
+                    <td><strong>220,000</strong> ریال</td>
+                    <td><span class="badge bg-label-info">18</span></td>
+                    <td><span class="badge bg-label-primary">156</span></td>
+                    <td>3,210</td>
+                    <td><span class="badge bg-label-danger">غیرفعال</span></td>
+                    <td>۱۴۰۳/۱۱/۰۵</td>
+                    <td><!-- همان دکمه‌ها --></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#servicesTable').DataTable({
+            language: { url: '/vendor/libs/datatables-bs5/i18n/fa.dist.js' },
+            responsive: true,
+            order: [[9, 'desc']], 
+            columnDefs: [
+                { orderable: false, targets: [0, 1, 10] },
+                { className: "text-center", targets: [1, 5, 6, 7, 8] }
+            ],
+            pageLength: 25
+        });
+    });
+
+    function confirmServiceDelete(id, title) {
+        Swal.fire({
+            title: 'آیا از حذف خدمت مطمئن هستید؟',
+            text: `"${title}" و تمام ارتباط‌های آن حذف خواهد شد!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'بله، حذف کن',
+            cancelButtonText: 'لغو',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire('حذف شد!', 'خدمت با موفقیت حذف گردید.', 'success');
+            }
+        });
+    }
+</script>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="addServiceOffcanvas">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">افزودن خدمت جدید</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form>
+            <div class="mb-3">
+                <label class="form-label">عنوان خدمت</label>
+                <input type="text" class="form-control" placeholder="مثال: تعمیر پکیج دیواری" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">توضیح کوتاه</label>
+                <textarea class="form-control" rows="3" placeholder="توضیح مختصری درباره خدمت..."></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">دسته‌بندی</label>
+                <select class="select2 form-select">
+                    <option value="">انتخاب دسته‌بندی</option>
+                    <option value="1">تأسیسات و لوله‌کشی</option>
+                    <option value="2">نظافت و خانه‌داری</option>
+                    <option value="3">تعمیر لوازم خانگی</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">قیمت پایه (ریال)</label>
+                <input type="number" class="form-control" placeholder="150000" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">تصویر خدمت</label>
+                <input type="file" class="form-control" accept="image/*" />
+            </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="isActiveAdd" checked />
+                <label class="form-check-label" for="isActiveAdd">فعال باشد</label>
+            </div>
+            <div class="text-end">
+                <button type="button" class="btn btn-label-secondary me-2" data-bs-dismiss="offcanvas">لغو</button>
+                <button type="submit" class="btn btn-primary">ذخیره خدمت</button>
+            </div>
+        </form>
+    </div>
+</div>

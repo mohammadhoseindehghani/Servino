@@ -1,4 +1,165 @@
 ﻿@page
 @model Servino.Presentation.RazorPagesUI.Areas.Customer.Pages.ProfileModel
 @{
+    Layout = "Layouts/_ContentNavbarLayout";
+    ViewData["Title"] = "پروفایل";
 }
+
+
+
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/select2/select2.dist.css" />
+    <link rel="stylesheet" href="~/vendor/libs/&#64;form-validation/umd/styles/index.min.css" />
+    <link rel="stylesheet" href="~/vendor/libs/animate-css/animate.dist.css" />
+    <link rel="stylesheet" href="~/vendor/libs/sweetalert2/sweetalert2.dist.css" />
+}
+
+@section VendorScripts {
+    <script src="~/vendor/libs/select2/select2.dist.js"></script>
+    <script src="~/vendor/libs/select2/i18n/fa.dist.js"></script>
+    <script src="~/vendor/libs/&#64;form-validation/umd/bundle/popular.min.js"></script>
+    <script src="~/vendor/libs/&#64;form-validation/umd/plugin-bootstrap5/index.min.js"></script>
+    <script src="~/vendor/libs/&#64;form-validation/umd/plugin-auto-focus/index.min.js"></script>
+    <script src="~/vendor/libs/cleavejs/cleave.dist.js"></script>
+    <script src="~/vendor/libs/cleavejs/cleave-phone.dist.js"></script>
+    <script src="~/vendor/libs/sweetalert2/sweetalert2.dist.js"></script>
+}
+
+@section PageScripts {
+    <script src="~/js/pages-account-settings-account.dist.js"></script>
+}
+
+@* ************** Content ************** *@
+
+<h4 class="py-3 mb-4">
+    <span class="text-muted fw-light">تنظیمات حساب /</span>
+    حساب کاربری
+</h4>
+
+<div class="row">
+    <div class="col-md-12">
+        <ul class="nav nav-pills flex-column flex-md-row mb-4">
+            <li class="nav-item"><a class="nav-link active" href="javascript:void(0);"><i class="ti-xs ti ti-users me-1"></i> حساب کاربری</a></li>
+            <li class="nav-item"><a class="nav-link" href="Security"><i class="ti-xs ti ti-lock me-1"></i> امنیت حساب</a></li>
+        </ul>
+        <div class="card mb-4">
+            <h5 class="card-header">جزئیات پروفایل کارشناس</h5>
+            <!-- Account -->
+            <div class="card-body">
+                <div class="d-flex align-items-start align-items-sm-center gap-4">
+                    <img src="~/img/avatars/14.png"
+                         alt="آواتار کارشناس"
+                         class="d-block w-px-100 h-px-100 rounded"
+                         id="uploadedAvatar" />
+                    <div class="button-wrapper">
+                        <label for="upload" class="btn btn-primary me-2 mb-3" tabindex="0">
+                            <span class="d-none d-sm-block">آپلود عکس جدید</span>
+                            <i class="ti ti-upload d-block d-sm-none"></i>
+                            <input type="file" id="upload" class="account-file-input" hidden accept="image/png, image/jpeg, image/jpg" />
+                        </label>
+                        <button type="button" class="btn btn-label-secondary account-image-reset mb-3">
+                            <i class="ti ti-refresh-dot d-block d-sm-none"></i>
+                            <span class="d-none d-sm-block">حذف عکس</span>
+                        </button>
+                        <div class="text-muted small">حداکثر ۵ مگابایت - فرمت‌های مجاز: PNG, JPEG, JPG</div>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-0">
+            <div class="card-body">
+                <form id="formExpertSettings" method="POST">
+                    <div class="row">
+                        <div class="mb-3 col-md-6">
+                            <label class="form-label" for="firstName">نام کوچک</label>
+                            <input class="form-control" type="text" id="firstName" name="firstName" value="نوید" autofocus />
+                        </div>
+                        <div class="mb-3 col-md-6">
+                            <label class="form-label" for="lastName">نام خانوادگی</label>
+                            <input class="form-control" type="text" id="lastName" name="lastName" value="محمدزاده" />
+                        </div>
+                        <div class="mb-3 col-md-6">
+                            <label class="form-label" for="email">ایمیل</label>
+                            <input class="form-control" type="email" id="email" name="email" value="expert@example.com" />
+                        </div>
+                        <div class="mb-3 col-md-6">
+                            <label class="form-label" for="phoneNumber">شماره موبایل</label>
+                            <div class="input-group input-group-merge">
+                                <span class="input-group-text">IR (+98)</span>
+                                <input class="form-control ltr" type="text" id="phoneNumber" name="phoneNumber"
+                                       value="9101234567" placeholder="910 000 0000" />
+                            </div>
+                        </div>
+
+                        <!-- admin expert -->
+                        <div class="mb-3 col-md-12">
+                            <label class="form-label" for="bio">بیوگرافی (معرفی کوتاه خودتان)</label>
+                            <textarea class="form-control" id="bio" name="bio" rows="4"
+                                      placeholder="توضیح مختصری درباره تخصص و تجربه خود بنویسید...">من متخصص تعمیرات لوازم خانگی با بیش از ۱۰ سال تجربه هستم...</textarea>
+                        </div>
+
+                        <div class="mb-3 col-md-12">
+                            <label class="form-label" for="address">آدرس کامل (محل ارائه خدمات)</label>
+                            <input class="form-control" type="text" id="address" name="address"
+                                   value="تهران، خیابان آزادی، پلاک ۱۲۳"
+                                   placeholder="ایران، تهران، خیابان ..." />
+                        </div>
+
+                        <div class="mb-3 col-md-6">
+                            <label class="form-label" for="city">شهر</label>
+                            <select class="select2 form-select" id="city" name="city">
+                                <option value="">انتخاب شهر</option>
+                                <option value="1" selected>تهران</option>
+                                <option value="2">اصفهان</option>
+                                <option value="3">شیراز</option>
+                                <option value="4">مشهد</option>
+                                <option value="5">تبریز</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3 col-md-6">
+                            <label class="form-label" for="shebaNumber">شماره شبا (برای تسویه حساب)</label>
+                            <input class="form-control ltr" type="text" id="shebaNumber" name="shebaNumber"
+                                   value="IR120150000012345678901234"
+                                   placeholder="IR000000000000000000000000" />
+                        </div>
+
+                        <div class="mb-3 col-md-6">
+                            <label class="form-label" for="bankCardNumber">شماره کارت بانکی (اختیاری)</label>
+                            <input class="form-control ltr" type="text" id="bankCardNumber" name="bankCardNumber"
+                                   value="6037-9912-3456-7890"
+                                   placeholder="0000-0000-0000-0000" />
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary me-2">ذخیره تغییرات</button>
+                        <button type="reset" class="btn btn-label-secondary">لغو</button>
+                    </div>
+                </form>
+            </div>
+            <!-- /Account -->
+        </div>
+
+        <!-- delete account -->
+        <div class="card mt-4">
+            <h5 class="card-header">حذف حساب کاربری</h5>
+            <div class="card-body">
+                <div class="mb-3 col-12 mb-0">
+                    <div class="alert alert-warning">
+                        <h6 class="alert-heading mb-1">آیا مطمئن هستید که می‌خواهید حساب خود را حذف کنید؟</h6>
+                        <p class="mb-0">پس از حذف حساب، تمام اطلاعات، پیشنهادها و سابقه خدمات شما برای همیشه حذف خواهد شد و قابل بازگشت نیست.</p>
+                    </div>
+                </div>
+                <form id="formAccountDeactivation" onsubmit="return false">
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="accountActivation" name="accountActivation" />
+                        <label class="form-check-label" for="accountActivation">
+                            تأیید می‌کنم که می‌خواهم حساب کاربری خود را حذف کنم
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-danger deactivate-account">حذف حساب کاربری</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
