@@ -7,7 +7,6 @@ namespace Servino.Presentation.RazorPagesUI.Pages
     {
         public void OnGet()
         {
-
         }
     }
 }
