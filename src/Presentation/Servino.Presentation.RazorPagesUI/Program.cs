@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Servino.Domain.AppService;
+using Servino.Domain.Core.CategoryAgg.Contracts.AppService;
 using Servino.Domain.Core.CategoryAgg.Contracts.Data;
+using Servino.Domain.Core.CategoryAgg.Contracts.Service;
 using Servino.Domain.Core.CommentAgg.Contracts.AppService;
 using Servino.Domain.Core.CommentAgg.Contracts.Data;
 using Servino.Domain.Core.CommentAgg.Contracts.Service;
@@ -15,6 +17,7 @@ using Servino.Infa.DataAccess.Repo.EfCore.Repositories;
 using Servino.Infa.Db.SqlServer.EfCore.DataSeed;
 using Servino.Infa.Db.SqlServer.EfCore.DbContexts;
 using Servino.Infa.Db.SqlServer.EfCore.Identity.Service;
+using Servino.Presentation.RazorPagesUI.Services.File;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,7 +50,6 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IHomeServiceRepository, HomeServiceRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -57,13 +59,17 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 
 
 
 builder.Services.AddScoped<IUserAppService, UserAppService>();
 builder.Services.AddScoped<IUserAppService, UserAppService>();
 builder.Services.AddScoped<ICommentAppService, CommentAppService>();
+builder.Services.AddScoped<ICategoryAppService, CategoryAppService>();
 
+
+builder.Services.AddScoped<IFileService, FileService>();
 
 
 

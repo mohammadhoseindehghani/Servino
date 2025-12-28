@@ -81,7 +81,8 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
                 Title = c.Title,
                 ParentTitle = c.Parent != null ? c.Parent.Title : "-", 
                 SubCategoriesCount = c.SubCategories.Count, 
-                IsActive = c.IsActive
+                IsActive = c.IsActive,
+                ImagePath = c.ImagePath
             })
             .ToListAsync(ct);
     }

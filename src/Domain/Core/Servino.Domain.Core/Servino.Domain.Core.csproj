@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="CategoryAgg\Contracts\AppService\" />
     <Folder Include="CategoryAgg\Contracts\Service\" />
     <Folder Include="CategoryAgg\Enum\" />
     <Folder Include="ExpertHomeServiceAgg\Contracts\AppService\" />
