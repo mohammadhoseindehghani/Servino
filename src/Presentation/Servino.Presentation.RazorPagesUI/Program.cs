@@ -8,7 +8,9 @@ using Servino.Domain.Core.CategoryAgg.Contracts.Service;
 using Servino.Domain.Core.CommentAgg.Contracts.AppService;
 using Servino.Domain.Core.CommentAgg.Contracts.Data;
 using Servino.Domain.Core.CommentAgg.Contracts.Service;
+using Servino.Domain.Core.HomeServiceAgg.Contracts.AppService;
 using Servino.Domain.Core.HomeServiceAgg.Contracts.Data;
+using Servino.Domain.Core.HomeServiceAgg.Contracts.Service;
 using Servino.Domain.Core.UserAgg.Contracts.AppService;
 using Servino.Domain.Core.UserAgg.Contracts.Data;
 using Servino.Domain.Core.UserAgg.Contracts.Service;
@@ -60,6 +62,7 @@ builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IHomeServiceService, HomeServiceService>();
 
 
 
@@ -67,6 +70,8 @@ builder.Services.AddScoped<IUserAppService, UserAppService>();
 builder.Services.AddScoped<IUserAppService, UserAppService>();
 builder.Services.AddScoped<ICommentAppService, CommentAppService>();
 builder.Services.AddScoped<ICategoryAppService, CategoryAppService>();
+builder.Services.AddScoped<IHomeServiceAppService, HomeServiceAppService>();
+
 
 
 builder.Services.AddScoped<IFileService, FileService>();

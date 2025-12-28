@@ -15,7 +15,6 @@
     <Folder Include="ExpertHomeServiceAgg\Dtos\" />
     <Folder Include="ExpertHomeServiceAgg\Enum\" />
     <Folder Include="HomeServiceAgg\Contracts\AppService\" />
-    <Folder Include="HomeServiceAgg\Contracts\Service\" />
     <Folder Include="HomeServiceAgg\Dtos\" />
     <Folder Include="HomeServiceAgg\Enum\" />
     <Folder Include="LocationAgg\Contracts\AppService\" />

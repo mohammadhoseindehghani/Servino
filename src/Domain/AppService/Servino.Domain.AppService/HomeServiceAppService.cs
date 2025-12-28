@@ -1,0 +1,107 @@
+﻿using Servino.Domain.Core._common;
+using Servino.Domain.Core.HomeServiceAgg.Contracts.AppService;
+using Servino.Domain.Core.HomeServiceAgg.Contracts.Service;
+using Servino.Domain.Core.HomeServiceAgg.Dtos;
+
+namespace Servino.Domain.AppService;
+
+public class HomeServiceAppService(IHomeServiceService homeServiceService) : IHomeServiceAppService
+{
+    public async Task<Result<bool>> CreateAsync(HomeServiceDto command, CancellationToken ct)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(command.Title))
+                return Result<bool>.Failure("عنوان خدمت نمی‌تواند خالی باشد.");
+
+            if (command.BasePrice < 0)
+                return Result<bool>.Failure("قیمت پایه نمی‌تواند منفی باشد.");
+
+            if (command.CategoryId <= 0)
+                return Result<bool>.Failure("انتخاب دسته‌بندی الزامی است.");
+
+            var isCreated = await homeServiceService.CreateAsync(command, ct);
+
+            if (!isCreated)
+                return Result<bool>.Failure("خطایی در ثبت خدمت رخ داد.");
+
+            return Result<bool>.Success(true, "خدمت جدید با موفقیت ثبت شد.");
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Failure($"خطای سیستمی: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<bool>> UpdateAsync(HomeServiceDto command, CancellationToken ct)
+    {
+        try
+        {
+            if (command.Id <= 0)
+                return Result<bool>.Failure("شناسه خدمت نامعتبر است.");
+
+            if (command.BasePrice < 0)
+                return Result<bool>.Failure("قیمت پایه نمی‌تواند منفی باشد.");
+
+            var isUpdated = await homeServiceService.UpdateAsync(command, ct);
+
+            if (!isUpdated)
+                return Result<bool>.Failure("خدمت یافت نشد یا ویرایش انجام نشد.");
+
+            return Result<bool>.Success(true, "خدمت با موفقیت ویرایش شد.");
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Failure($"خطای سیستمی: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<bool>> DeleteAsync(int id, CancellationToken ct)
+    {
+        try
+        {
+
+            var isDeleted = await homeServiceService.DeleteAsync(id, ct);
+
+            if (!isDeleted)
+                return Result<bool>.Failure("خدمت یافت نشد.");
+
+            return Result<bool>.Success(true, "خدمت با موفقیت حذف شد.");
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Failure($"خطای سیستمی: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<HomeServiceDto>> GetByIdAsync(int id, CancellationToken ct)
+    {
+        try
+        {
+            var service = await homeServiceService.GetByIdAsync(id, ct);
+
+            if (service is null)
+                return Result<HomeServiceDto>.Failure("خدمت مورد نظر یافت نشد.", "404");
+
+            return Result<HomeServiceDto>.Success(service);
+        }
+        catch (Exception ex)
+        {
+            return Result<HomeServiceDto>.Failure($"خطای سیستمی: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<List<HomeServiceSummaryDto>>> GetAllAsync(PaginationRequestDto search, CancellationToken ct)
+    {
+        try
+        {
+            var services = await homeServiceService.GetAllAsync(search, ct);
+
+            return Result<List<HomeServiceSummaryDto>>.Success(services);
+        }
+        catch (Exception ex)
+        {
+            return Result<List<HomeServiceSummaryDto>>.Failure($"خطای سیستمی: {ex.Message}");
+        }
+    }
+}

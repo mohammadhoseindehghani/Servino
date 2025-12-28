@@ -9,10 +9,10 @@ public class HomeService : BaseEntity
 {
     public string Title { get; set; }
     public string? ShortDescription { get; set; }
-    public decimal BasePrice { get; set; } 
+    public decimal BasePrice { get; set; }
     public string? ImagePath { get; set; }
     public bool IsActive { get; set; }
-    public int VisitCount { get; set; } 
+    public int VisitCount { get; set; }
 
     public int CategoryId { get; set; }
 
@@ -26,4 +26,4 @@ public class HomeService : BaseEntity
         ExpertHomeServices = new List<ExpertHomeService>();
     }
 
-    }
+}
