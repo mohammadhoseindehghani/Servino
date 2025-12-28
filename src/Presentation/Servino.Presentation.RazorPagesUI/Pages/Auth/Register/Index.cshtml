@@ -29,62 +29,103 @@
 <div class="authentication-wrapper authentication-cover authentication-bg">
     <div class="authentication-inner row">
 
-        <!-- /Left Text -->
         <div class="d-none d-lg-flex col-lg-7 p-0">
             <div class="auth-cover-bg auth-cover-bg-color d-flex justify-content-center align-items-center">
                 <img src="~/img/illustrations/auth-register-illustration-light.png" alt="auth-register-cover" class="img-fluid my-5 auth-illustration" data-app-light-img="illustrations/auth-register-illustration-light.png" data-app-dark-img="illustrations/auth-register-illustration-dark.png">
-
                 <img src="~/img/illustrations/bg-shape-image-light.png" alt="auth-register-cover" class="platform-bg" data-app-light-img="illustrations/bg-shape-image-light.png" data-app-dark-img="illustrations/bg-shape-image-dark.png">
             </div>
         </div>
-        <!-- /Left Text -->
-        <!-- Register -->
         <div class="d-flex col-12 col-lg-5 align-items-center p-sm-5 p-4">
             <div class="w-px-400 mx-auto">
-                <!-- Logo -->
                 <div class="app-brand mb-4">
                     <a href="/" class="app-brand-link gap-2">
                         <span class="app-brand-logo demo">@await Html.PartialAsync("../_Partials/_Macros")</span>
                     </a>
                 </div>
-                <!-- /Logo -->
                 <h3 class="mb-1">شروع همه چی از اینجا 🚀</h3>
                 <p class="mb-4">مدیریت برنامه خود را آسان و سرگرم کننده کنید!</p>
 
-                <form id="formAuthentication" class="mb-3" action="~/" method="GET">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <form id="formAuthentication" class="mb-3" method="POST">
+
                     <div class="mb-3">
-                        <label class="form-label" for="username">نام کاربری</label>
-                        <input autofocus class="form-control" id="username" name="username" placeholder="نام کاربری خود را وارد کنید" type="text" />
+                        <label class="form-label" asp-for="Input.UserName">نام کاربری</label>
+                        <input autofocus class="form-control" asp-for="Input.UserName" placeholder="نام کاربری خود را وارد کنید" type="text" />
+                        <span asp-validation-for="Input.UserName" class="text-danger"></span>
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label" for="email">ایمیل</label>
-                        <input class="form-control" id="email" name="email" placeholder="ایمیل خود را وارد کنید" type="text" />
+                        <label class="form-label" asp-for="Input.Email">ایمیل</label>
+                        <input class="form-control" asp-for="Input.Email" placeholder="ایمیل خود را وارد کنید" type="text" />
+                        <span asp-validation-for="Input.Email" class="text-danger"></span>
                     </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" asp-for="Input.PhoneNumber">شماره موبایل</label>
+                        <input class="form-control" asp-for="Input.PhoneNumber" placeholder="0912..." type="text" />
+                        <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                    </div>
+
                     <div class="mb-3 form-password-toggle">
-                        <label class="form-label" for="password">کلمه عبور</label>
+                        <label class="form-label" asp-for="Input.Password">کلمه عبور</label>
                         <div class="input-group input-group-merge">
-                            <input type="password" id="password" class="form-control" name="password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-describedby="password" />
+                            <input type="password" asp-for="Input.Password" class="form-control" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-describedby="password" />
                             <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
                         </div>
+                        <span asp-validation-for="Input.Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label d-block">قصد دارید چگونه فعالیت کنید؟</label>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="form-check custom-option custom-option-icon">
+                                    <label class="form-check-label custom-option-content" for="roleCustomer">
+                                        <span class="custom-option-body">
+                                            <i class='ti ti-user fs-3 mb-2'></i>
+                                            <span class="custom-option-title">مشتری</span>
+                                            <small>درخواست خدمات دارم</small>
+                                        </span>
+                                        <input name="Input.Role" class="form-check-input" type="radio" value="Customer" id="roleCustomer" checked />
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check custom-option custom-option-icon">
+                                    <label class="form-check-label custom-option-content" for="roleExpert">
+                                        <span class="custom-option-body">
+                                            <i class='ti ti-briefcase fs-3 mb-2'></i>
+                                            <span class="custom-option-title">متخصص</span>
+                                            <small>ارائه خدمات می‌دهم</small>
+                                        </span>
+                                        <input name="Input.Role" class="form-check-input" type="radio" value="Expert" id="roleExpert" />
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <span asp-validation-for="Input.Role" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3">
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="terms-conditions" name="terms">
+                            <input class="form-check-input" type="checkbox" id="terms-conditions" asp-for="Input.TermsAccepted">
                             <label class="form-check-label" for="terms-conditions">
                                 من با سیاست
                                 <a href="javascript:void(0);">حفظ حریم خصوصی و شرایط</a>
                                 موافقت می کنم
                             </label>
                         </div>
+                        <span asp-validation-for="Input.TermsAccepted" class="text-danger"></span>
                     </div>
-                    <button class="btn btn-primary d-grid w-100">ثبت نام</button>
+
+                    <button class="btn btn-primary d-grid w-100" type="submit">ثبت نام</button>
 
                 </form>
 
                 <p class="text-center">
                     <span>در حال حاضر یک حساب کاربری دارید؟</span>
-                    <a href="/Auth/Login/Cover">
+                    <a href="/Auth/Login/Index">
                         <span>وارد شوید</span>
                     </a>
                 </p>
@@ -108,7 +149,5 @@
                 </div>
             </div>
         </div>
-        <!-- /Register -->
     </div>
 </div>
-

@@ -10,10 +10,6 @@
     <Folder Include="CategoryAgg\Contracts\AppService\" />
     <Folder Include="CategoryAgg\Contracts\Service\" />
     <Folder Include="CategoryAgg\Enum\" />
-    <Folder Include="CommentAgg\Contracts\AppService\" />
-    <Folder Include="CommentAgg\Contracts\Data\" />
-    <Folder Include="CommentAgg\Contracts\Service\" />
-    <Folder Include="CommentAgg\Dtos\" />
     <Folder Include="ExpertHomeServiceAgg\Contracts\AppService\" />
     <Folder Include="ExpertHomeServiceAgg\Contracts\Data\" />
     <Folder Include="ExpertHomeServiceAgg\Contracts\Service\" />
@@ -38,11 +34,7 @@
     <Folder Include="SuggestionAgg\Contracts\Service\" />
     <Folder Include="SuggestionAgg\Dtos\" />
     <Folder Include="UserAgg\Enum\" />
-    <Folder Include="UserAgg\Dtos\" />
-    <Folder Include="UserAgg\Contracts\Data\" />
     <Folder Include="UserAgg\Contracts\AppService\" />
-    <Folder Include="UserAgg\Contracts\" />
-    <Folder Include="UserAgg\Contracts\Service\" />
   </ItemGroup>
 
 </Project>

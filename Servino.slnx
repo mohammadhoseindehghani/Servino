@@ -11,7 +11,7 @@
     <Project Path="src/Domain/Core/Servino.Domain.Core/Servino.Domain.Core.csproj" Id="11f991ed-5e71-4629-989e-502abaad8b3d" />
   </Folder>
   <Folder Name="/src/Domain/Service/">
-    <Project Path="src/Domain/Service/Servino.Domain.Servcie/Servino.Domain.Servcie.csproj" Id="190fb836-cfb4-4c9c-899a-509df4e04f63" />
+    <Project Path="src/Domain/Service/Servino.Domain.Servcie/Servino.Domain.Service.csproj" Id="190fb836-cfb4-4c9c-899a-509df4e04f63" />
   </Folder>
   <Folder Name="/src/Infrastructure/" />
   <Folder Name="/src/Infrastructure/DataAccess/">

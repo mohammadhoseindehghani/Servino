@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Servino.Domain.Core._common;
 using Servino.Domain.Core.CategoryAgg.Entity;
 using Servino.Domain.Core.CommentAgg.Entity;
 using Servino.Domain.Core.ExpertHomeServiceAgg.Entity;

@@ -1,10 +1,20 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Servino.Domain.AppService;
 using Servino.Domain.Core.CategoryAgg.Contracts.Data;
+using Servino.Domain.Core.CommentAgg.Contracts.AppService;
+using Servino.Domain.Core.CommentAgg.Contracts.Data;
+using Servino.Domain.Core.CommentAgg.Contracts.Service;
 using Servino.Domain.Core.HomeServiceAgg.Contracts.Data;
+using Servino.Domain.Core.UserAgg.Contracts.AppService;
+using Servino.Domain.Core.UserAgg.Contracts.Data;
+using Servino.Domain.Core.UserAgg.Contracts.Service;
+using Servino.Domain.Service;
 using Servino.Infa.DataAccess.Repo.EfCore.Repositories;
 using Servino.Infa.Db.SqlServer.EfCore.DataSeed;
 using Servino.Infa.Db.SqlServer.EfCore.DbContexts;
+using Servino.Infa.Db.SqlServer.EfCore.Identity.Service;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +25,13 @@ builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddRazorPages();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection")));
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Auth/Login";
+        options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    });
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
     {
@@ -29,7 +46,25 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
     .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IHomeServiceRepository, HomeServiceRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+
+
+builder.Services.AddScoped<IIdentityService, IdentityService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+
+
+builder.Services.AddScoped<IUserAppService, UserAppService>();
+builder.Services.AddScoped<IUserAppService, UserAppService>();
+builder.Services.AddScoped<ICommentAppService, CommentAppService>();
+
+
 
 
 var app = builder.Build();

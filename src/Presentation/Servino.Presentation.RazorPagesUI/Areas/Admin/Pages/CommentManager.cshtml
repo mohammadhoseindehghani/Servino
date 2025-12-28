@@ -28,8 +28,8 @@
             <div class="card-body">
                 <div class="d-flex align-items-start justify-content-between">
                     <div class="content-left">
-                        <span>کل نظرات</span>
-                        <h3 class="mb-0 me-2">1,284</h3>
+                        <span>تعداد در صفحه</span>
+                        <h3 class="mb-0 me-2">@Model.Comments.Count</h3>
                     </div>
                     <div class="avatar">
                         <span class="avatar-initial rounded bg-label-primary">
@@ -40,166 +40,154 @@
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex align-items-start justify-content-between">
-                    <div class="content-left">
-                        <span>تایید شده</span>
-                        <h3 class="mb-0 me-2 text-success">1,105</h3>
-                    </div>
-                    <div class="avatar">
-                        <span class="avatar-initial rounded bg-label-success">
-                            <i class="ti ti-check ti-sm"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex align-items-start justify-content-between">
-                    <div class="content-left">
-                        <span>در انتظار تأیید</span>
-                        <h3 class="mb-0 me-2 text-warning">156</h3>
-                    </div>
-                    <div class="avatar">
-                        <span class="avatar-initial rounded bg-label-warning">
-                            <i class="ti ti-clock ti-sm"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex align-items-start justify-content-between">
-                    <div class="content-left">
-                        <span>امتیاز میانگین</span>
-                        <h3 class="mb-0 me-2">4.6 <i class="ti ti-star-filled text-warning ti-xs"></i></h3>
-                    </div>
-                    <div class="avatar">
-                        <span class="avatar-initial rounded bg-label-info">
-                            <i class="ti ti-star ti-sm"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <div class="card">
-    <div class="card-header d-flex align-items-center justify-content-between">
-        <h5 class="card-title mb-0">لیست نظرات کاربران</h5>
-        <div class="btn-group">
-            <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
-                <i class="ti ti-filter me-1"></i> فیلتر وضعیت
-            </button>
-            <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="javascript:void(0);" data-filter="all">همه</a></li>
-                <li><a class="dropdown-item" href="javascript:void(0);" data-filter="approved">تایید شده</a></li>
-                <li><a class="dropdown-item" href="javascript:void(0);" data-filter="pending">در انتظار تأیید</a></li>
-            </ul>
+    <div class="card-header border-bottom">
+        <h5 class="card-title mb-3">لیست نظرات کاربران</h5>
+        <div class="d-flex justify-content-between align-items-center row pb-2 gap-3 gap-md-0">
+            <div class="col-md-6 user_plan">
+                <form method="get">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="SearchKey" value="@Model.SearchKey" placeholder="جستجو در متن یا عنوان...">
+                        <button class="btn btn-outline-primary" type="submit">جستجو</button>
+                        @if (!string.IsNullOrEmpty(Model.SearchKey))
+                        {
+                            <a asp-page="./CommentManager" class="btn btn-outline-secondary">حذف فیلتر</a>
+                        }
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
-    <div class="card-datatable table-responsive">
-        <table id="commentsTable" class="table table-hover">
+    <div class="table-responsive">
+        <table class="table table-hover">
             <thead class="table-light">
                 <tr>
-                    <th></th>
+                    <th>#</th>
                     <th>مشتری</th>
                     <th>کارشناس</th>
                     <th>امتیاز</th>
-                    <th>عنوان نظر</th>
-                    <th>متن نظر (خلاصه)</th>
-                    <th>درخواست</th>
+                    <th>عنوان</th>
                     <th>وضعیت</th>
                     <th>تاریخ</th>
                     <th>عملیات</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td></td>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <img src="~/img/avatars/3.png" class="rounded-circle me-2" width="32" height="32" alt="مشتری">
-                            <div>مهتاب کرامتی</div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <img src="~/img/avatars/7.png" class="rounded-circle me-2" width="32" height="32" alt="کارشناس">
-                            <div>رضا احمدی</div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="d-flex">
-                            <i class="ti ti-star-filled text-warning"></i>
-                            <i class="ti ti-star-filled text-warning"></i>
-                            <i class="ti ti-star-filled text-warning"></i>
-                            <i class="ti ti-star-filled text-warning"></i>
-                            <i class="ti ti-star-filled text-warning"></i>
-                        </div>
-                    </td>
-                    <td>عالی بود!</td>
-                    <td class="text-truncate" style="max-width: 200px;">
-                        کار خیلی تمیز و سریع انجام شد. کارشناس بسیار مودب و حرفه‌ای بود...
-                    </td>
-                    <td>#R1024</td>
-                    <td><span class="badge bg-label-success">تایید شده</span></td>
-                    <td>۱۴۰۴/۰۹/۱۰</td>
-                    <td>
-                        <div class="d-flex gap-1">
-                            <button class="btn btn-icon btn-sm btn-info" title="مشاهده متن کامل"
-                                    data-bs-toggle="modal" data-bs-target="#viewCommentModal"
-                                    data-title="عالی بود!" data-text="کار خیلی تمیز و سریع انجام شد. کارشناس بسیار مودب و حرفه‌ای بود. حتماً دوباره از خدماتش استفاده می‌کنم.">
-                                <i class="ti ti-eye"></i>
-                            </button>
-                            <button class="btn btn-icon btn-sm btn-success" title="تایید نظر"
-                                    onclick="approveComment(45, true)">
-                                <i class="ti ti-check"></i>
-                            </button>
-                            <button class="btn btn-icon btn-sm btn-danger" title="رد نظر"
-                                    onclick="approveComment(45, false)">
-                                <i class="ti ti-x"></i>
-                            </button>
-                            <button class="btn btn-icon btn-sm btn-outline-danger" title="حذف"
-                                    onclick="confirmCommentDelete(45)">
-                                <i class="ti ti-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
+                @if (Model.Comments.Any())
+                {
+                    @foreach (var item in Model.Comments)
+                    {
+                        <tr>
+                            <td>@item.Id</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar avatar-sm me-2">
+                                        <span class="avatar-initial rounded-circle bg-label-info">@item.CustomerName.Substring(0, 1)</span>
+                                    </div>
+                                    <div>@item.CustomerName</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar avatar-sm me-2">
+                                        <span class="avatar-initial rounded-circle bg-label-warning">@item.ExpertName.Substring(0, 1)</span>
+                                    </div>
+                                    <div>@item.ExpertName</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="text-warning">
+                                    @for (int i = 0; i < (int)item.Rating; i++)
+                                    {
+                                        <i class="ti ti-star-filled ti-xs"></i>
+                                    }
+                                </div>
+                            </td>
+                            <td>@item.Title</td>
+                            <td>
+                                @if (item.IsApproved)
+                                {
+                                    <span class="badge bg-label-success">تایید شده</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-label-warning">در انتظار</span>
+                                }
+                            </td>
+                            <td dir="ltr">@item.CreatedAt.ToString("yyyy/MM/dd")</td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <button class="btn btn-icon btn-sm btn-info"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#viewCommentModal"
+                                            data-title="@item.Title"
+                                            data-text="@item.Text">
+                                        <i class="ti ti-eye"></i>
+                                    </button>
 
-                <tr>
-                    <td></td>
-                    <td><!-- مشتری --></td>
-                    <td><!-- کارشناس --></td>
-                    <td>
-                        <div class="d-flex">
-                            <i class="ti ti-star-filled text-warning"></i>
-                            <i class="ti ti-star-filled text-warning"></i>
-                            <i class="ti ti-star-filled text-warning"></i>
-                            <i class="ti ti-star text-muted"></i>
-                            <i class="ti ti-star text-muted"></i>
-                        </div>
-                    </td>
-                    <td>متوسط بود</td>
-                    <td class="text-truncate" style="max-width: 200px;">کار قابل قبول بود ولی کمی تأخیر داشت...</td>
-                    <td>#R987</td>
-                    <td><span class="badge bg-label-warning">در انتظار تأیید</span></td>
-                    <td>۱۴۰۴/۰۹/۱۵</td>
-                    <td><!-- همان دکمه‌ها --></td>
-                </tr>
+                                    @if (!item.IsApproved)
+                                    {
+                                        <form method="post" asp-page-handler="ChangeStatus" asp-route-id="@item.Id" asp-route-isApproved="true" class="d-inline">
+                                            <input type="hidden" name="PageNumber" value="@Model.PageNumber" />
+                                            <input type="hidden" name="SearchKey" value="@Model.SearchKey" />
+                                            <button type="button" class="btn btn-icon btn-sm btn-success confirm-action" data-msg="آیا این نظر را تایید می‌کنید؟">
+                                                <i class="ti ti-check"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form method="post" asp-page-handler="ChangeStatus" asp-route-id="@item.Id" asp-route-isApproved="false" class="d-inline">
+                                            <input type="hidden" name="PageNumber" value="@Model.PageNumber" />
+                                            <input type="hidden" name="SearchKey" value="@Model.SearchKey" />
+                                            <button type="button" class="btn btn-icon btn-sm btn-warning confirm-action" data-msg="آیا تایید این نظر را لغو می‌کنید؟">
+                                                <i class="ti ti-x"></i>
+                                            </button>
+                                        </form>
+                                    }
+
+                                    <form method="post" asp-page-handler="Delete" asp-route-id="@item.Id" class="d-inline">
+                                        <input type="hidden" name="PageNumber" value="@Model.PageNumber" />
+                                        <input type="hidden" name="SearchKey" value="@Model.SearchKey" />
+                                        <button type="button" class="btn btn-icon btn-sm btn-danger confirm-delete">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <i class="ti ti-search fs-2 text-muted mb-2"></i>
+                            <p>هیچ نظری یافت نشد.</p>
+                        </td>
+                    </tr>
+                }
             </tbody>
         </table>
+    </div>
+
+    <div class="card-footer d-flex justify-content-center">
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                    <a class="page-link" asp-page="./CommentManager" asp-route-PageNumber="@(Model.PageNumber - 1)" asp-route-SearchKey="@Model.SearchKey">قبلی</a>
+                </li>
+                <li class="page-item active">
+                    <span class="page-link">صفحه @Model.PageNumber</span>
+                </li>
+                <li class="page-item @(Model.Comments.Count < Model.PageSize ? "disabled" : "")">
+                    <a class="page-link" asp-page="./CommentManager" asp-route-PageNumber="@(Model.PageNumber + 1)" asp-route-SearchKey="@Model.SearchKey">بعدی</a>
+                </li>
+            </ul>
+        </nav>
     </div>
 </div>
 
@@ -211,7 +199,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p id="commentModalText" class="lead"></p>
+                <p id="commentModalText" class="lead text-break"></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
@@ -221,65 +209,59 @@
 </div>
 
 <script>
-    document.querySelectorAll('[data-bs-target="#viewCommentModal"]').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const title = this.getAttribute('data-title');
-            const text = this.getAttribute('data-text');
-            document.getElementById('commentModalTitle').textContent = title;
-            document.getElementById('commentModalText').textContent = text;
+    const modal = document.getElementById('viewCommentModal');
+    modal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const title = button.getAttribute('data-title');
+        const text = button.getAttribute('data-text');
+
+        modal.querySelector('#commentModalTitle').textContent = title;
+        modal.querySelector('#commentModalText').textContent = text;
+    });
+
+    document.querySelectorAll('.confirm-action').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const form = this.closest('form');
+            const msg = this.getAttribute('data-msg');
+
+            Swal.fire({
+                title: 'تغییر وضعیت',
+                text: msg,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'بله',
+                cancelButtonText: 'خیر'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
         });
     });
 
-    function approveComment(id, approve) {
-        const action = approve ? 'تایید' : 'رد';
-        Swal.fire({
-            title: `آیا نظر را ${action} می‌کنید؟`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: `بله، ${action} کن`,
-            cancelButtonText: 'خیر'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire(`${action} شد!`, `نظر با موفقیت ${action} گردید.`, 'success');
-            }
-        });
-    }
+    document.querySelectorAll('.confirm-delete').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const form = this.closest('form');
 
-    function confirmCommentDelete(id) {
-        Swal.fire({
-            title: 'آیا از حذف مطمئن هستید؟',
-            text: 'این نظر برای همیشه حذف خواهد شد!',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'بله، حذف کن',
-            cancelButtonText: 'لغو'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire('حذف شد!', 'نظر با موفقیت حذف گردید.', 'success');
-            }
-        });
-    }
-
-    $(document).ready(function () {
-        const table = $('#commentsTable').DataTable({
-            language: { url: '/vendor/libs/datatables-bs5/i18n/fa.dist.js' },
-            responsive: true,
-            order: [[8, 'desc']],
-            columnDefs: [
-                { orderable: false, targets: [0, 9] },
-                { className: "text-center", targets: [3, 7] }
-            ]
-        });
-
-        $('[data-filter]').on('click', function () {
-            const filter = $(this).data('filter');
-            if (filter === 'all') {
-                table.column(7).search('').draw();
-            } else if (filter === 'approved') {
-                table.column(7).search('تایید شده').draw();
-            } else if (filter === 'pending') {
-                table.column(7).search('در انتظار تأیید').draw();
-            }
+            Swal.fire({
+                title: 'حذف نظر',
+                text: 'آیا از حذف این نظر مطمئن هستید؟ این عملیات غیرقابل بازگشت است.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'بله، حذف کن',
+                cancelButtonText: 'لغو',
+                customClass: {
+                    confirmButton: 'btn btn-danger me-3',
+                    cancelButton: 'btn btn-label-secondary'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
         });
     });
 </script>

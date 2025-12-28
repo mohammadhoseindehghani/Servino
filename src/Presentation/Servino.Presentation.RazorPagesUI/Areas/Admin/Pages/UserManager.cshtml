@@ -20,17 +20,21 @@
     <script src="~/vendor/libs/sweetalert2/sweetalert2.dist.js"></script>
 }
 
+
+<h4 class="py-3 mb-4">
+    <span class="text-muted fw-light">مدیریت /</span> کاربران
+</h4>
+
 <div class="row g-4 mb-4">
     <div class="col-sm-6 col-xl-3">
         <div class="card">
             <div class="card-body">
                 <div class="d-flex align-items-start justify-content-between">
                     <div class="content-left">
-                        <span>کل کاربران</span>
+                        <span>تعداد نمایش</span>
                         <div class="d-flex align-items-center my-2">
-                            <h3 class="mb-0 me-2">1,248</h3>
+                            <h3 class="mb-0 me-2">@Model.Users.Count</h3>
                         </div>
-                        <p class="mb-0">ثبت‌شده در سیستم</p>
                     </div>
                     <div class="avatar">
                         <span class="avatar-initial rounded bg-label-primary">
@@ -41,169 +45,143 @@
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex align-items-start justify-content-between">
-                    <div class="content-left">
-                        <span>مشتریان</span>
-                        <div class="d-flex align-items-center my-2">
-                            <h3 class="mb-0 me-2">892</h3>
-                        </div>
-                        <p class="mb-0">کاربران عادی</p>
-                    </div>
-                    <div class="avatar">
-                        <span class="avatar-initial rounded bg-label-info">
-                            <i class="ti ti-user ti-sm"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex align-items-start justify-content-between">
-                    <div class="content-left">
-                        <span>کارشناسان</span>
-                        <div class="d-flex align-items-center my-2">
-                            <h3 class="mb-0 me-2">342</h3>
-                        </div>
-                        <p class="mb-0">متخصصین فعال</p>
-                    </div>
-                    <div class="avatar">
-                        <span class="avatar-initial rounded bg-label-warning">
-                            <i class="ti ti-tool ti-sm"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex align-items-start justify-content-between">
-                    <div class="content-left">
-                        <span>ادمین‌ها</span>
-                        <div class="d-flex align-items-center my-2">
-                            <h3 class="mb-0 me-2">14</h3>
-                        </div>
-                        <p class="mb-0">مدیران سیستم</p>
-                    </div>
-                    <div class="avatar">
-                        <span class="avatar-initial rounded bg-label-danger">
-                            <i class="ti ti-shield ti-sm"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <div class="card">
-    <div class="card-header d-flex align-items-center justify-content-between">
-        <h5 class="card-title mb-0">مدیریت کاربران</h5>
-        <button type="button" class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#addUserOffcanvas">
-            <i class="ti ti-plus me-1"></i> افزودن کاربر جدید
-        </button>
+    <div class="card-header border-bottom">
+        <h5 class="card-title mb-3">لیست کاربران</h5>
+        <div class="d-flex justify-content-between align-items-center row pb-2 gap-3 gap-md-0">
+            <div class="col-md-6">
+                <form method="get">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="SearchKey" value="@Model.SearchKey" placeholder="جستجو (نام، ایمیل، موبایل)...">
+                        <button class="btn btn-outline-primary" type="submit">جستجو</button>
+                        @if (!string.IsNullOrEmpty(Model.SearchKey))
+                        {
+                            <a asp-page="./UserManager" class="btn btn-outline-secondary">حذف فیلتر</a>
+                        }
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-6 text-end">
+                <button type="button" class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#addUserOffcanvas">
+                    <i class="ti ti-plus me-1"></i> افزودن کاربر جدید
+                </button>
+            </div>
+        </div>
     </div>
 
-    <div class="card-datatable table-responsive">
-        <table id="usersTable" class="table table-hover">
-            <thead class="border-top">
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-light">
                 <tr>
-                    <th></th>
-                    <th>آیدی</th>
+                    <th>#</th>
                     <th>نام کامل</th>
-                    <th>ایمیل</th>
-                    <th>موبایل</th>
+                    <th>اطلاعات تماس</th>
                     <th>نقش</th>
                     <th>موجودی (ریال)</th>
-                    <th>وضعیت</th>
                     <th>تاریخ ثبت‌نام</th>
                     <th>عملیات</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td></td>
-                    <td>101</td>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <img src="~/img/avatars/1.png" alt="Avatar" class="rounded-circle me-2" width="32" height="32">
-                            <div>مهتاب کرامتی</div>
-                        </div>
-                    </td>
-                    <td>violet.dev@example.com</td>
-                    <td><bdi dir="ltr">0913 000 0000</bdi></td>
-                    <td><span class="badge bg-label-info">مشتری</span></td>
-                    <td>2,450,000</td>
-                    <td><span class="badge bg-label-success">فعال</span></td>
-                    <td>۱۴۰۴/۰۵/۱۲</td>
-                    <td>
-                        <div class="d-flex gap-1">
-                            <button class="btn btn-icon btn-sm btn-primary" title="شارژ کیف پول"
-                                    data-bs-toggle="modal" data-bs-target="#chargeBalanceModal" data-user-id="101" data-user-name="مهتاب کرامتی">
-                                <i class="ti ti-wallet"></i>
-                            </button>
+                @if (Model.Users.Any())
+                {
+                    @foreach (var user in Model.Users)
+                    {
+                        var avatarUrl = string.IsNullOrEmpty(user.ImageUrl)
+                        ? "/img/default/userAvatar.png"
+                        : user.ImageUrl;
 
-                            <button class="btn btn-icon btn-sm btn-warning" title="ویرایش"
-                                    data-bs-toggle="offcanvas" data-bs-target="#editUserOffcanvas" data-user-id="101">
-                                <i class="ti ti-edit"></i>
-                            </button>
+                        <tr>
+                            <td>@user.Id</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="@avatarUrl" alt="Avatar" class="rounded-circle me-2 object-fit-cover" width="32" height="32">
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-medium">@user.FullName</span>
+                                        @* <small class="text-muted">@user.UserName</small> *@
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="text-truncate" style="max-width: 150px;">@user.Email</span>
+                                    <small class="text-muted" dir="ltr">@user.Mobile</small>
+                                </div>
+                            </td>
+                            <td>
+                                @if (user.Role == "Admin")
+                                {
+                                    <span class="badge bg-label-danger">ادمین</span>
+                                }
+                                else if (user.Role == "Expert")
+                                {
 
-                            <button class="btn btn-icon btn-sm btn-info" title="تغییر وضعیت">
-                                <i class="ti ti-toggle-left"></i>
-                            </button>
+                                    <span class="badge bg-label-warning">کارشناس</span>
+                                }
+                                else
+                                {
 
-                            <button class="btn btn-icon btn-sm btn-danger" title="حذف"
-                                    onclick="confirmDelete(101, 'مهتاب کرامتی')">
-                                <i class="ti ti-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
+                                    <span class="badge bg-label-info">مشتری</span>
+                                }
+                            </td>
+                            <td dir="ltr">@user.Balance.ToString("N0")</td>
+                            <td dir="ltr">@user.RegisterDate.ToString("yyyy/MM/dd")</td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <button class="btn btn-icon btn-sm btn-label-success" title="شارژ کیف پول"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#chargeBalanceModal"
+                                            data-user-id="@user.Id"
+                                            data-user-name="@user.FullName">
+                                        <i class="ti ti-wallet"></i>
+                                    </button>
 
-                <tr>
-                    <td></td>
-                    <td>205</td>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <img src="~/img/avatars/5.png" alt="Avatar" class="rounded-circle me-2" width="32" height="32">
-                            <div>نوید محمدزاده</div>
-                        </div>
-                    </td>
-                    <td>expert@example.com</td>
-                    <td><bdi dir="ltr">0912 345 6789</bdi></td>
-                    <td><span class="badge bg-label-warning">کارشناس</span></td>
-                    <td>8,120,000</td>
-                    <td><span class="badge bg-label-success">فعال</span></td>
-                    <td>۱۴۰۳/۱۰/۰۳</td>
-                    <td><!-- همان دکمه‌ها --></td>
-                </tr>
+                                    <button class="btn btn-icon btn-sm btn-label-primary" title="ویرایش">
+                                        <i class="ti ti-edit"></i>
+                                    </button>
 
-                <tr>
-                    <td></td>
-                    <td>301</td>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <img src="~/img/avatars/10.png" alt="Avatar" class="rounded-circle me-2" width="32" height="32">
-                            <div>علی احمدی</div>
-                        </div>
-                    </td>
-                    <td>admin@example.com</td>
-                    <td><bdi dir="ltr">0912 111 2222</bdi></td>
-                    <td><span class="badge bg-label-danger">ادمین</span></td>
-                    <td>0</td>
-                    <td><span class="badge bg-label-danger">غیرفعال</span></td>
-                    <td>۱۴۰۲/۰۱/۱۵</td>
-                    <td><!-- همان دکمه‌ها --></td>
-                </tr>
+                                    <form method="post" asp-page-handler="Delete" asp-route-id="@user.Id" class="d-inline">
+                                        <input type="hidden" name="PageNumber" value="@Model.PageNumber" />
+                                        <input type="hidden" name="SearchKey" value="@Model.SearchKey" />
+                                        <button type="button" class="btn btn-icon btn-sm btn-label-danger confirm-delete"
+                                                data-name="@user.FullName">
+                                            <i class="ti ti-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-4">
+                            <i class="ti ti-search fs-2 text-muted mb-2"></i>
+                            <p>هیچ کاربری یافت نشد.</p>
+                        </td>
+                    </tr>
+                }
             </tbody>
         </table>
+    </div>
+
+    <div class="card-footer d-flex justify-content-center">
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                    <a class="page-link" asp-page="./UserManager" asp-route-PageNumber="@(Model.PageNumber - 1)" asp-route-SearchKey="@Model.SearchKey">قبلی</a>
+                </li>
+                <li class="page-item active">
+                    <span class="page-link">صفحه @Model.PageNumber</span>
+                </li>
+                <li class="page-item @(Model.Users.Count < Model.PageSize ? "disabled" : "")">
+                    <a class="page-link" asp-page="./UserManager" asp-route-PageNumber="@(Model.PageNumber + 1)" asp-route-SearchKey="@Model.SearchKey">بعدی</a>
+                </li>
+            </ul>
+        </nav>
     </div>
 </div>
 
@@ -211,61 +189,82 @@
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">شارژ کیف پول کاربر</h5>
+                <h5 class="modal-title">مدیریت موجودی</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="/Admin/Users/ChargeBalance" method="post">
+            <form method="post" asp-page-handler="Charge">
                 <div class="modal-body">
-                    <input type="hidden" name="UserId" id="chargeUserId" />
-                    <p>کاربر: <strong id="chargeUserName"></strong></p>
+                    <input type="hidden" name="PageNumber" value="@Model.PageNumber" />
+                    <input type="hidden" name="SearchKey" value="@Model.SearchKey" />
+
+                    <input type="hidden" asp-for="ChargeModel.UserId" id="chargeUserId" />
+
+                    <p class="mb-3">کاربر: <strong id="chargeUserName" class="text-primary"></strong></p>
+
                     <div class="mb-3">
-                        <label class="form-label">مبلغ شارژ (ریال)</label>
-                        <input type="text" class="form-control text-start" name="Amount" placeholder="500,000" required />
-                        <small class="text-muted">بدون جداکننده هزارگان وارد کنید</small>
+                        <label class="form-label">مبلغ (ریال)</label>
+                        <input type="number" class="form-control text-start" asp-for="ChargeModel.Amount" placeholder="مثلا: 50000 یا -20000" required />
+                        <div class="form-text">برای کاهش موجودی از علامت منفی استفاده کنید.</div>
                     </div>
+
                     <div class="mb-3">
                         <label class="form-label">توضیح (اختیاری)</label>
-                        <textarea class="form-control" name="Description" rows="2" placeholder="شارژ دستی توسط ادمین"></textarea>
+                        <textarea class="form-control" asp-for="ChargeModel.Description" rows="2"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">لغو</button>
-                    <button type="submit" class="btn btn-primary">شارژ کن</button>
+                    <button type="submit" class="btn btn-primary">ثبت تراکنش</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+<div class="offcanvas offcanvas-end" tabindex="-1" id="addUserOffcanvas">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">افزودن کاربر جدید</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <p class="text-muted">فرم ایجاد کاربر را اینجا قرار دهید...</p>
+    </div>
+</div>
+
 <script>
-    document.querySelectorAll('[data-bs-target="#chargeBalanceModal"]').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const userId = this.getAttribute('data-user-id');
-            const userName = this.getAttribute('data-user-name');
-            document.getElementById('chargeUserId').value = userId;
-            document.getElementById('chargeUserName').textContent = userName;
-        });
+    const chargeModal = document.getElementById('chargeBalanceModal');
+    chargeModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const userId = button.getAttribute('data-user-id');
+        const userName = button.getAttribute('data-user-name');
+
+        document.getElementById('chargeUserId').value = userId;
+        document.getElementById('chargeUserName').textContent = userName;
     });
 
-    function confirmDelete(userId, userName) {
-        Swal.fire({
-            title: 'آیا مطمئن هستید؟',
-            text: `کاربر "${userName}" برای همیشه حذف خواهد شد!`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'بله، حذف کن',
-            cancelButtonText: 'خیر'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                Swal.fire('حذف شد!', '', 'success');
-            }
-        });
-    }
+    document.querySelectorAll('.confirm-delete').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const form = this.closest('form');
+            const userName = this.getAttribute('data-name');
 
-    new DataTable('#usersTable', {
-        language: { url: '/vendor/libs/datatables-bs5/i18n/fa.dist.js' },
-        columnDefs: [{ orderable: false, targets: [0, 9] }],
-        order: [[1, 'desc']],
-        responsive: true
+            Swal.fire({
+                title: 'آیا مطمئن هستید؟',
+                text: `کاربر "${userName}" و تمام اطلاعات مربوطه حذف خواهند شد!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'بله، حذف کن',
+                cancelButtonText: 'لغو',
+                customClass: {
+                    confirmButton: 'btn btn-danger me-3',
+                    cancelButton: 'btn btn-label-secondary'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
     });
 </script>
