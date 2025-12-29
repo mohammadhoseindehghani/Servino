@@ -19,6 +19,7 @@
     <ProjectReference Include="..\..\Domain\Service\Servino.Domain.Servcie\Servino.Domain.Service.csproj" />
     <ProjectReference Include="..\..\Infrastrucure\DataAccess\Servino.Infa.DataAccess.Repo.EfCore\Servino.Infa.DataAccess.Repo.EfCore.csproj" />
     <ProjectReference Include="..\..\Infrastrucure\Db\Servino.Infa.Db.SqlServer.EfCore\Servino.Infa.Db.SqlServer.EfCore.csproj" />
+    <ProjectReference Include="..\..\Infrastrucure\Providers\Servino.Infra.Providers\Servino.Infra.Providers.csproj" />
   </ItemGroup>
 
 </Project>

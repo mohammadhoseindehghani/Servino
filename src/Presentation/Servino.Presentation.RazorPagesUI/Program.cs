@@ -19,6 +19,7 @@ using Servino.Infa.DataAccess.Repo.EfCore.Repositories;
 using Servino.Infa.Db.SqlServer.EfCore.DataSeed;
 using Servino.Infa.Db.SqlServer.EfCore.DbContexts;
 using Servino.Infa.Db.SqlServer.EfCore.Identity.Service;
+using Servino.Infra.Providers.SmsProvider.SmsIrService;
 using Servino.Presentation.RazorPagesUI.Services.File;
 
 
@@ -75,6 +76,7 @@ builder.Services.AddScoped<IHomeServiceAppService, HomeServiceAppService>();
 
 
 builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<ISmsService, SmsIrService>();
 
 
 

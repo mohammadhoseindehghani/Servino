@@ -20,6 +20,9 @@
   <Folder Name="/src/Infrastructure/Db/">
     <Project Path="src/Infrastrucure/Db/Servino.Infa.Db.SqlServer.EfCore/Servino.Infa.Db.SqlServer.EfCore.csproj" Id="0f781f93-f4ee-4c59-a8c2-74e7341903ab" />
   </Folder>
+  <Folder Name="/src/Infrastructure/Providers/">
+    <Project Path="src/Infrastrucure/Providers/Servino.Infra.Providers/Servino.Infra.Providers.csproj" Id="f9116468-1577-4167-965c-de5d647a8d7d" />
+  </Folder>
   <Folder Name="/src/Presentation/">
     <Project Path="src/Presentation/Servino.Presentation.RazorPagesUI/Servino.Presentation.RazorPagesUI.csproj" Id="add3cde9-a56c-4eaa-9ff8-2292d3e84317" />
   </Folder>
