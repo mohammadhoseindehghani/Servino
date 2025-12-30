@@ -1,11 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Servino.Domain.Core.UserAgg.Contracts.AppService;
 using Servino.Domain.Core.UserAgg.Dtos.Identity;
+using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 
 namespace Servino.Presentation.RazorPagesUI.Pages.Auth.Login
 {
@@ -19,12 +18,11 @@ namespace Servino.Presentation.RazorPagesUI.Pages.Auth.Login
 
         public class InputModel
         {
-            [Required(ErrorMessage = "لطفا ایمیل یا نام کاربری را وارد کنید")]
+            [Required(ErrorMessage = "ایمیل یا شماره موبایل الزامی است")]
             public string UserName { get; set; }
 
-            [Required(ErrorMessage = "لطفا رمز عبور را وارد کنید")]
             [DataType(DataType.Password)]
-            public string Password { get; set; }
+            public string? Password { get; set; }
 
             public bool RememberMe { get; set; }
         }
@@ -32,61 +30,54 @@ namespace Servino.Presentation.RazorPagesUI.Pages.Auth.Login
         public async Task OnGet(string returnUrl = null)
         {
             if (!string.IsNullOrEmpty(ErrorMessage))
-            {
                 ModelState.AddModelError(string.Empty, ErrorMessage);
-            }
 
-            returnUrl ??= Url.Content("~/");
-
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-            ReturnUrl = returnUrl;
+            ReturnUrl = returnUrl ?? "/";
+            await HttpContext.SignOutAsync();
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
-            returnUrl ??= Url.Content("~/");
+            returnUrl ??= "/";
 
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid) return Page();
+
+            var input = Input.UserName.Trim();
+
+            bool isMobile = Regex.IsMatch(input, @"^09\d{9}$");
+
+            if (isMobile)
             {
+                var otpResult = await userAppService.SendOtpAsync(new SendOtpDto { MobileNumber = input }, CancellationToken.None);
+
+                if (otpResult.IsSuccess)
+                {
+                    return RedirectToPage("VerifyOtp", new { mobile = input, returnUrl });
+                }
+
+                ModelState.AddModelError("", otpResult.Message ?? "خطا در ارسال پیامک");
                 return Page();
-            }
-
-            var command = new LoginWithPassDto
-            {
-                UserName = Input.UserName,
-                Password = Input.Password
-            };
-
-            var result = await userAppService.LoginWithPasswordAsync(command, CancellationToken.None);
-
-            if (result.IsSuccess)
-            {
-
-
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, Input.UserName),
-                };
-
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                var authProperties = new AuthenticationProperties
-                {
-                    IsPersistent = Input.RememberMe, 
-                    ExpiresUtc = Input.RememberMe ? DateTime.UtcNow.AddDays(30) : DateTime.UtcNow.AddMinutes(30)
-                };
-
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity),
-                    authProperties);
-
-                return LocalRedirect(returnUrl);
             }
             else
             {
-                ModelState.AddModelError(string.Empty, result.Message ?? "تلاش برای ورود نامعتبر است.");
+                if (string.IsNullOrEmpty(Input.Password))
+                {
+                    ModelState.AddModelError("Input.Password", "برای ورود با ایمیل، رمز عبور الزامی است.");
+                    return Page();
+                }
+
+                var loginResult = await userAppService.LoginWithPasswordAsync(new LoginWithPassDto
+                {
+                    UserName = input,
+                    Password = Input.Password
+                }, CancellationToken.None);
+
+                if (loginResult.IsSuccess)
+                {
+                    return LocalRedirect(returnUrl);
+                }
+
+                ModelState.AddModelError("", loginResult.Message);
                 return Page();
             }
         }
