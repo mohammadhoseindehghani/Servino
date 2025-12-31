@@ -41,12 +41,12 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 
         public async Task<IActionResult> OnPostCreateAsync(CancellationToken ct)
         {
-            if (!ModelState.IsValid)
-            {
-                ErrorMessage = "اطلاعات ورودی نامعتبر است.";
-                await LoadDataAsync(ct);
-                return Page();
-            }
+            //if (!ModelState.IsValid)
+            //{
+            //    ErrorMessage = "اطلاعات ورودی نامعتبر است.";
+            //    await LoadDataAsync(ct);
+            //    return Page();
+            //}
 
             string? imagePath = null;
             if (CreateInput.ImageFile != null)

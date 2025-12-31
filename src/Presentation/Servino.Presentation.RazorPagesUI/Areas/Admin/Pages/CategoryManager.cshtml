@@ -17,6 +17,35 @@
     <script src="~/vendor/libs/datatables-bs5/i18n/fa.dist.js"></script>
     <script src="~/vendor/libs/sweetalert2/sweetalert2.dist.js"></script>
 }
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            Swal.fire({
+                title: 'موفق!',
+                text: '@Html.Raw(TempData["SuccessMessage"])', 
+                icon: 'success',
+                confirmButtonText: 'باشه'
+            });
+        });
+    </script>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            Swal.fire({
+                title: 'خطا!',
+                text: '@Html.Raw(TempData["ErrorMessage"])', 
+                icon: 'error',
+                confirmButtonText: 'باشه'
+            });
+        });
+    </script>
+}
+
 <h4 class="py-3 mb-4">
     <span class="text-muted fw-light">مدیریت محتوا /</span> دسته‌بندی‌های خدمات
 </h4>
@@ -54,7 +83,6 @@
                     <th>عنوان دسته‌بندی</th>
                     <th>دسته والد</th>
                     <th class="text-center">زیرمجموعه</th>
-                    <th>وضعیت</th>
                     <th>عملیات</th>
                 </tr>
             </thead>
@@ -63,7 +91,6 @@
                 {
                     @foreach (var item in Model.Categories)
                     {
-
                         var imgPath = !string.IsNullOrEmpty(item.ImagePath) ? item.ImagePath : "/img/default/category-placeholder.png";
 
                         <tr>
@@ -84,18 +111,9 @@
                             </td>
                             <td class="text-center">@item.SubCategoriesCount</td>
                             <td>
-                                @if (item.IsActive)
-                                {
-                                    <span class="badge bg-label-success">فعال</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-label-danger">غیرفعال</span>
-                                }
-                            </td>
-                            <td>
                                 <div class="d-flex gap-1">
-                                    <button class="btn btn-icon btn-sm btn-label-warning" title="ویرایش">
+                                    <button class="btn btn-icon btn-sm btn-label-warning" title="ویرایش"
+                                            onclick="openEditModal(@item.Id)">
                                         <i class="ti ti-edit"></i>
                                     </button>
 
@@ -115,7 +133,7 @@
                 else
                 {
                     <tr>
-                        <td colspan="7" class="text-center py-4">
+                        <td colspan="6" class="text-center py-4">
                             <i class="ti ti-search fs-2 text-muted mb-2"></i>
                             <p>داده‌ای یافت نشد.</p>
                         </td>
@@ -169,11 +187,6 @@
                 <input type="file" class="form-control" asp-for="CreateInput.ImageFile" accept="image/*" />
             </div>
 
-            <div class="mb-3 form-check">
-                <input type="checkbox" class="form-check-input" asp-for="CreateInput.IsActive" />
-                <label class="form-check-label" for="isActiveAdd">فعال باشد</label>
-            </div>
-
             <div class="text-end">
                 <button type="button" class="btn btn-label-secondary me-2" data-bs-dismiss="offcanvas">لغو</button>
                 <button type="submit" class="btn btn-primary">ذخیره</button>
@@ -182,30 +195,123 @@
     </div>
 </div>
 
-<script>
-    document.querySelectorAll('.confirm-delete').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const form = this.closest('form');
-            const title = this.getAttribute('data-title');
+<div class="offcanvas offcanvas-end" tabindex="-1" id="editCategoryOffcanvas">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">ویرایش دسته‌بندی</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
 
-            Swal.fire({
-                title: 'حذف دسته‌بندی',
-                text: `آیا از حذف "${title}" مطمئن هستید؟`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'بله، حذف کن',
-                cancelButtonText: 'لغو',
-                customClass: {
-                    confirmButton: 'btn btn-danger me-3',
-                    cancelButton: 'btn btn-label-secondary'
-                },
-                buttonsStyling: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
+        <div id="editLoader" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">در حال بارگذاری...</p>
+        </div>
+
+        <form id="editForm" method="post" asp-page-handler="Edit" enctype="multipart/form-data" style="display:none;">
+            <input type="hidden" name="PageNumber" value="@Model.PageNumber" />
+            <input type="hidden" name="SearchKey" value="@Model.SearchKey" />
+
+            <input type="hidden" id="editId" asp-for="EditInput.Id" />
+
+            <div class="mb-3">
+                <label class="form-label">عنوان دسته‌بندی</label>
+                <input type="text" class="form-control" id="editTitle" asp-for="EditInput.Title" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">دسته والد (اختیاری)</label>
+                <select class="form-select" id="editParentId" asp-for="EditInput.ParentId" asp-items="Model.ParentCategories">
+                    <option value="">— دسته اصلی —</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">تصویر جدید (اختیاری)</label>
+                <input type="file" class="form-control" asp-for="EditInput.ImageFile" accept="image/*" />
+                <div class="form-text">اگر تصویری انتخاب نکنید، تصویر قبلی باقی می‌ماند.</div>
+            </div>
+
+            <div class="text-end">
+                <button type="button" class="btn btn-label-secondary me-2" data-bs-dismiss="offcanvas">لغو</button>
+                <button type="submit" class="btn btn-warning">ویرایش تغییرات</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+    <script>
+        document.querySelectorAll('.confirm-delete').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const form = this.closest('form');
+                const title = this.getAttribute('data-title');
+
+                Swal.fire({
+                    title: 'حذف دسته‌بندی',
+                    text: `آیا از حذف "${title}" مطمئن هستید؟ زیرمجموعه‌های آن نیز ممکن است حذف شوند.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'بله، حذف کن',
+                    cancelButtonText: 'لغو',
+                    customClass: {
+                        confirmButton: 'btn btn-danger me-3',
+                        cancelButton: 'btn btn-label-secondary'
+                    },
+                    buttonsStyling: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
             });
         });
-    });
-</script>
+
+        let editOffcanvas;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            var element = document.getElementById('editCategoryOffcanvas');
+            if (element) {
+                editOffcanvas = new bootstrap.Offcanvas(element);
+            }
+        });
+
+        function openEditModal(id) {
+            if (!editOffcanvas) {
+                var element = document.getElementById('editCategoryOffcanvas');
+                editOffcanvas = new bootstrap.Offcanvas(element);
+            }
+
+            editOffcanvas.show();
+
+            document.getElementById('editLoader').style.display = 'block';
+            document.getElementById('editForm').style.display = 'none';
+
+            fetch(`?handler=RowData&id=${id}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('editId').value = data.id;
+                    document.getElementById('editTitle').value = data.title;
+
+                    const parentSelect = document.getElementById('editParentId');
+                    if (data.parentId) {
+                        parentSelect.value = data.parentId;
+                    } else {
+                        parentSelect.value = "";
+                    }
+
+                    document.getElementById('editLoader').style.display = 'none';
+                    document.getElementById('editForm').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire('خطا', 'مشکلی در دریافت اطلاعات رخ داد.', 'error');
+                    editOffcanvas.hide();
+                });
+        }
+    </script>

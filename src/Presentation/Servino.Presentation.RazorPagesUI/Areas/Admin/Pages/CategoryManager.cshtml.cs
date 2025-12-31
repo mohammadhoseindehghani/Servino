@@ -5,12 +5,13 @@ using Servino.Domain.Core._common;
 using Servino.Domain.Core.CategoryAgg.Contracts.AppService;
 using Servino.Domain.Core.CategoryAgg.Dtos;
 using Servino.Presentation.RazorPagesUI.Services.File;
+using System.ComponentModel.DataAnnotations;
 
 namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 {
     public class CategoryManagerModel(
-         ICategoryAppService categoryAppService,
-         IFileService fileService) : PageModel 
+          ICategoryAppService categoryAppService,
+          IFileService fileService) : PageModel
     {
         public List<CategorySummaryDto> Categories { get; set; } = [];
         public SelectList ParentCategories { get; set; }
@@ -25,6 +26,9 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
         [BindProperty]
         public CreateCategoryModel CreateInput { get; set; } = new();
 
+        [BindProperty]
+        public EditCategoryModel EditInput { get; set; } = new();
+
         [TempData] public string? SuccessMessage { get; set; }
         [TempData] public string? ErrorMessage { get; set; }
 
@@ -35,7 +39,9 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 
         public async Task<IActionResult> OnPostCreateAsync(CancellationToken ct)
         {
-            if (!ModelState.IsValid)
+            ModelState.Clear();
+
+            if (!TryValidateModel(CreateInput, nameof(CreateInput)))
             {
                 ErrorMessage = "اطلاعات وارد شده معتبر نیست.";
                 await LoadDataAsync(ct);
@@ -43,7 +49,6 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
             }
 
             string? imagePath = null;
-
             if (CreateInput.ImageFile != null)
             {
                 try
@@ -75,16 +80,58 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
             else
             {
                 if (imagePath != null) await fileService.DeleteFile(imagePath, ct);
-
                 ErrorMessage = result.Message;
                 await LoadDataAsync(ct);
                 return Page();
             }
         }
 
-        public async Task<IActionResult> OnPostDeleteAsync(int id, CancellationToken ct)
+        public async Task<IActionResult> OnPostEditAsync(CancellationToken ct)
         {
-            var result = await categoryAppService.DeleteAsync(id, ct);
+            ModelState.Clear();
+
+            if (!TryValidateModel(EditInput, nameof(EditInput)))
+            {
+                ErrorMessage = "اطلاعات وارد شده برای ویرایش معتبر نیست.";
+                return RedirectToPage(new { PageNumber, SearchKey });
+            }
+
+            var currentCategoryResult = await categoryAppService.GetByIdAsync(EditInput.Id, ct);
+            if (!currentCategoryResult.IsSuccess)
+            {
+                ErrorMessage = "دسته‌بندی یافت نشد.";
+                return RedirectToPage(new { PageNumber, SearchKey });
+            }
+
+            string? newImagePath = currentCategoryResult.Data.ImagePath;
+
+            if (EditInput.ImageFile != null)
+            {
+                try
+                {
+                    newImagePath = await fileService.Upload(EditInput.ImageFile, "categories", ct);
+
+                    if (!string.IsNullOrEmpty(currentCategoryResult.Data.ImagePath))
+                    {
+                        await fileService.DeleteFile(currentCategoryResult.Data.ImagePath, ct);
+                    }
+                }
+                catch (Exception)
+                {
+                    ErrorMessage = "خطا در آپلود تصویر جدید.";
+                    return RedirectToPage(new { PageNumber, SearchKey });
+                }
+            }
+
+            var command = new CategoryDto
+            {
+                Id = EditInput.Id,
+                Title = EditInput.Title,
+                ParentId = EditInput.ParentId,
+                ImagePath = newImagePath
+            };
+
+            var result = await categoryAppService.UpdateAsync(command, ct);
 
             if (result.IsSuccess)
                 SuccessMessage = result.Message;
@@ -92,6 +139,34 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
                 ErrorMessage = result.Message;
 
             return RedirectToPage(new { PageNumber, SearchKey });
+        }
+
+        public async Task<IActionResult> OnPostDeleteAsync(int id, CancellationToken ct)
+        {
+            var catResult = await categoryAppService.GetByIdAsync(id, ct);
+            var result = await categoryAppService.DeleteAsync(id, ct);
+
+            if (result.IsSuccess)
+            {
+                if (catResult.IsSuccess && !string.IsNullOrEmpty(catResult.Data.ImagePath))
+                {
+                    await fileService.DeleteFile(catResult.Data.ImagePath, ct);
+                }
+                SuccessMessage = result.Message;
+            }
+            else
+            {
+                ErrorMessage = result.Message;
+            }
+
+            return RedirectToPage(new { PageNumber, SearchKey });
+        }
+
+        public async Task<IActionResult> OnGetRowDataAsync(int id, CancellationToken ct)
+        {
+            var result = await categoryAppService.GetByIdAsync(id, ct);
+            if (!result.IsSuccess) return NotFound();
+            return new JsonResult(result.Data);
         }
 
         private async Task LoadDataAsync(CancellationToken ct)
@@ -110,10 +185,23 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 
         public class CreateCategoryModel
         {
-            public string Title { get; set; }
+            [Required(ErrorMessage = "عنوان الزامی است")]
+            public string? Title { get; set; }
             public int? ParentId { get; set; }
             public IFormFile? ImageFile { get; set; }
             public bool IsActive { get; set; } = true;
+        }
+
+        public class EditCategoryModel
+        {
+            public int Id { get; set; }
+
+            [Required(ErrorMessage = "عنوان الزامی است")]
+            public string? Title { get; set; }
+
+            public int? ParentId { get; set; }
+            public IFormFile? ImageFile { get; set; }
+            public bool IsActive { get; set; }
         }
     }
 }
