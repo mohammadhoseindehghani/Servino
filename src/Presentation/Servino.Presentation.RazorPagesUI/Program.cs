@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Servino.Domain.AppService;
 using Servino.Domain.Core.CategoryAgg.Contracts.AppService;
@@ -24,20 +23,8 @@ using Servino.Presentation.RazorPagesUI.Services.File;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-builder.Services.AddScoped<DbInitializer>();
-builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-
-builder.Services.AddRazorPages();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection")));
-
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Auth/Login";
-        options.ExpireTimeSpan = TimeSpan.FromDays(30);
-    });
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {
@@ -46,13 +33,26 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
     options.Password.RequireUppercase = false;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequiredLength = 4;
-    options.SignIn.RequireConfirmedAccount = false;
+    options.User.RequireUniqueEmail = true;
 })
     .AddEntityFrameworkStores<AppDbContext>()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddClaimsPrincipalFactory<AppUserClaimsPrincipalFactory>(); ;
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Auth/Login"; 
+    options.AccessDeniedPath = "/Auth/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    options.SlidingExpiration = true;
+});
+
+builder.Services.AddScoped<DbInitializer>();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddRazorPages();
 
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>(); 
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IHomeServiceRepository, HomeServiceRepository>();
 
@@ -62,7 +62,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IHomeServiceService, HomeServiceService>();
 
-builder.Services.AddScoped<IUserAppService, UserAppService>(); 
+builder.Services.AddScoped<IUserAppService, UserAppService>();
 builder.Services.AddScoped<ICommentAppService, CommentAppService>();
 builder.Services.AddScoped<ICategoryAppService, CategoryAppService>();
 builder.Services.AddScoped<IHomeServiceAppService, HomeServiceAppService>();
@@ -70,13 +70,10 @@ builder.Services.AddScoped<IHomeServiceAppService, HomeServiceAppService>();
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddMemoryCache();
 
-
-
 builder.Services.AddScoped<ISmsService>(provider =>
-    new SmsIrService("Hsglr29hTKTzz9k4F9mDFVdFQMkllYkxv3VV5wDBilPyljbp"));
+    new SmsIrService("Hsglr29hTKTzz9k4F9mDFVdFQMkllYkxv3VV5wDBilPyljbp")); 
 
 var app = builder.Build();
-
 
 using (var scope = app.Services.CreateScope())
 {
@@ -85,8 +82,6 @@ using (var scope = app.Services.CreateScope())
     {
         var initializer = services.GetRequiredService<DbInitializer>();
         await initializer.SeedAsync();
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogInformation("Database initialization completed successfully.");
     }
     catch (Exception ex)
     {
@@ -107,10 +102,9 @@ app.UseStaticFiles();
 app.UseRouting();
 
 
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseAuthentication(); 
+app.UseAuthorization();  
 
-app.MapStaticAssets();
-app.MapRazorPages().WithStaticAssets();
+app.MapRazorPages();
 
 app.Run();

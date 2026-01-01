@@ -6,6 +6,9 @@ namespace Servino.Domain.Core.UserAgg.Contracts.AppService;
 
 public interface IUserAppService
 {
+    Task<Result<UserProfileDto>> GetUserProfileAsync(int userId, string role, CancellationToken ct);
+    Task<Result<bool>> UpdateUserProfileAsync(UpdateProfileDto command, string role, CancellationToken ct);
+    Task<Result<bool>> UpdateEmailAsync(int userId, string newEmail, CancellationToken ct); 
     Task<Result<LoginResultDto>> LoginWithPasswordAsync(LoginWithPassDto command, CancellationToken ct);
     Task<Result<bool>> RegisterUserAsync(RegisterDto command, CancellationToken ct);
     Task<Result<string>> SendOtpAsync(SendOtpDto command, CancellationToken ct);

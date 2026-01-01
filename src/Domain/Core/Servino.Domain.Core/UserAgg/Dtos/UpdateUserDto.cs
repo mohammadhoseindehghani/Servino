@@ -8,4 +8,5 @@ public class UpdateUserDto
     public string? Mobile { get; set; } 
     public int? CityId { get; set; }
     public string? ProfileImagePath { get; set; }
+    public string? Email { get; set; }
 }

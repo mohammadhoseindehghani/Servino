@@ -1,7 +1,7 @@
 ﻿@page
 @model Servino.Presentation.RazorPagesUI.Areas.Admin.Pages.SuggestionsModel
 @{
-    Layout = "Layouts/_ContentNavbarLayout";
+    Layout = "Layouts/_ContentNavbarLayouT";
     ViewData["Title"] = "مدیریت پیشنهادهای کارشناسان";
 }
 
@@ -22,7 +22,6 @@
     <span class="text-muted fw-light">مدیریت سفارش‌ها /</span> پیشنهادهای کارشناسان
 </h4>
 
-<!-- کارت‌های آمار سریع -->
 <div class="row g-4 mb-4">
     <div class="col-sm-6 col-xl-3">
         <div class="card">
@@ -94,7 +93,6 @@
     </div>
 </div>
 
-<!-- جدول پیشنهادها -->
 <div class="card">
     <div class="card-header d-flex align-items-center justify-content-between">
         <h5 class="card-title mb-0">لیست تمام پیشنهادهای ارسال‌شده</h5>
@@ -129,7 +127,6 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- نمونه ردیف -->
                 <tr>
                     <td></td>
                     <td><a href="/Admin/Requests/View/1024" class="fw-medium">#R1024</a></td>
@@ -210,7 +207,6 @@
     </div>
 </div>
 
-<!-- مودال مشاهده جزئیات پیشنهاد -->
 <div class="modal fade" id="viewSuggestionModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -258,7 +254,6 @@
 </div>
 
 <script>
-    // پر کردن مودال جزئیات پیشنهاد
     document.querySelectorAll('[data-bs-target="#viewSuggestionModal"]').forEach(btn => {
         btn.addEventListener('click', function () {
             document.getElementById('modalRequest').textContent = this.getAttribute('data-request');
@@ -285,12 +280,11 @@
         });
     });
 
-    // راه‌اندازی DataTable
     $(document).ready(function () {
         const table = $('#suggestionsTable').DataTable({
             language: { url: '/vendor/libs/datatables-bs5/i18n/fa.dist.js' },
             responsive: true,
-            order: [[9, 'desc']], // جدیدترین پیشنهادها اول
+            order: [[9, 'desc']], 
             columnDefs: [
                 { orderable: false, targets: [0, 10] },
                 { className: "text-center", targets: [8] }
@@ -298,7 +292,6 @@
             pageLength: 25
         });
 
-        // فیلتر وضعیت
         $('[data-filter]').on('click', function () {
             const filter = $(this).data('filter');
             if (filter === 'all') {

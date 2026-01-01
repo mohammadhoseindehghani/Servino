@@ -21,8 +21,4 @@
     <ProjectReference Include="..\..\Providers\Servino.Infra.Providers\Servino.Infra.Providers.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Identity\Service\" />
-  </ItemGroup>
-
 </Project>

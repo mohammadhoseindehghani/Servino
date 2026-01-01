@@ -2,6 +2,7 @@
 using Servino.Domain.Core._common;
 using Servino.Domain.Core.UserAgg.Contracts.Data;
 using Servino.Domain.Core.UserAgg.Dtos;
+using Servino.Domain.Core.UserAgg.Dtos.Identity;
 using Servino.Domain.Core.UserAgg.Entity;
 using Servino.Infa.Db.SqlServer.EfCore.DbContexts;
 
@@ -9,6 +10,112 @@ namespace Servino.Infa.DataAccess.Repo.EfCore.Repositories;
 
 public class UserRepository(AppDbContext context) : IUserRepository
 {
+    public async Task<UserProfileDto?> GetProfileByIdAsync(int userId, string role, CancellationToken ct)
+    {
+        IQueryable<User> query;
+
+        if (role == "Expert")
+        {
+            query = context.Users
+                .AsNoTracking()
+                .Where(u => u.Id == userId && !u.IsDeleted)
+                .Include(u => u.City)
+                .Include(u => u.Expert);
+        }
+        else if (role == "Customer")
+        {
+            query = context.Users
+                .AsNoTracking()
+                .Where(u => u.Id == userId && !u.IsDeleted)
+                .Include(u => u.City)
+                .Include(u => u.Customer);
+        }
+        else 
+        {
+            query = context.Users
+                .AsNoTracking()
+                .Where(u => u.Id == userId && !u.IsDeleted)
+                .Include(u => u.City);
+        }
+
+        var user = await query.FirstOrDefaultAsync(ct);
+        if (user == null)
+            return null;
+
+        var dto = new UserProfileDto
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            MobileNumber = user.MobileNumber,
+            CityId = user.CityId,
+            CityName = user.City?.Title,
+            ProfileImagePath = user.ProfileImagePath,
+            Balance = user.Balance,
+            RegisterDate = user.CreatedAt,
+            Role = role
+        };
+
+        if (role == "Expert" && user.Expert != null)
+        {
+            dto.ExpertInfo = new ExpertProfileInfo
+            {
+                Bio = user.Expert.Bio,
+                Address = user.Expert.Address,
+                BankCardNumber = user.Expert.BankCardNumber,
+                ShebaNumber = user.Expert.ShebaNumber,
+                AverageScore = user.Expert.AverageScore
+            };
+        }
+        return dto;
+    }
+
+    public async Task<bool> UpdateProfileAsync(UpdateProfileDto command, string role, CancellationToken ct)
+    {
+        try
+        {
+            var user = await context.Users
+                .Include(u => u.Expert)
+                .FirstOrDefaultAsync(u => u.Id == command.Id && !u.IsDeleted, ct);
+
+            if (user == null) return false;
+
+            user.FirstName = command.FirstName;
+            user.LastName = command.LastName;
+            user.CityId = command.CityId;
+
+            if (!string.IsNullOrEmpty(command.ProfileImagePath))
+                user.ProfileImagePath = command.ProfileImagePath;
+
+            user.UpdatedAt = DateTime.Now;
+
+            if (role == "Expert" && user.Expert != null)
+            {
+                user.Expert.Bio = command.Bio;
+                user.Expert.Address = command.Address;
+                user.Expert.BankCardNumber = command.BankCardNumber;
+                user.Expert.ShebaNumber = command.ShebaNumber;
+            }
+
+            if (!context.ChangeTracker.HasChanges())
+                return true;
+
+            await context.SaveChangesAsync(ct);
+            return true;
+        }
+        catch (Exception ex)
+        {
+
+            Console.WriteLine(ex.Message);
+            return false;
+        }
+    }
+    public Task<bool> CityExistsAsync(int cityId, CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<bool> CreateAsync(CreateUserDto command, CancellationToken ct)
     {
         var user = new User
@@ -69,6 +176,7 @@ public class UserRepository(AppDbContext context) : IUserRepository
             .Select(u => new UserDetailDto
             {
                 Id = u.Id,
+                IdentityId = u.IdentityId,
                 FirstName = u.FirstName,
                 LastName = u.LastName,
                 Email = u.Email,
@@ -79,6 +187,15 @@ public class UserRepository(AppDbContext context) : IUserRepository
                 RegisterDate = u.CreatedAt
             })
             .FirstOrDefaultAsync(ct);
+    }
+
+    public async Task<int> GetIdByIdentityIdAsync(string identityId, CancellationToken ct)
+    {
+        var id = await context.Users
+            .Where(u => u.IdentityId == identityId)
+            .Select(u => u.Id)
+            .FirstOrDefaultAsync(ct);
+        return id;  
     }
 
 

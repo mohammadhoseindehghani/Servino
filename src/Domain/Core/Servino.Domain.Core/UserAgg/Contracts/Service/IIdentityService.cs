@@ -1,4 +1,5 @@
-﻿using Servino.Domain.Core.UserAgg.Dtos.Identity;
+﻿using Servino.Domain.Core._common;
+using Servino.Domain.Core.UserAgg.Dtos.Identity;
 
 namespace Servino.Domain.Core.UserAgg.Contracts.Service;
 
@@ -10,4 +11,7 @@ public interface IIdentityService
     Task<LoginResultDto> VerifyOtpAndLoginAsync(LoginWithOtpDto otpDto, CancellationToken ct);
     Task<LoginResultDto> LoginWithGoogleAsync(LoginWithGoogleDto googleDto, CancellationToken ct);
     Task DeleteUserAsync(string id, CancellationToken ct);
+
+    Task<Result<bool>> ChangeEmailAsync(string identityId, string newEmail, CancellationToken ct);
+    Task<string?> GetEmailByIdentityIdAsync(string identityId, CancellationToken ct);
 }
