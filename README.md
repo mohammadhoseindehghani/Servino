@@ -1,78 +1,191 @@
-# 🏠 Servino - Home Services Web Application
+# 🏠 Servino – Home Services Web Application
 
-[![GitHub repo size](https://img.shields.io/github/repo-size/mohammadhoseindehghani/Servino)](https://github.com/mohammadhoseindehghani/Servino)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/mohammadhoseindehghani/Servino/blob/main/LICENSE)
-
-Servino is a modern web platform for managing **home services**, connecting **customers**, **service experts**, and **administrators** seamlessly. This project is developed in **ASP.NET Core** following **Onion Architecture** for clean, maintainable, and scalable code.
+<p align="center">
+  <img src="https://img.shields.io/github/repo-size/mohammadhoseindehghani/Servino" />
+  <img src="https://img.shields.io/github/license/mohammadhoseindehghani/Servino" />
+  <img src="https://img.shields.io/badge/ASP.NET%20Core-Onion%20Architecture-blueviolet" />
+</p>
 
 ---
 
 ## 🌟 Project Overview
 
-- **Customers** can:
-  - Browse available services 🛠️
-  - Submit service requests 📝
-  - Compare and select expert proposals ✅
-  - Confirm orders and make payments 💳
-  - Leave ratings and feedback ⭐
+**Servino** is a modern **Home Services Management Platform** that connects  
+**Customers**, **Service Experts**, and **Administrators** in a unified system.
 
-- **Service Experts** can:
-  - View requests matching their skills 👀
-  - Submit proposals ✍️
-  - Track order details 📋
-  - Perform services and receive payments 💰
+The project is built using **ASP.NET Core** and follows **Onion Architecture** to ensure:
 
-- **Administrators** can:
-  - Manage services and categories 🗂️
-  - Review requests and assign statuses 📌
-  - Manage feedback and ratings 📝
-  - Generate reports 📊
+- Clean separation of concerns  
+- High maintainability  
+- Scalability for real-world applications  
+
+---
+
+## 👥 User Roles & Capabilities
+
+### 👤 Customers
+- Browse available home services 🛠️
+- Submit service requests 📝
+- Review and select expert proposals ✅
+- Confirm orders and make payments 💳
+- Rate services and leave feedback ⭐
+
+### 🧑‍🔧 Service Experts
+- View requests matching their skills 👀
+- Submit proposals ✍️
+- Track assigned jobs 📋
+- Complete services and receive payments 💰
+
+### 🛡️ Administrators
+- Manage users, services, and categories 🗂️
+- Monitor requests and proposals 📌
+- Moderate comments and ratings 📝
+- Access system reports 📊
 
 ---
 
 ## 🏗️ Architecture
 
-Servino follows a **layered Onion Architecture**:
+### Layer Responsibilities
 
-- **Domain.Core** – Entities, Value Objects, DTOs, Contracts (Interfaces)  
-- **Domain.Service** – Service Implementations (business logic)  
-- **Domain.AppService** – Application services orchestrating multiple domain services  
-- **Infrastructure** – Data access (EF Core, Dapper), DbContext, Configurations, External Providers  
-- **Presentation** – MVC / Razor Pages UI, styled with **Bootstrap**  
+- **Domain.Core**
+  - Entities
+  - Value Objects
+  - DTOs
+  - Contracts (Interfaces)
 
-> 🔹 Dependencies flow inward. Presentation → AppService → Service → Core → Entities
+- **Domain.Service**
+  - Business logic implementations
+
+- **Domain.AppService**
+  - Application-level orchestration
+  - Use-case coordination
+
+- **Infrastructure**
+  - EF Core & Dapper
+  - DbContext & configurations
+  - Identity, OTP, and external providers
+
+- **Presentation**
+  - ASP.NET MVC / Razor Pages
+  - Bootstrap-based UI
+
+> 🔹 Dependencies always flow inward.  
+> Outer layers depend on inner layers, never the opposite.
 
 ---
 
-## 🚀 Phase 1 Highlights
+## 🚀 Phase 1 – Foundation & Core Setup
 
-✅ Initial analysis & design completed  
-✅ Core entities and properties created  
-✅ Project layers structured according to Onion Architecture  
-✅ DbContext created & configured  
-✅ Entity relationships defined  
-✅ Seed data added for initial setup  
-✅ CRU operations implemented for categories & services  
-✅ Project builds successfully  
+✅ System analysis and domain modeling  
+✅ Onion Architecture project structure  
+✅ Core entities and relationships  
+✅ EF Core DbContext & Fluent API configurations  
+✅ Seed data for categories and services  
+✅ CRUD operations for Categories & Services  
+✅ Stable build and ready-to-extend foundation  
 
-> Phase 1 sets the foundation for the entire project, ensuring the system is stable and extendable for future phases.
+> **Phase 1** established a solid architectural base for future development.
 
 ---
 
-## ⚙️ Key Features
+## 🚀 Phase 2 – Core Features & Management Panels
 
-- EF Core & Dapper for optimized data access  
-- Fluent API for entity configurations  
-- Role-based authentication using Microsoft Identity 🔒  
-- Persian (Jalali) date handling across the system 📅  
-- Pagination & filtering for large datasets 📄  
-- Secure file management: images stored on disk only 🖼️  
-- Consistent naming conventions and coding standards 💻  
+In this phase, Servino evolved into a **fully functional platform** without changing the core architecture.
+
+---
+
+### 🔹 Logging & Monitoring
+
+- Logging implemented across **all layers**
+- **Serilog** used as the logging provider
+- Centralized log storage with **Seq**
+- Logged events include:
+  - System exceptions and errors
+  - Critical user actions
+  - Order lifecycle and status changes
+
+---
+
+### 🔹 Authentication & Authorization
+
+- Full **Register & Login** implementation using **Microsoft Identity**
+- Role-based access control:
+  - Customer
+  - Expert
+  - Admin
+- Authorization policies applied throughout the system
+
+---
+
+### 🔹 OTP-Based Authentication
+
+- Implemented **OTP (One-Time Password)** authentication
+- Supported login methods:
+  - Email + OTP
+  - Mobile number + OTP
+- Secure handling of:
+  - OTP generation
+  - Expiration and validation
+  - Retry and abuse protection
+- OTP logic implemented in **Infrastructure** and consumed via **Application Services**
+
+---
+
+### 🔹 User Profile Management
+
+- Display customer and expert profile information
+- Edit and update profile details
+- Profile logic isolated in Application Services
+
+---
+
+### 🔹 Admin Panel
+
+A complete **Admin Dashboard** with:
+
+- User management (**CRUD**)
+- Service management (**CRUD**)
+- Category management (**CRUD**)
+- Viewing expert proposals per request
+- Comment & rating moderation (approve / reject)
+
+---
+
+### 🔹 Soft Delete Strategy
+
+- All delete operations use **Soft Delete**
+- No physical deletion from the database
+- Common fields:
+  - `IsDeleted`
+  - `DeletedAt`
+- Global Query Filters applied via EF Core
+
+> **Phase 2** significantly improves security, observability, and system administration while preserving Onion Architecture principles.
+
+---
+
+## ⚙️ Key Technical Features
+
+- ASP.NET Core
+- EF Core & Dapper
+- Fluent API entity configurations
+- Microsoft Identity
+- OTP-based authentication
+- Serilog + Seq centralized logging
+- Persian (Jalali) date support 📅
+- Pagination & filtering
+- Secure file storage (disk-based) 🖼️
+- Soft Delete applied across all entities
+- SOLID principles & clean code practices
 
 ---
 
 ## 🌐 Getting Started
 
-1. Clone the repository:  
-   ```bash
-   git clone https://github.com/mohammadhoseindehghani/Servino.git
+### 1️⃣ Clone the repository
+```bash
+git clone https://github.com/mohammadhoseindehghani/Servino.git
+```
+
+
