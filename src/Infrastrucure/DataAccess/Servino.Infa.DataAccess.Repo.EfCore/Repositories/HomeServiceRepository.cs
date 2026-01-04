@@ -9,6 +9,19 @@ namespace Servino.Infa.DataAccess.Repo.EfCore.Repositories;
 
 public class HomeServiceRepository(AppDbContext context) : IHomeServiceRepository
 {
+    public async Task<List<HomeServiceSummaryDto>> GetAllActiveServicesAsync(CancellationToken ct)
+    {
+        return await context.HomeServices.Select(hs => new HomeServiceSummaryDto()
+        {
+            Id = hs.Id,
+            Title = hs.Title,
+            CategoryName = hs.Category.Title,
+            BasePrice = hs.BasePrice.ToString("N0"),
+            VisitCount = hs.VisitCount,
+            ImagePath = hs.ImagePath
+        }).ToListAsync(ct);
+    }
+
     public async Task<bool> CreateAsync(HomeServiceDto command, CancellationToken ct)
     {
         var service = new HomeService

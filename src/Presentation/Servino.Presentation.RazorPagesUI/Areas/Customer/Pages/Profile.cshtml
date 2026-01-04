@@ -139,7 +139,7 @@
                             <label for="cityId" class="form-label">شهر <span class="text-danger">*</span></label>
                             <select class="form-select select2"
                                     id="cityId"
-                                    name="cityId"
+                                    name="cityUserId"
                                     style="width:100%"
                                     required>
                                 <option value="">انتخاب کنید...</option>
@@ -177,7 +177,7 @@
             $('#editProfileModal').on('show.bs.modal', function () {
                 $('#firstName').val('@Model.Profile.FirstName');
                 $('#lastName').val('@Model.Profile.LastName');
-                $('#cityId').val('@Model.Profile.CityId').trigger('change');
+                $('#cityUserId').val('@Model.Profile.CityId').trigger('change');
                 $('#modalAvatar').attr('src', '@(string.IsNullOrEmpty(Model.Profile.ProfileImagePath) ? "/img/avatars/14.png" : Model.Profile.ProfileImagePath)');
             });
         });

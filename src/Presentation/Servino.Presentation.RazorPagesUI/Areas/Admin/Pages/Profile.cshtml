@@ -172,7 +172,7 @@
         @if (!ModelState.IsValid || !string.IsNullOrEmpty(Model.ErrorMessage))
         {
                 <text>
-                    var myModal = new bootstrap.Modal(document.getElementById('editAdminModal'));
+                    var myModal = new bootstrap.Modal(document.getElementByUserId('editAdminModal'));
                     myModal.show();
                 </text>
         }

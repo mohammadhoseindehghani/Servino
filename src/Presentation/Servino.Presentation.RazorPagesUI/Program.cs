@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Servino.Domain.AppService;
+using Servino.Domain.AppService.UserAgg;
 using Servino.Domain.Core.CategoryAgg.Contracts.AppService;
 using Servino.Domain.Core.CategoryAgg.Contracts.Data;
 using Servino.Domain.Core.CategoryAgg.Contracts.Service;
 using Servino.Domain.Core.CommentAgg.Contracts.AppService;
 using Servino.Domain.Core.CommentAgg.Contracts.Data;
 using Servino.Domain.Core.CommentAgg.Contracts.Service;
+using Servino.Domain.Core.ExpertHomeServiceAgg.Contracts.Data;
+using Servino.Domain.Core.ExpertHomeServiceAgg.Contracts.Service;
 using Servino.Domain.Core.HomeServiceAgg.Contracts.AppService;
 using Servino.Domain.Core.HomeServiceAgg.Contracts.Data;
 using Servino.Domain.Core.HomeServiceAgg.Contracts.Service;
@@ -37,7 +40,7 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 })
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders()
-    .AddClaimsPrincipalFactory<AppUserClaimsPrincipalFactory>(); ;
+    .AddClaimsPrincipalFactory<AppUserClaimsPrincipalFactory>();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -55,17 +58,22 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<IHomeServiceRepository, HomeServiceRepository>();
+builder.Services.AddScoped<IExpertRepository, ExpertRepository>();
+builder.Services.AddScoped<IExpertHomeServiceRepository, ExpertHomeServiceRepository>();
 
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IHomeServiceService, HomeServiceService>();
+builder.Services.AddScoped<IExpertHomeServiceService, ExpertHomeServiceService>();
+builder.Services.AddScoped<IExpertService, ExpertService>();
 
 builder.Services.AddScoped<IUserAppService, UserAppService>();
 builder.Services.AddScoped<ICommentAppService, CommentAppService>();
 builder.Services.AddScoped<ICategoryAppService, CategoryAppService>();
 builder.Services.AddScoped<IHomeServiceAppService, HomeServiceAppService>();
+builder.Services.AddScoped<IExpertAppService, ExpertAppService>();
 
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddMemoryCache();

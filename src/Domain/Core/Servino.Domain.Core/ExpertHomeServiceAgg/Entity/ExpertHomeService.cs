@@ -11,6 +11,4 @@ public class ExpertHomeService : BaseEntity
 
     public Expert Expert { get; set; }
     public HomeService HomeService { get; set; }
-
-
 }

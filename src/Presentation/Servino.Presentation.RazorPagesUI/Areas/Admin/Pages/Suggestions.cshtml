@@ -256,16 +256,16 @@
 <script>
     document.querySelectorAll('[data-bs-target="#viewSuggestionModal"]').forEach(btn => {
         btn.addEventListener('click', function () {
-            document.getElementById('modalRequest').textContent = this.getAttribute('data-request');
-            document.getElementById('modalService').textContent = this.getAttribute('data-service');
-            document.getElementById('modalCustomer').textContent = this.getAttribute('data-customer');
-            document.getElementById('modalExpert').textContent = this.getAttribute('data-expert');
-            document.getElementById('modalPrice').textContent = this.getAttribute('data-price');
-            document.getElementById('modalDuration').textContent = this.getAttribute('data-duration');
-            document.getElementById('modalDate').textContent = this.getAttribute('data-date');
+            document.getElementByUserId('modalRequest').textContent = this.getAttribute('data-request');
+            document.getElementByUserId('modalService').textContent = this.getAttribute('data-service');
+            document.getElementByUserId('modalCustomer').textContent = this.getAttribute('data-customer');
+            document.getElementByUserId('modalExpert').textContent = this.getAttribute('data-expert');
+            document.getElementByUserId('modalPrice').textContent = this.getAttribute('data-price');
+            document.getElementByUserId('modalDuration').textContent = this.getAttribute('data-duration');
+            document.getElementByUserId('modalDate').textContent = this.getAttribute('data-date');
 
             const status = this.getAttribute('data-status');
-            const statusEl = document.getElementById('modalStatus');
+            const statusEl = document.getElementByUserId('modalStatus');
             statusEl.textContent = status;
             if (status === 'پذیرفته شده') {
                 statusEl.className = 'badge bg-label-success';
@@ -276,7 +276,7 @@
             }
 
             const note = this.getAttribute('data-note') || '-';
-            document.getElementById('modalNote').textContent = note;
+            document.getElementByUserId('modalNote').textContent = note;
         });
     });
 

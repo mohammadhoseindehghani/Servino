@@ -232,14 +232,14 @@
 </div>
 
 <script>
-    const chargeModal = document.getElementById('chargeBalanceModal');
+    const chargeModal = document.getElementByUserId('chargeBalanceModal');
     chargeModal.addEventListener('show.bs.modal', function (event) {
         const button = event.relatedTarget;
-        const userId = button.getAttribute('data-user-id');
+        const userUserId = button.getAttribute('data-user-id');
         const userName = button.getAttribute('data-user-name');
 
-        document.getElementById('chargeUserId').value = userId;
-        document.getElementById('chargeUserName').textContent = userName;
+        document.getElementByUserId('chargeUserUserId').value = userUserId;
+        document.getElementByUserId('chargeUserName').textContent = userName;
     });
 
     document.querySelectorAll('.confirm-delete').forEach(btn => {

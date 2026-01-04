@@ -75,7 +75,7 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                         name: "FK_Categories_Categories_ParentId",
                         column: x => x.ParentId,
                         principalTable: "Categories",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -140,7 +140,7 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                         name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -161,7 +161,7 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                         name: "FK_AspNetUserClaims_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -181,7 +181,7 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                         name: "FK_AspNetUserLogins_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -199,13 +199,13 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                         name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_AspNetUserRoles_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -225,7 +225,7 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                         name: "FK_AspNetUserTokens_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -257,7 +257,7 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                         name: "FK_HomeServices_Categories_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categories",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -284,7 +284,7 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                         name: "FK_Cities_Provinces_ProvinceId",
                         column: x => x.ProvinceId,
                         principalTable: "Provinces",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -318,7 +318,7 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                         name: "FK_Users_Cities_CityId",
                         column: x => x.CityId,
                         principalTable: "Cities",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.SetNull);
                 });
 
@@ -344,7 +344,7 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                         name: "FK_Admins_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -370,7 +370,7 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                         name: "FK_Customers_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -401,7 +401,7 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                         name: "FK_Experts_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -427,13 +427,13 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                         name: "FK_ExpertHomeServices_Experts_ExpertId",
                         column: x => x.ExpertId,
                         principalTable: "Experts",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_ExpertHomeServices_HomeServices_HomeServiceId",
                         column: x => x.HomeServiceId,
                         principalTable: "HomeServices",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -466,13 +466,13 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                         name: "FK_Comments_Customers_CustomerId",
                         column: x => x.CustomerId,
                         principalTable: "Customers",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Comments_Experts_ExpertId",
                         column: x => x.ExpertId,
                         principalTable: "Experts",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -529,19 +529,19 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                         name: "FK_Requests_Cities_CityId",
                         column: x => x.CityId,
                         principalTable: "Cities",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Requests_Customers_CustomerId",
                         column: x => x.CustomerId,
                         principalTable: "Customers",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Requests_HomeServices_HomeServiceId",
                         column: x => x.HomeServiceId,
                         principalTable: "HomeServices",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -573,13 +573,13 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                         name: "FK_Suggestions_Experts_ExpertId",
                         column: x => x.ExpertId,
                         principalTable: "Experts",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Suggestions_Requests_RequestId",
                         column: x => x.RequestId,
                         principalTable: "Requests",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -761,7 +761,7 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                 table: "Comments",
                 column: "RequestId",
                 principalTable: "Requests",
-                principalColumn: "Id",
+                principalColumn: "UserId",
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
@@ -769,7 +769,7 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                 table: "RequestImages",
                 column: "RequestId",
                 principalTable: "Requests",
-                principalColumn: "Id",
+                principalColumn: "UserId",
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
@@ -777,7 +777,7 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
                 table: "Requests",
                 column: "WinnerSuggestionId",
                 principalTable: "Suggestions",
-                principalColumn: "Id",
+                principalColumn: "UserId",
                 onDelete: ReferentialAction.Restrict);
         }
 

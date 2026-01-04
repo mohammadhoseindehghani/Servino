@@ -10,8 +10,6 @@
     <Folder Include="CategoryAgg\Contracts\Service\" />
     <Folder Include="CategoryAgg\Enum\" />
     <Folder Include="ExpertHomeServiceAgg\Contracts\AppService\" />
-    <Folder Include="ExpertHomeServiceAgg\Contracts\Data\" />
-    <Folder Include="ExpertHomeServiceAgg\Contracts\Service\" />
     <Folder Include="ExpertHomeServiceAgg\Dtos\" />
     <Folder Include="ExpertHomeServiceAgg\Enum\" />
     <Folder Include="HomeServiceAgg\Contracts\AppService\" />
@@ -32,7 +30,6 @@
     <Folder Include="SuggestionAgg\Contracts\Service\" />
     <Folder Include="SuggestionAgg\Dtos\" />
     <Folder Include="UserAgg\Enum\" />
-    <Folder Include="UserAgg\Contracts\AppService\" />
   </ItemGroup>
 
 </Project>

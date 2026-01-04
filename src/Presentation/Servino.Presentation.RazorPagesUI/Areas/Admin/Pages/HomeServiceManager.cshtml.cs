@@ -152,7 +152,7 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
             var catPagination = new PaginationRequestDto { PageSize = 100 };
             var cats = await categoryAppService.GetAllAsync(catPagination, ct);
 
-            Categories = new SelectList(cats, "Id", "Title");
+            Categories = new SelectList(cats, "UserId", "Title");
         }
 
         public class CreateHomeServiceModel

@@ -7,6 +7,11 @@ namespace Servino.Domain.Service;
 
 public class HomeServiceService(IHomeServiceRepository homeServiceRepo) : IHomeServiceService
 {
+    public async Task<List<HomeServiceSummaryDto>> GetAllActiveServicesAsync(CancellationToken ct)
+    {
+        return await homeServiceRepo.GetAllActiveServicesAsync(ct);
+    }
+
     public async Task<bool> CreateAsync(HomeServiceDto command, CancellationToken ct)
     {
         return await homeServiceRepo.CreateAsync(command, ct);

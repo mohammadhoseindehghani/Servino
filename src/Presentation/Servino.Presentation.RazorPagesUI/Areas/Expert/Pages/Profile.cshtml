@@ -9,98 +9,113 @@
     <link rel="stylesheet" href="~/vendor/libs/select2/select2.dist.css" />
     <link rel="stylesheet" href="~/vendor/libs/sweetalert2/sweetalert2.dist.css" />
 }
-
 @section VendorScripts {
     <script src="~/vendor/libs/select2/select2.dist.js"></script>
-    <script src="~/vendor/libs/select2/i18n/fa.dist.js"></script>
     <script src="~/vendor/libs/sweetalert2/sweetalert2.dist.js"></script>
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            Swal.fire({ title: 'موفق!', text: '@Html.Raw(TempData["SuccessMessage"])', icon: 'success', confirmButtonText: 'باشه' });
+        });
+    </script>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            Swal.fire({ title: 'خطا!', text: '@Html.Raw(TempData["ErrorMessage"])', icon: 'error', confirmButtonText: 'باشه' });
+        });
+    </script>
 }
 
 <h4 class="py-3 mb-4">
     <span class="text-muted fw-light">تنظیمات /</span> پروفایل متخصص
 </h4>
 
-@if (!string.IsNullOrEmpty(Model.SuccessMessage))
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @Model.SuccessMessage
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-@if (!string.IsNullOrEmpty(Model.ErrorMessage))
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @Model.ErrorMessage
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-
 <div class="row">
     <div class="col-md-12">
+        <ul class="nav nav-pills flex-column flex-md-row mb-4">
+            <li class="nav-item"><a class="nav-link active" href="javascript:void(0);"><i class="ti-xs ti ti-user me-1"></i> مشخصات فردی</a></li>
+            <li class="nav-item"><a class="nav-link" asp-page="./MyServices"><i class="ti-xs ti ti-tools me-1"></i> خدمات من</a></li>
+        </ul>
 
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">اطلاعات حساب و تخصص</h5>
+                <h5 class="mb-0">اطلاعات حساب</h5>
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editExpertModal">
                     <i class="ti ti-edit me-1"></i> ویرایش پروفایل
                 </button>
             </div>
-
             <div class="card-body">
                 <div class="d-flex align-items-center gap-4 mb-4">
-                    <img src="@(string.IsNullOrEmpty(Model.Profile.ProfileImagePath) ? "/img/avatars/14.png" : Model.Profile.ProfileImagePath)"
-                         alt="Avatar" class="d-block w-px-100 h-px-100 rounded" />
+                    <img src="@(string.IsNullOrEmpty(Model.ExpertProfile.ProfileImagePath) ? "/img/avatars/default.png" : Model.ExpertProfile.ProfileImagePath)"
+                         alt="Avatar" class="d-block w-px-100 h-px-100 rounded object-fit-cover"
+                         onerror="this.onerror=null;this.src='/img/avatars/default.png';" />
                     <div>
-                        <h4>@Model.Profile.FirstName @Model.Profile.LastName</h4>
-                        <span class="badge bg-label-success">متخصص (Expert)</span>
-                        @if (Model.Profile.ExpertInfo?.AverageScore != null)
-                        {
-                            <div class="mt-1">
-                                <span class="text-warning"><i class="ti ti-star-filled"></i> @Model.Profile.ExpertInfo.AverageScore</span>
-                            </div>
-                        }
+                        <h4>@Model.ExpertProfile.FirstName @Model.ExpertProfile.LastName</h4>
+                        <span class="badge bg-label-success">متخصص</span>
+                        <div class="text-muted mt-1 small dir-ltr">@Model.ExpertProfile.Email</div>
                     </div>
                 </div>
-
+                <hr class="my-4" />
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">نام و نام خانوادگی:</label>
-                        <p class="fs-5">@Model.Profile.FirstName @Model.Profile.LastName</p>
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-bold text-muted">نام و نام خانوادگی:</label>
+                        <p class="mb-0 fs-5">@Model.ExpertProfile.FirstName @Model.ExpertProfile.LastName</p>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">شماره موبایل:</label>
-                        <p class="fs-5 ltr text-end">@Model.Profile.MobileNumber</p>
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-bold text-muted">شماره موبایل:</label>
+                        <p class="mb-0 fs-5 dir-ltr text-end">@Model.ExpertProfile.Phone</p>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">ایمیل:</label>
-                        <p class="fs-5">@Model.Profile.Email</p>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">شهر:</label>
-                        <p class="fs-5">@(Model.Profile.CityName ?? "تعیین نشده")</p>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">موجودی کیف پول:</label>
-                        <p class="fs-5 text-success">@Model.Profile.Balance.ToString("N0") تومان</p>
-                    </div>
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-bold text-muted">شهر:</label>
+                        <p class="mb-0 fs-5">
+                            @switch (Model.ExpertProfile.CityId)
+                            {
+                                case 1:
+                                    <text>تهران</text>
+                                    ; break;
+                                case 2:
 
-                    <div class="col-12"><hr /></div>
+                                    <text>اصفهان</text>
+                                    ; break;
+                                case 3:
 
-                    <div class="col-md-12 mb-3">
-                        <label class="form-label fw-bold">بیوگرافی:</label>
-                        <p class="fs-6 text-muted">@(string.IsNullOrEmpty(Model.Profile.ExpertInfo?.Bio) ? "توضیحاتی ثبت نشده است." : Model.Profile.ExpertInfo.Bio)</p>
+                                    <text>شیراز</text>
+                                    ; break;
+                                case 4:
+
+                                    <text>مشهد</text>
+                                    ; break;
+                                case 5:
+
+                                    <text>تبریز</text>
+                                    ; break;
+                                default:
+
+                                    <text>-</text>
+                                    ; break;
+                            }
+                        </p>
                     </div>
-                    <div class="col-md-12 mb-3">
-                        <label class="form-label fw-bold">آدرس:</label>
-                        <p class="fs-5">@(string.IsNullOrEmpty(Model.Profile.ExpertInfo?.Address) ? "آدرس ثبت نشده است." : Model.Profile.ExpertInfo.Address)</p>
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-bold text-muted">آدرس:</label>
+                        <p class="mb-0 fs-5">@(string.IsNullOrWhiteSpace(Model.ExpertProfile.Address) ? "-" : Model.ExpertProfile.Address)</p>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">شماره کارت:</label>
-                        <p class="fs-5 ltr">@(string.IsNullOrEmpty(Model.Profile.ExpertInfo?.BankCardNumber) ? "-" : Model.Profile.ExpertInfo.BankCardNumber)</p>
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-bold text-muted">شماره کارت:</label>
+                        <p class="mb-0 fs-5 dir-ltr text-end">@(string.IsNullOrWhiteSpace(Model.ExpertProfile.BankCardNumber) ? "-" : Model.ExpertProfile.BankCardNumber)</p>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">شماره شبا:</label>
-                        <p class="fs-5 ltr">IR @(string.IsNullOrEmpty(Model.Profile.ExpertInfo?.ShebaNumber) ? "-" : Model.Profile.ExpertInfo.ShebaNumber)</p>
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-bold text-muted">شماره شبا:</label>
+                        <p class="mb-0 fs-5 dir-ltr text-end">@(string.IsNullOrWhiteSpace(Model.ExpertProfile.ShebaNumber) ? "-" : Model.ExpertProfile.ShebaNumber)</p>
+                    </div>
+                    <div class="col-md-12 mb-4">
+                        <label class="form-label fw-bold text-muted">بیوگرافی:</label>
+                        <p class="mb-0 fs-5 text-break">@(string.IsNullOrWhiteSpace(Model.ExpertProfile.Bio) ? "-" : Model.ExpertProfile.Bio)</p>
                     </div>
                 </div>
             </div>
@@ -112,80 +127,80 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-label-primary">
-                <h5 class="modal-title">ویرایش اطلاعات متخصص</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">ویرایش اطلاعات فردی</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-
             <form method="post" enctype="multipart/form-data">
-                @Html.AntiForgeryToken()
                 <div class="modal-body">
                     <div class="d-flex align-items-start align-items-sm-center gap-4 mb-4">
-                        <img src="@(string.IsNullOrEmpty(Model.Profile.ProfileImagePath) ? "/img/avatars/14.png" : Model.Profile.ProfileImagePath)"
-                             alt="user-avatar" class="d-block w-px-100 h-px-100 rounded" id="modalAvatar" />
-
+                        <img src="@(string.IsNullOrEmpty(Model.ExpertProfile.ProfileImagePath) ? "/img/avatars/default.png" : Model.ExpertProfile.ProfileImagePath)"
+                             alt="user-avatar" class="d-block w-px-100 h-px-100 rounded object-fit-cover" id="modalAvatar"
+                             onerror="this.onerror=null;this.src='/img/avatars/default.png';" />
                         <div class="button-wrapper">
                             <label for="upload" class="btn btn-primary me-2 mb-3" tabindex="0">
-                                <span class="d-none d-sm-block">انتخاب عکس جدید</span>
+                                <span class="d-none d-sm-block">تغییر عکس پروفایل</span>
                                 <i class="ti ti-upload d-block d-sm-none"></i>
-                                <input type="file" id="upload" name="upload" class="account-file-input" hidden accept="image/png,image/jpeg,image/jpg" onchange="previewImage(this)" />
+                                <input type="file" id="upload" class="account-file-input" hidden accept="image/png,image/jpeg,image/jpg"
+                                       asp-for="Input.NewImageFile" onchange="previewImage(this)" />
                             </label>
-                            <div class="text-muted small">JPG, GIF or PNG. Max size of 5MB</div>
+                            <div class="text-muted small">فرمت‌های مجاز: JPG, PNG. حداکثر 5MB</div>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="firstName" class="form-label">نام</label>
-                            <input type="text" id="firstName" name="firstName" class="form-control" value="@Model.Profile.FirstName" required />
+                            <label class="form-label">نام <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" asp-for="Input.FirstName" />
+                            <span asp-validation-for="Input.FirstName" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="lastName" class="form-label">نام خانوادگی</label>
-                            <input type="text" id="lastName" name="lastName" class="form-control" value="@Model.Profile.LastName" required />
+                            <label class="form-label">نام خانوادگی <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" asp-for="Input.LastName" />
+                            <span asp-validation-for="Input.LastName" class="text-danger"></span>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="cityId" class="form-label">شهر فعالیت</label>
-                            <select class="form-select select2" id="cityId" name="cityId" style="width:100%" required>
+                            <label class="form-label">شماره موبایل (غیرقابل تغییر)</label>
+                            <input type="text" class="form-control dir-ltr" value="@Model.ExpertProfile.Phone" disabled />
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">شهر</label>
+                            <select class="form-select select2-modal" asp-for="Input.CityId" style="width:100%">
                                 <option value="">انتخاب کنید...</option>
-                                <option value="1" @(Model.Profile.CityId == 1 ? "selected" : "")>تهران</option>
-                                <option value="2" @(Model.Profile.CityId == 2 ? "selected" : "")>اصفهان</option>
-                                <option value="3" @(Model.Profile.CityId == 3 ? "selected" : "")>شیراز</option>
-                                <option value="4" @(Model.Profile.CityId == 4 ? "selected" : "")>مشهد</option>
-                                <option value="5" @(Model.Profile.CityId == 5 ? "selected" : "")>تبریز</option>
+                                <option value="1">تهران</option>
+                                <option value="2">اصفهان</option>
+                                <option value="3">شیراز</option>
+                                <option value="4">مشهد</option>
+                                <option value="5">تبریز</option>
                             </select>
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">موبایل (غیرقابل تغییر)</label>
-                            <input type="text" class="form-control" value="@Model.Profile.MobileNumber" disabled />
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">آدرس کامل</label>
+                            <input type="text" class="form-control" asp-for="Input.Address" placeholder="نام خیابان، کوچه، پلاک..." />
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="address" class="form-label">آدرس</label>
-                            <input type="text" id="address" name="address" class="form-control" value="@Model.Profile.ExpertInfo?.Address" />
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label for="bankCardNumber" class="form-label">شماره کارت</label>
-                            <input type="text" id="bankCardNumber" name="bankCardNumber" class="form-control ltr"
-                                   value="@Model.Profile.ExpertInfo?.BankCardNumber" placeholder="6037..." maxlength="16" />
+                            <label class="form-label">شماره کارت</label>
+                            <input type="text" class="form-control dir-ltr" asp-for="Input.BankCardNumber" placeholder="xxxx-xxxx-xxxx-xxxx" maxlength="16" />
+                            <span asp-validation-for="Input.BankCardNumber" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="shebaNumber" class="form-label">شماره شبا (بدون IR)</label>
-                            <div class="input-group input-group-merge">
+                            <label class="form-label">شماره شبا</label>
+                            <div class="input-group">
                                 <span class="input-group-text">IR</span>
-                                <input type="text" id="shebaNumber" name="shebaNumber" class="form-control ltr"
-                                       value="@Model.Profile.ExpertInfo?.ShebaNumber" maxlength="24" />
+                                <input type="text" class="form-control dir-ltr" asp-for="Input.ShebaNumber" placeholder="۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰" maxlength="24" />
                             </div>
+                            <span asp-validation-for="Input.ShebaNumber" class="text-danger"></span>
                         </div>
 
-                        <div class="col-12 mb-3">
-                            <label for="bio" class="form-label">بیوگرافی و تخصص‌ها</label>
-                            <textarea id="bio" name="bio" class="form-control" rows="3" placeholder="توضیح مختصری درباره سوابق و تخصص خود بنویسید...">@Model.Profile.ExpertInfo?.Bio</textarea>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">درباره من (بیوگرافی)</label>
+                            <textarea class="form-control" rows="4" asp-for="Input.Bio" placeholder="توضیحی کوتاه درباره تخصص و تجربیات خود بنویسید..."></textarea>
                         </div>
                     </div>
                 </div>
-
                 <div class="modal-footer">
                     <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">انصراف</button>
                     <button type="submit" class="btn btn-primary">ذخیره تغییرات</button>
@@ -198,21 +213,10 @@
 @section PageScripts {
     <script>
         $(document).ready(function () {
-            $('.select2').select2({
+            $('.select2-modal').select2({
                 language: "fa",
                 dir: "rtl",
                 dropdownParent: $('#editExpertModal')
-            });
-
-            $('#editExpertModal').on('show.bs.modal', function () {
-                $('#firstName').val('@Model.Profile.FirstName');
-                $('#lastName').val('@Model.Profile.LastName');
-                $('#cityId').val('@Model.Profile.CityId').trigger('change');
-                $('#address').val('@Model.Profile.ExpertInfo?.Address');
-                $('#bankCardNumber').val('@Model.Profile.ExpertInfo?.BankCardNumber');
-                $('#shebaNumber').val('@Model.Profile.ExpertInfo?.ShebaNumber');
-                $('#bio').val(`@Html.Raw(Model.Profile.ExpertInfo?.Bio)`);
-                $('#modalAvatar').attr('src', '@(string.IsNullOrEmpty(Model.Profile.ProfileImagePath) ? "/img/avatars/14.png" : Model.Profile.ProfileImagePath)');
             });
         });
 
@@ -224,14 +228,6 @@
                 }
                 reader.readAsDataURL(input.files[0]);
             }
-        }
-
-        @if (!ModelState.IsValid || !string.IsNullOrEmpty(Model.ErrorMessage))
-        {
-                <text>
-                    var myModal = new bootstrap.Modal(document.getElementById('editExpertModal'));
-                    myModal.show();
-                </text>
         }
     </script>
 }

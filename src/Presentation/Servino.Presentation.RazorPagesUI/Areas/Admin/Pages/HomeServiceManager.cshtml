@@ -270,7 +270,7 @@
          let editOffcanvas;
 
          document.addEventListener("DOMContentLoaded", function () {
-             var element = document.getElementById('editServiceOffcanvas');
+             var element = document.getElementByUserId('editServiceOffcanvas');
              if (element) {
                  editOffcanvas = new bootstrap.Offcanvas(element);
              }
@@ -278,14 +278,14 @@
 
          function openEditModal(id) {
              if (!editOffcanvas) {
-                 var element = document.getElementById('editServiceOffcanvas');
+                 var element = document.getElementByUserId('editServiceOffcanvas');
                  editOffcanvas = new bootstrap.Offcanvas(element);
              }
 
              editOffcanvas.show();
 
-             document.getElementById('editLoader').style.display = 'block';
-             document.getElementById('editForm').style.display = 'none';
+             document.getElementByUserId('editLoader').style.display = 'block';
+             document.getElementByUserId('editForm').style.display = 'none';
 
              fetch(`?handler=RowData&id=${id}`)
                  .then(response => {
@@ -293,14 +293,14 @@
                      return response.json();
                  })
                  .then(data => {
-                     document.getElementById('editId').value = data.id;
-                     document.getElementById('editTitle').value = data.title;
-                     document.getElementById('editDesc').value = data.shortDescription;
-                     document.getElementById('editCategory').value = data.categoryId;
-                     document.getElementById('editPrice').value = data.basePrice;
+                     document.getElementByUserId('editUserId').value = data.id;
+                     document.getElementByUserId('editTitle').value = data.title;
+                     document.getElementByUserId('editDesc').value = data.shortDescription;
+                     document.getElementByUserId('editCategory').value = data.categoryUserId;
+                     document.getElementByUserId('editPrice').value = data.basePrice;
 
-                     document.getElementById('editLoader').style.display = 'none';
-                     document.getElementById('editForm').style.display = 'block';
+                     document.getElementByUserId('editLoader').style.display = 'none';
+                     document.getElementByUserId('editForm').style.display = 'block';
                  })
                  .catch(error => {
                      console.error('Error:', error);

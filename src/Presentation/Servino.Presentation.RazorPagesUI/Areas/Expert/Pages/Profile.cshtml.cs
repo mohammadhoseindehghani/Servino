@@ -1,152 +1,141 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Servino.Domain.Core._common;
 using Servino.Domain.Core.UserAgg.Contracts.AppService;
 using Servino.Domain.Core.UserAgg.Dtos;
-using Servino.Domain.Core.UserAgg.Dtos.Identity;
 using Servino.Presentation.RazorPagesUI.Services.File;
+using System.ComponentModel.DataAnnotations;
 
 namespace Servino.Presentation.RazorPagesUI.Areas.Expert.Pages
 {
     [Authorize(Roles = "Expert")]
-    public class ProfileModel(IUserAppService userAppService, IFileService fileService) : PageModel
+    public class ProfileModel(
+            IExpertAppService expertAppService,
+            IUserAppService userAppService,
+            IFileService fileService) : PageModel
     {
-        public UserProfileDto Profile { get; set; } = new();
+        public ExpertProfileDto ExpertProfile { get; set; } = new();
 
-        [TempData]
-        public string? SuccessMessage { get; set; }
+        [BindProperty]
+        public UpdateExpertProfileInput Input { get; set; } = new();
 
-        [TempData]
-        public string? ErrorMessage { get; set; }
+        [TempData] public string? SuccessMessage { get; set; }
+        [TempData] public string? ErrorMessage { get; set; }
 
-        private int GetCurrentUserId()
+        public async Task<IActionResult> OnGet(CancellationToken ct)
         {
-            var userIdStr = User.FindFirst("userId")?.Value;
-            if (int.TryParse(userIdStr, out int userId))
-                return userId;
-            return 0;
-        }
-
-        public async Task<IActionResult> OnGetAsync()
-        {
-            var userId = GetCurrentUserId();
+            var userId = await GetCurrentUserIdAsync(ct);
             if (userId == 0) return RedirectToPage("/Auth/Login/Index");
 
-            await LoadProfile(userId);
+            var profileResult = await expertAppService.GetByUserId(userId, ct);
+            if (!profileResult.IsSuccess) return RedirectToPage("/Index");
+
+            ExpertProfile = profileResult.Data;
+
+            Input = new UpdateExpertProfileInput
+            {
+                FirstName = ExpertProfile.FirstName,
+                LastName = ExpertProfile.LastName,
+                CityId = ExpertProfile.CityId,
+                Bio = ExpertProfile.Bio,
+                Address = ExpertProfile.Address,
+                BankCardNumber = ExpertProfile.BankCardNumber,
+                ShebaNumber = ExpertProfile.ShebaNumber
+            };
+
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(
-            string firstName,
-            string lastName,
-            int cityId,
-            string? address,
-            string? bankCardNumber,
-            string? shebaNumber,
-            string? bio,
-            IFormFile? upload)
+        public async Task<IActionResult> OnPostAsync(CancellationToken ct)
         {
-            var userId = GetCurrentUserId();
-            if (userId == 0) return Unauthorized();
+            var userId = await GetCurrentUserIdAsync(ct);
+            if (userId == 0) return RedirectToPage("/Auth/Login/Index");
 
-            if (string.IsNullOrWhiteSpace(firstName))
+            if (!ModelState.IsValid)
             {
-                ErrorMessage = "نام الزامی است.";
-                await LoadProfile(userId);
+                ErrorMessage = "اطلاعات وارد شده معتبر نیست. لطفاً ورودی‌ها را بررسی کنید.";
+                var profileResult = await expertAppService.GetByUserId(userId, ct);
+                if (profileResult.IsSuccess) ExpertProfile = profileResult.Data;
                 return Page();
             }
 
-            if (string.IsNullOrWhiteSpace(lastName))
-            {
-                ErrorMessage = "نام خانوادگی الزامی است.";
-                await LoadProfile(userId);
-                return Page();
-            }
+            string? imagePath = null;
+            var currentProfileResult = await expertAppService.GetByUserId(userId, ct);
+            if (currentProfileResult.IsSuccess) imagePath = currentProfileResult.Data.ProfileImagePath;
 
-            if (cityId == 0)
+            if (Input.NewImageFile != null)
             {
-                ErrorMessage = "انتخاب شهر الزامی است.";
-                await LoadProfile(userId);
-                return Page();
-            }
-
-            var currentProfileResult = await userAppService.GetUserProfileAsync(userId, "Expert", CancellationToken.None);
-            string? profileImagePath = currentProfileResult.IsSuccess ? currentProfileResult.Data?.ProfileImagePath : null;
-
-            if (upload != null && upload.Length > 0)
-            {
-                if (upload.Length > 5 * 1024 * 1024)
+                try
                 {
-                    ErrorMessage = "حجم فایل بیشتر از ۵ مگابایت است.";
-                    await LoadProfile(userId);
+                    var newPath = await fileService.Upload(Input.NewImageFile, "avatars", ct);
+                    if (!string.IsNullOrEmpty(imagePath)) await fileService.DeleteFile(imagePath, ct);
+                    imagePath = newPath;
+                }
+                catch (Exception ex)
+                {
+                    ErrorMessage = "خطا در آپلود عکس: " + ex.Message;
+                    if (currentProfileResult.IsSuccess) ExpertProfile = currentProfileResult.Data;
                     return Page();
                 }
-
-                var allowedExtensions = new[] { ".png", ".jpg", ".jpeg" };
-                var extension = Path.GetExtension(upload.FileName).ToLowerInvariant();
-                if (!allowedExtensions.Contains(extension))
-                {
-                    ErrorMessage = "فرمت فایل مجاز نیست (فقط JPG, JPEG, PNG).";
-                    await LoadProfile(userId);
-                    return Page();
-                }
-
-                if (!string.IsNullOrEmpty(profileImagePath) && profileImagePath.StartsWith("/Files/"))
-                {
-                    await fileService.DeleteFile(profileImagePath, CancellationToken.None);
-                }
-
-                var newPath = await fileService.Upload(upload, "profiles", CancellationToken.None);
-                if (newPath == null)
-                {
-                    ErrorMessage = "خطا در آپلود فایل.";
-                    await LoadProfile(userId);
-                    return Page();
-                }
-
-                profileImagePath = newPath;
             }
 
-            var updateCommand = new UpdateProfileDto
+            var command = new UpdateExpertProfileDto
             {
-                Id = userId,
-                FirstName = firstName.Trim(),
-                LastName = lastName.Trim(),
-                CityId = cityId,
-                ProfileImagePath = profileImagePath,
-
-                Address = address?.Trim(),
-                BankCardNumber = bankCardNumber?.Trim(),
-                ShebaNumber = shebaNumber?.Trim(),
-                Bio = bio?.Trim()
+                UserId = userId,
+                FirstName = Input.FirstName,
+                LastName = Input.LastName,
+                CityId = Input.CityId,
+                Bio = Input.Bio,
+                Address = Input.Address,
+                BankCardNumber = Input.BankCardNumber,
+                ShebaNumber = Input.ShebaNumber,
+                ProfileImagePath = imagePath
             };
 
-            var updateResult = await userAppService.UpdateUserProfileAsync(updateCommand, "Expert", CancellationToken.None);
+            var result = await expertAppService.UpdateProfile(command, ct);
 
-            if (!updateResult.IsSuccess)
+            if (result.IsSuccess)
             {
-                ErrorMessage = updateResult.Message ?? "خطا در ذخیره تغییرات.";
-                await LoadProfile(userId);
-                return Page();
+                SuccessMessage = "پروفایل با موفقیت بروزرسانی شد.";
+                return RedirectToPage();
             }
 
-            SuccessMessage = "پروفایل متخصص با موفقیت بروزرسانی شد.";
-            return RedirectToPage();
+            ErrorMessage = result.Message;
+            if (currentProfileResult.IsSuccess) ExpertProfile = currentProfileResult.Data;
+            return Page();
         }
 
-        private async Task LoadProfile(int userId)
+        private async Task<int> GetCurrentUserIdAsync(CancellationToken ct)
         {
-            var result = await userAppService.GetUserProfileAsync(userId, "Expert", CancellationToken.None);
+            var userName = User.Identity?.Name;
+            if (string.IsNullOrEmpty(userName)) return 0;
+            var search = new PaginationRequestDto { SearchKey = userName };
+            var listResult = await userAppService.GetUsersListAsync(search, ct);
+            return listResult.IsSuccess && listResult.Data.Any() ? listResult.Data.First().Id : 0;
+        }
 
-            if (result.IsSuccess && result.Data != null)
-            {
-                Profile = result.Data;
-            }
-            else
-            {
-                ErrorMessage = "اطلاعات پروفایل یافت نشد.";
-                Profile = new UserProfileDto();
-            }
+        public class UpdateExpertProfileInput
+        {
+            [Required(ErrorMessage = "نام الزامی است")]
+            public string? FirstName { get; set; }
+
+            [Required(ErrorMessage = "نام خانوادگی الزامی است")]
+            public string? LastName { get; set; }
+
+            public int? CityId { get; set; }
+
+            public string? Bio { get; set; }
+
+            public string? Address { get; set; }
+
+            [MaxLength(16, ErrorMessage = "شماره کارت باید ۱۶ رقم باشد")]
+            public string? BankCardNumber { get; set; }
+
+            [MaxLength(26, ErrorMessage = "شماره شبا معتبر نیست")]
+            public string? ShebaNumber { get; set; }
+
+            public IFormFile? NewImageFile { get; set; }
         }
     }
 }
