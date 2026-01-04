@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using Servino.Domain.AppService;
 using Servino.Domain.AppService.UserAgg;
 using Servino.Domain.Core.CategoryAgg.Contracts.AppService;
@@ -22,12 +23,18 @@ using Servino.Infa.Db.SqlServer.EfCore.DataSeed;
 using Servino.Infa.Db.SqlServer.EfCore.DbContexts;
 using Servino.Infa.Db.SqlServer.EfCore.Identity.Service;
 using Servino.Infra.Providers.SmsProvider.SmsIrService;
+using Servino.Presentation.RazorPagesUI.CustomMiddleware;
 using Servino.Presentation.RazorPagesUI.Services.File;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection")));
+
+builder.Host.UseSerilog((context, configuration) =>
+{
+    configuration.ReadFrom.Configuration(context.Configuration);
+});
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {
@@ -82,6 +89,7 @@ builder.Services.AddScoped<ISmsService>(provider =>
     new SmsIrService("Hsglr29hTKTzz9k4F9mDFVdFQMkllYkxv3VV5wDBilPyljbp")); 
 
 var app = builder.Build();
+app.UseMiddleware<RequestLoggingMiddleware>();
 
 using (var scope = app.Services.CreateScope())
 {
