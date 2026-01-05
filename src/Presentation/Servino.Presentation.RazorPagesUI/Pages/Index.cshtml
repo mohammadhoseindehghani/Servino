@@ -97,7 +97,7 @@
             <div class="row g-4 justify-content-center">
                 @if (Model.Categories != null && Model.Categories.Any())
                 {
-                    @foreach (var item in Model.Categories.Where(c => c.ParentId == null && c.IsActive))
+                    @foreach (var item in Model.Categories)
                     {
                         <div class="col-6 col-sm-4 col-md-3 col-lg-2">
                             <a href="/Services/Category/@item.Id" class="card h-100 shadow-sm border text-center text-decoration-none category-card bg-body">

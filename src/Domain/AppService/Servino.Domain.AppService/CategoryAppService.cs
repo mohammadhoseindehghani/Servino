@@ -98,4 +98,25 @@ public class CategoryAppService(ICategoryService categoryService) : ICategoryApp
     {
         return await categoryService.GetCountAsync(ct);
     }
+
+    public async Task<List<CategoryClientDto>> GetCategoriesByParentIdAsync(int? parentId, CancellationToken ct)
+    {
+        return await categoryService.GetCategoriesByParentIdAsync(parentId, ct);
+    }
+
+    public async Task<List<ServiceClientDto>> GetServicesByCategoryIdAsync(int categoryId, CancellationToken ct)
+    {
+        var exists = await categoryService.IsCategoryExistAndActiveAsync(categoryId, ct);
+        if (!exists)
+        {
+            return new List<ServiceClientDto>();
+        }
+
+        return await categoryService.GetServicesByCategoryIdAsync(categoryId, ct);
+    }
+
+    public async Task<List<BreadcrumbDto>> GetBreadcrumbAsync(int categoryId, CancellationToken ct)
+    {
+        return await categoryService.GetBreadcrumbAsync(categoryId, ct);
+    }
 }

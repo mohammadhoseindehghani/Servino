@@ -36,4 +36,24 @@ public class CategoryService(ICategoryRepository categoryRepo) : ICategoryServic
     {
         return await categoryRepo.GetCountAsync(ct);
     }
+
+    public async Task<List<CategoryClientDto>> GetCategoriesByParentIdAsync(int? parentId, CancellationToken ct)
+    {
+        return await categoryRepo.GetCategoriesByParentIdAsync(parentId, ct);
+    }
+
+    public async Task<List<ServiceClientDto>> GetServicesByCategoryIdAsync(int categoryId, CancellationToken ct)
+    {
+        return await categoryRepo.GetServicesByCategoryIdAsync(categoryId, ct);
+    }
+
+    public async Task<List<BreadcrumbDto>> GetBreadcrumbAsync(int categoryId, CancellationToken ct)
+    {
+        return await categoryRepo.GetBreadcrumbAsync(categoryId, ct);
+    }
+
+    public async Task<bool> IsCategoryExistAndActiveAsync(int id, CancellationToken ct)
+    {
+        return await categoryRepo.IsCategoryExistAndActiveAsync(id, ct);
+    }
 }
