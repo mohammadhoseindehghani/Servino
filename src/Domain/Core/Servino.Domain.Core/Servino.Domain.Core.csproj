@@ -17,10 +17,6 @@
     <Folder Include="HomeServiceAgg\Enum\" />
     <Folder Include="LocationAgg\Entity\" />
     <Folder Include="LocationAgg\Enum\" />
-    <Folder Include="RequestAgg\Contracts\AppService\" />
-    <Folder Include="RequestAgg\Contracts\Data\" />
-    <Folder Include="RequestAgg\Contracts\Service\" />
-    <Folder Include="RequestAgg\Dtos\" />
     <Folder Include="SuggestionAgg\Contracts\AppService\" />
     <Folder Include="SuggestionAgg\Contracts\Data\" />
     <Folder Include="SuggestionAgg\Contracts\Service\" />
