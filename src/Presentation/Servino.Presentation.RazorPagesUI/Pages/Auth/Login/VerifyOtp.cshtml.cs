@@ -35,10 +35,7 @@ namespace Servino.Presentation.RazorPagesUI.Pages.Auth.Login
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
+            if (!ModelState.IsValid) return Page();
 
             var result = await userAppService.VerifyOtpAndLoginAsync(new LoginWithOtpDto
             {
@@ -46,23 +43,37 @@ namespace Servino.Presentation.RazorPagesUI.Pages.Auth.Login
                 Code = Input.Code
             }, CancellationToken.None);
 
-            if (!result.IsSuccess || result.Data?.Token == null)
+            if (!result.IsSuccess)
             {
+                if (result.Message == "UserNotFound")
+                {
+                    return RedirectToPage("/Auth/Register/Index", new { mobile = Mobile });
+                }
+
                 ModelState.AddModelError(string.Empty, result.Message ?? "کد تأیید نامعتبر است.");
                 return Page();
             }
 
-            var cookieOptions = new CookieOptions
+            if (!string.IsNullOrEmpty(result.Data?.Token))
             {
-                HttpOnly = true,
-                Secure = true, 
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddHours(8) 
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTimeOffset.UtcNow.AddHours(8)
+                };
+                Response.Cookies.Append("access_token", result.Data.Token, cookieOptions);
+            }
+
+            string redirectUrl = result.Data?.Role?.ToLower() switch
+            {
+                "admin" => "/Admin/Dashboard",
+                "expert" => "/Expert/Dashboard",
+                _ => !string.IsNullOrEmpty(ReturnUrl) ? ReturnUrl : "/"
             };
 
-            Response.Cookies.Append("access_token", result.Data.Token, cookieOptions);
-
-            return LocalRedirect(string.IsNullOrEmpty(ReturnUrl) ? "/" : ReturnUrl);
+            return LocalRedirect(redirectUrl);
         }
     }
 }
