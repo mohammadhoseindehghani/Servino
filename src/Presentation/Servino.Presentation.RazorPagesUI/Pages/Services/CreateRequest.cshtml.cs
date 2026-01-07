@@ -104,7 +104,7 @@ namespace Servino.Presentation.RazorPagesUI.Pages.Services
             if (result.IsSuccess)
             {
                 SuccessMessage = "سفارش شما با موفقیت ثبت شد. منتظر پیشنهاد متخصصین باشید.";
-                return RedirectToPage("/Index"); 
+                return RedirectToPage("/Customer/MyRequests"); 
             }
             else
             {

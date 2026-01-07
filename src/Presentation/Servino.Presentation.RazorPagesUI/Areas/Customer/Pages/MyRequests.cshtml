@@ -1,0 +1,94 @@
+﻿@page
+@using Servino.Domain.Core.RequestAgg.Enum
+@model Servino.Presentation.RazorPagesUI.Areas.Customer.Pages.MyRequestsModel
+@{
+    Layout = "Layouts/_ContentNavbarLayout"; 
+    ViewData["Title"] = "سفارش‌های من";
+}
+
+<h4 class="py-3 mb-4">
+    <span class="text-muted fw-light">سفارش‌ها /</span> لیست درخواست‌های من
+</h4>
+
+<div class="card">
+    <div class="table-responsive text-nowrap">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>عنوان</th>
+                    <th>سرویس</th>
+                    <th>تاریخ انجام</th>
+                    <th>وضعیت</th>
+                    <th>پیشنهادها</th>
+                    <th>عملیات</th>
+                </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+                @if (Model.Requests.Any())
+                {
+                    @foreach (var item in Model.Requests)
+                    {
+                        <tr>
+                            <td><strong>@item.Title</strong></td>
+                            <td>@item.ServiceName</td>
+                            <td>@item.DateRequired</td> 
+                            <td>
+                                @switch (item.Status)
+                                {
+                                    case RequestStatus.WaitingForExperts:
+                                        <span class="badge bg-label-warning">منتظر پیشنهاد</span>
+                                         break;
+                                    case RequestStatus.WaitingForSelection:
+
+                                        <span class="badge bg-label-info">انتخاب متخصص</span>
+                                         break;
+                                    case RequestStatus.Started:
+
+                                        <span class="badge bg-label-primary">در حال انجام</span>
+                                         break;
+                                    case RequestStatus.Done:
+
+                                        <span class="badge bg-label-success">تمام شده</span>
+                                        ; break;
+                                    case RequestStatus.Canceled:
+
+                                        <span class="badge bg-label-danger">لغو شده</span>
+                                         break;
+                                    default:
+
+                                        <span class="badge bg-label-secondary">@item.Status</span>
+                                         break;
+                                }
+                            </td>
+                            <td>
+                                @if (item.SuggestionCount > 0)
+                                {
+                                    <span class="badge bg-primary rounded-pill">@item.SuggestionCount</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">بدون پیشنهاد</span>
+                                }
+                            </td>
+                            <td>
+                                <a asp-page="./RequestDetails" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">جزئیات</a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <div class="d-flex flex-column align-items-center">
+                                <i class="ti ti-folder-off fs-1 text-muted mb-2"></i>
+                                <p class="mb-0">هنوز سفارشی ثبت نکرده‌اید.</p>
+                                <a href="/" class="btn btn-primary mt-3">ثبت اولین سفارش</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
