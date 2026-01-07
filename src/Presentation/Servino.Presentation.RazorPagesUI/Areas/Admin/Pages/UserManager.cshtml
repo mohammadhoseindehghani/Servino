@@ -1,220 +1,249 @@
 ﻿@page
 @model Servino.Presentation.RazorPagesUI.Areas.Admin.Pages.UserManagerModel
-
 @{
     Layout = "Layouts/_ContentNavbarLayout";
     ViewData["Title"] = "مدیریت کاربران";
 }
 
 @section VendorStyles {
-    <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.dist.css">
-    <link rel="stylesheet" href="~/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.dist.css">
-    <link rel="stylesheet" href="~/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.dist.css">
     <link rel="stylesheet" href="~/vendor/libs/sweetalert2/sweetalert2.dist.css" />
 }
-
 @section VendorScripts {
-    <script src="~/vendor/libs/moment/moment.dist.js"></script>
-    <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.dist.js"></script>
-    <script src="~/vendor/libs/datatables-bs5/i18n/fa.dist.js"></script>
     <script src="~/vendor/libs/sweetalert2/sweetalert2.dist.js"></script>
 }
 
+<h4 class="py-3 mb-4"><span class="text-muted fw-light">مدیریت /</span> کاربران</h4>
 
-<h4 class="py-3 mb-4">
-    <span class="text-muted fw-light">مدیریت /</span> کاربران
-</h4>
-
-<div class="row g-4 mb-4">
-    <div class="col-sm-6 col-xl-3">
-        <div class="card">
-            <div class="card-body">
-                <div class="d-flex align-items-start justify-content-between">
-                    <div class="content-left">
-                        <span>تعداد نمایش</span>
-                        <div class="d-flex align-items-center my-2">
-                            <h3 class="mb-0 me-2">@Model.Users.Count</h3>
-                        </div>
-                    </div>
-                    <div class="avatar">
-                        <span class="avatar-initial rounded bg-label-primary">
-                            <i class="ti ti-users ti-sm"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
+@if (Model.SuccessMessage != null)
+{
+    <div class="alert alert-success alert-dismissible" role="alert">
+        @Model.SuccessMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-</div>
+}
+@if (Model.ErrorMessage != null)
+{
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        @Model.ErrorMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
 
 <div class="card">
-    <div class="card-header border-bottom">
-        <h5 class="card-title mb-3">لیست کاربران</h5>
-        <div class="d-flex justify-content-between align-items-center row pb-2 gap-3 gap-md-0">
-            <div class="col-md-6">
-                <form method="get">
-                    <div class="input-group">
-                        <input type="text" class="form-control" name="SearchKey" value="@Model.SearchKey" placeholder="جستجو (نام، ایمیل، موبایل)...">
-                        <button class="btn btn-outline-primary" type="submit">جستجو</button>
-                        @if (!string.IsNullOrEmpty(Model.SearchKey))
-                        {
-                            <a asp-page="./UserManager" class="btn btn-outline-secondary">حذف فیلتر</a>
-                        }
-                    </div>
-                </form>
-            </div>
-            <div class="col-md-6 text-end">
-                <button type="button" class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#addUserOffcanvas">
-                    <i class="ti ti-plus me-1"></i> افزودن کاربر جدید
-                </button>
-            </div>
+    <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">لیست کاربران (@Model.Users.Count)</h5>
+        <div>
+            <button class="btn btn-primary" data-bs-toggle="offcanvas" data-bs-target="#addUserOffcanvas">
+                <i class="ti ti-plus me-1"></i> افزودن کاربر
+            </button>
         </div>
     </div>
 
-    <div class="table-responsive">
+    <div class="p-3 border-bottom">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" name="SearchKey" value="@Model.SearchKey" class="form-control" placeholder="جستجو..." />
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-secondary w-100">بگرد</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-responsive text-nowrap">
         <table class="table table-hover">
-            <thead class="table-light">
+            <thead>
                 <tr>
                     <th>#</th>
-                    <th>نام کامل</th>
-                    <th>اطلاعات تماس</th>
+                    <th>نام کاربر</th>
+                    <th>ایمیل / موبایل</th>
                     <th>نقش</th>
-                    <th>موجودی (ریال)</th>
-                    <th>تاریخ ثبت‌نام</th>
+                    <th>موجودی</th>
                     <th>عملیات</th>
                 </tr>
             </thead>
             <tbody>
-                @if (Model.Users.Any())
-                {
-                    @foreach (var user in Model.Users)
-                    {
-                        var avatarUrl = string.IsNullOrEmpty(user.ImageUrl)
-                        ? "/img/default/userAvatar.png"
-                        : user.ImageUrl;
-
-                        <tr>
-                            <td>@user.Id</td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <img src="@avatarUrl" alt="Avatar" class="rounded-circle me-2 object-fit-cover" width="32" height="32">
-                                    <div class="d-flex flex-column">
-                                        <span class="fw-medium">@user.FullName</span>
-                                        @* <small class="text-muted">@user.UserName</small> *@
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="d-flex flex-column">
-                                    <span class="text-truncate" style="max-width: 150px;">@user.Email</span>
-                                    <small class="text-muted" dir="ltr">@user.Mobile</small>
-                                </div>
-                            </td>
-                            <td>
-                                @if (user.Role == "Admin")
-                                {
-                                    <span class="badge bg-label-danger">ادمین</span>
-                                }
-                                else if (user.Role == "Expert")
-                                {
-
-                                    <span class="badge bg-label-warning">کارشناس</span>
-                                }
-                                else
-                                {
-
-                                    <span class="badge bg-label-info">مشتری</span>
-                                }
-                            </td>
-                            <td dir="ltr">@user.Balance.ToString("N0")</td>
-                            <td dir="ltr">@user.RegisterDate.ToString("yyyy/MM/dd")</td>
-                            <td>
-                                <div class="d-flex gap-1">
-                                    <button class="btn btn-icon btn-sm btn-label-success" title="شارژ کیف پول"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#chargeBalanceModal"
-                                            data-user-id="@user.Id"
-                                            data-user-name="@user.FullName">
-                                        <i class="ti ti-wallet"></i>
-                                    </button>
-
-                                    <button class="btn btn-icon btn-sm btn-label-primary" title="ویرایش">
-                                        <i class="ti ti-edit"></i>
-                                    </button>
-
-                                    <form method="post" asp-page-handler="Delete" asp-route-id="@user.Id" class="d-inline">
-                                        <input type="hidden" name="PageNumber" value="@Model.PageNumber" />
-                                        <input type="hidden" name="SearchKey" value="@Model.SearchKey" />
-                                        <button type="button" class="btn btn-icon btn-sm btn-label-danger confirm-delete"
-                                                data-name="@user.FullName">
-                                            <i class="ti ti-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                }
-                else
+                @foreach (var user in Model.Users)
                 {
                     <tr>
-                        <td colspan="7" class="text-center py-4">
-                            <i class="ti ti-search fs-2 text-muted mb-2"></i>
-                            <p>هیچ کاربری یافت نشد.</p>
+                        <td>@user.Id</td>
+                        <td><strong>@user.FullName</strong></td>
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span>@user.Email</span>
+                                <small class="text-muted">@user.Mobile</small>
+                            </div>
+                        </td>
+                        <td>
+                            @if (user.Role == "Admin")
+                            {
+                                <span class="badge bg-label-danger">ادمین</span>
+                            }
+                            else if (user.Role == "Expert")
+                            {
+
+                                <span class="badge bg-label-warning">کارشناس</span>
+                            }
+                            else
+                            {
+
+                                <span class="badge bg-label-info">مشتری</span>
+                            }
+                        </td>
+                        <td>@user.Balance.ToString("N0")</td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-icon btn-sm btn-label-success charge-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#chargeModal"
+                                        data-userid="@user.Id"
+                                        data-fullname="@user.FullName">
+                                    <i class="ti ti-wallet"></i>
+                                </button>
+
+                                <button type="button" class="btn btn-icon btn-sm btn-label-primary edit-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editUserModal"
+                                        data-id="@user.Id"
+                                        data-fullname="@user.FullName"
+                                        data-email="@user.Email"
+                                        data-mobile="@user.Mobile"
+                                        data-role="@user.Role">
+                                    <i class="ti ti-edit"></i>
+                                </button>
+
+                                @if (user.Role == "Expert")
+                                {
+                                    <button type="button" class="btn btn-icon btn-sm btn-label-info services-btn"
+                                            onclick="openServicesModal(@user.Id, '@user.FullName')">
+                                        <i class="ti ti-list-check"></i>
+                                    </button>
+                                }
+
+                                <form method="post" asp-page-handler="Delete" asp-route-id="@user.Id" class="d-inline" 
+                                      onsubmit="return confirm('آیا مطمئن هستید؟');">
+                                    <button type="submit" class="btn btn-icon btn-sm btn-label-danger">
+                                        <i class="ti ti-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
-
-    <div class="card-footer d-flex justify-content-center">
-        <nav aria-label="Page navigation">
-            <ul class="pagination">
-                <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
-                    <a class="page-link" asp-page="./UserManager" asp-route-PageNumber="@(Model.PageNumber - 1)" asp-route-SearchKey="@Model.SearchKey">قبلی</a>
-                </li>
-                <li class="page-item active">
-                    <span class="page-link">صفحه @Model.PageNumber</span>
-                </li>
-                <li class="page-item @(Model.Users.Count < Model.PageSize ? "disabled" : "")">
-                    <a class="page-link" asp-page="./UserManager" asp-route-PageNumber="@(Model.PageNumber + 1)" asp-route-SearchKey="@Model.SearchKey">بعدی</a>
-                </li>
-            </ul>
-        </nav>
-    </div>
 </div>
 
-<div class="modal fade" id="chargeBalanceModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-sm" role="document">
+<div class="modal fade" id="chargeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">مدیریت موجودی</h5>
+                <h5 class="modal-title">شارژ حساب</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="post" asp-page-handler="Charge">
                 <div class="modal-body">
-                    <input type="hidden" name="PageNumber" value="@Model.PageNumber" />
-                    <input type="hidden" name="SearchKey" value="@Model.SearchKey" />
-
-                    <input type="hidden" asp-for="ChargeModel.UserId" id="chargeUserId" />
-
-                    <p class="mb-3">کاربر: <strong id="chargeUserName" class="text-primary"></strong></p>
+                    <input type="hidden" asp-for="ChargeModel.UserId" id="inputChargeUserId" />
+                    <p>کاربر: <strong id="lblChargeUserName" class="text-primary"></strong></p>
 
                     <div class="mb-3">
                         <label class="form-label">مبلغ (ریال)</label>
-                        <input type="number" class="form-control text-start" asp-for="ChargeModel.Amount" placeholder="مثلا: 50000 یا -20000" required />
-                        <div class="form-text">برای کاهش موجودی از علامت منفی استفاده کنید.</div>
+                        <input type="number" asp-for="ChargeModel.Amount" class="form-control" required />
                     </div>
-
                     <div class="mb-3">
-                        <label class="form-label">توضیح (اختیاری)</label>
-                        <textarea class="form-control" asp-for="ChargeModel.Description" rows="2"></textarea>
+                        <label class="form-label">توضیحات</label>
+                        <textarea asp-for="ChargeModel.Description" class="form-control" rows="2"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">لغو</button>
-                    <button type="submit" class="btn btn-primary">ثبت تراکنش</button>
+                    <button type="submit" class="btn btn-primary w-100">انجام تراکنش</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">ویرایش اطلاعات</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-page-handler="Edit">
+                <div class="modal-body">
+                    <input type="hidden" asp-for="EditModel.Id" id="inputEditId" />
+                    <input type="hidden" asp-for="EditModel.Role" id="inputEditRole" />
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">نام</label>
+                            <input type="text" asp-for="EditModel.FirstName" id="inputEditName" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">نام خانوادگی</label>
+                            <input type="text" asp-for="EditModel.LastName" id="inputEditFamily" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">موبایل</label>
+                            <input type="text" asp-for="EditModel.Mobile" id="inputEditMobile" class="form-control" />
+                        </div>
+
+                        <div id="expertFieldsContainer" class="col-12 mt-3 p-3 bg-light rounded" style="display:none;">
+                            <h6>اطلاعات متخصص</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">شماره شبا</label>
+                                    <input type="text" asp-for="EditModel.ExpertInfo.ShebaNumber" class="form-control" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">شماره کارت</label>
+                                    <input type="text" asp-for="EditModel.ExpertInfo.BankCardNumber" class="form-control" />
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">آدرس</label>
+                                    <input type="text" asp-for="EditModel.ExpertInfo.Address" class="form-control" />
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">بیوگرافی</label>
+                                    <textarea asp-for="EditModel.ExpertInfo.Bio" class="form-control" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 border-top pt-3 mt-3">
+                            <label class="form-label text-warning">تغییر رمز عبور (اختیاری)</label>
+                            <input type="password" asp-for="EditModel.NewPassword" class="form-control" placeholder="****" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">ذخیره تغییرات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="servicesModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">مدیریت تخصص‌ها</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-page-handler="UpdateServices">
+                <div class="modal-body">
+                    <input type="hidden" asp-for="TargetExpertId" id="inputServiceExpertId" />
+                    <p>متخصص: <strong id="lblServiceExpertName" class="text-primary"></strong></p>
+                    <hr />
+                    <div id="servicesListContainer" class="d-flex flex-column gap-2" style="max-height: 300px; overflow-y: auto;">
+                        <div class="text-center"><div class="spinner-border text-primary"></div></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">ذخیره تخصص‌ها</button>
                 </div>
             </form>
         </div>
@@ -223,48 +252,100 @@
 
 <div class="offcanvas offcanvas-end" tabindex="-1" id="addUserOffcanvas">
     <div class="offcanvas-header">
-        <h5 class="offcanvas-title">افزودن کاربر جدید</h5>
+        <h5 class="offcanvas-title">کاربر جدید</h5>
         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
     </div>
     <div class="offcanvas-body">
-        <p class="text-muted">فرم ایجاد کاربر را اینجا قرار دهید...</p>
+        <form method="post" asp-page-handler="Create">
+            <div class="mb-3"><label>نام</label><input type="text" asp-for="CreateModel.FirstName" class="form-control" required /></div>
+            <div class="mb-3"><label>نام خانوادگی</label><input type="text" asp-for="CreateModel.LastName" class="form-control" required /></div>
+            <div class="mb-3"><label>ایمیل</label><input type="email" asp-for="CreateModel.Email" class="form-control" required /></div>
+            <div class="mb-3"><label>موبایل</label><input type="text" asp-for="CreateModel.Mobile" class="form-control" required /></div>
+            <div class="mb-3"><label>رمز عبور</label><input type="password" asp-for="CreateModel.Password" class="form-control" required /></div>
+            <div class="mb-3">
+                <label>نقش</label>
+                <select asp-for="CreateModel.Role" class="form-select">
+                    <option value="Customer">مشتری</option>
+                    <option value="Expert">متخصص</option>
+                    <option value="Admin">ادمین</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">ثبت</button>
+        </form>
     </div>
 </div>
 
-<script>
-    const chargeModal = document.getElementByUserId('chargeBalanceModal');
-    chargeModal.addEventListener('show.bs.modal', function (event) {
-        const button = event.relatedTarget;
-        const userUserId = button.getAttribute('data-user-id');
-        const userName = button.getAttribute('data-user-name');
+@section PageScripts {
+    <script>
+        $(document).on('click', '.charge-btn', function () {
+            var userId = $(this).data('userid');
+            var fullName = $(this).data('fullname');
 
-        document.getElementByUserId('chargeUserUserId').value = userUserId;
-        document.getElementByUserId('chargeUserName').textContent = userName;
-    });
+            $('#inputChargeUserId').val(userId);
+            $('#lblChargeUserName').text(fullName);
+        });
 
-    document.querySelectorAll('.confirm-delete').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const form = this.closest('form');
-            const userName = this.getAttribute('data-name');
+        $(document).on('click', '.edit-btn', function () {
+            var id = $(this).data('id');
+            var fullName = $(this).data('fullname');
+            var mobile = $(this).data('mobile');
+            var role = $(this).data('role');
 
-            Swal.fire({
-                title: 'آیا مطمئن هستید؟',
-                text: `کاربر "${userName}" و تمام اطلاعات مربوطه حذف خواهند شد!`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'بله، حذف کن',
-                cancelButtonText: 'لغو',
-                customClass: {
-                    confirmButton: 'btn btn-danger me-3',
-                    cancelButton: 'btn btn-label-secondary'
+            var names = fullName.split(' ');
+            var fname = names[0];
+            var lname = names.slice(1).join(' ');
+
+            $('#inputEditId').val(id);
+            $('#inputEditRole').val(role);
+            $('#inputEditName').val(fname);
+            $('#inputEditFamily').val(lname);
+            $('#inputEditMobile').val(mobile);
+
+            if (role === 'Expert') {
+                $('#expertFieldsContainer').slideDown();
+
+            } else {
+                $('#expertFieldsContainer').slideUp();
+            }
+        });
+
+        function openServicesModal(userId, userName) {
+            $('#inputServiceExpertId').val(userId);
+            $('#lblServiceExpertName').text(userName);
+
+            var container = $('#servicesListContainer');
+            container.html('<div class="text-center p-3"><div class="spinner-border text-primary"></div></div>');
+
+            var modal = new bootstrap.Modal(document.getElementById('servicesModal'));
+            modal.show();
+
+            $.ajax({
+                url: '?handler=ExpertServices',
+                data: { userId: userId },
+                success: function (data) {
+                    container.empty();
+                    if (!data || data.length === 0) {
+                        container.html('<p class="text-muted text-center">سرویسی یافت نشد.</p>');
+                        return;
+                    }
+
+                    $.each(data, function (i, item) {
+                        var checked = item.isSelected ? 'checked' : '';
+                        var html = `
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="SelectedServiceIds" 
+                                value="${item.homeServiceId}" id="srv_${item.homeServiceId}" ${checked}>
+                                <label class="form-check-label" for="srv_${item.homeServiceId}">
+                                    ${item.homeServiceTitle}
+                                </label>
+                            </div>`;
+                        container.append(html);
+                    });
                 },
-                buttonsStyling: false
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
+                error: function () {
+                    container.html('<p class="text-danger text-center">خطا در دریافت لیست خدمات.</p>');
                 }
             });
-        });
-    });
-</script>
+        }
+    </script>
+}

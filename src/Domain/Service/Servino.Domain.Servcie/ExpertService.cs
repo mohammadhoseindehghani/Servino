@@ -6,6 +6,11 @@ namespace Servino.Domain.Service;
 
 public class ExpertService(IExpertRepository expertRepo) : IExpertService
 {
+    public async Task<bool> CreateAsync(int userId, CancellationToken ct)
+    {
+       return await expertRepo.CreateAsync(userId, ct);
+    }
+
     public async Task<ExpertProfileDto?> GetByUserId(int userId, CancellationToken ct)
     {
         return await expertRepo.GetByUserIdAsync(userId, ct);

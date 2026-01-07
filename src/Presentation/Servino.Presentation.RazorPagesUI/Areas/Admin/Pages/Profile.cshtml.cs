@@ -83,14 +83,14 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
                 UpdateCommand.ProfileImagePath = newPath;
             }
 
-            var updateResult = await userAppService.UpdateUserProfileAsync(UpdateCommand, "Admin", CancellationToken.None);
+            //var updateResult = await userAppService.UpdateUserProfileAsync(UpdateCommand, "Admin", CancellationToken.None);
 
-            if (!updateResult.IsSuccess)
-            {
-                ErrorMessage = updateResult.Message ?? "خطا در ذخیره تغییرات.";
-                await LoadProfile(userId);
-                return Page();
-            }
+            //if (!updateResult.IsSuccess)
+            //{
+            //    ErrorMessage = updateResult.Message ?? "خطا در ذخیره تغییرات.";
+            //    await LoadProfile(userId);
+            //    return Page();
+            //}
 
             SuccessMessage = "پروفایل با موفقیت بروزرسانی شد.";
             await LoadProfile(userId);

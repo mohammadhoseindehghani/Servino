@@ -7,7 +7,7 @@ namespace Servino.Domain.Core.UserAgg.Contracts.Data;
 public interface IUserRepository
 {
     Task<UserProfileDto?> GetProfileByIdAsync(int userId, string role, CancellationToken ct);
-    Task<bool> UpdateProfileAsync(UpdateProfileDto command, string role, CancellationToken ct);
+    Task<bool> UpdateProfileAsync(UpdateUserDto command, CancellationToken ct);
     Task<bool> CityExistsAsync(int cityId, CancellationToken ct);
 
     Task<bool> CreateAsync(CreateUserDto command, CancellationToken ct);

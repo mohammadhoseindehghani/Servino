@@ -8,6 +8,12 @@ namespace Servino.Infa.DataAccess.Repo.EfCore.Repositories;
 
 public class ExpertRepository(AppDbContext context) : IExpertRepository
 {
+    public async Task<bool> CreateAsync(int userId, CancellationToken ct)
+    {
+        var expert = new Expert { UserId = userId };
+        context.Experts.Add(expert);
+        return await context.SaveChangesAsync(ct)>0;
+    }
     public async Task<int> SaveChangesAsync(CancellationToken ct)
     {
         return await context.SaveChangesAsync(ct);

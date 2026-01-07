@@ -13,9 +13,9 @@ public class UserService(IUserRepository userRepo) : IUserService
         return await userRepo.GetProfileByIdAsync(userId, role, ct);
     }
 
-    public async Task<bool> UpdateProfileAsync(UpdateProfileDto command, string role, CancellationToken ct)
+    public async Task<bool> UpdateProfileAsync(UpdateUserDto command, CancellationToken ct)
     {
-        return await userRepo.UpdateProfileAsync(command, role, ct);
+        return await userRepo.UpdateProfileAsync(command, ct);
     }
 
     public async Task<bool> CreateAsync(CreateUserDto command, CancellationToken ct)

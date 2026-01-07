@@ -5,6 +5,7 @@ namespace Servino.Domain.Core.UserAgg.Contracts.Data;
 
 public interface IExpertRepository
 {
+    Task<bool> CreateAsync(int userId, CancellationToken ct);
     Task<int> SaveChangesAsync(CancellationToken ct);
     Task<int> GetIdByUserIdAsync(int userId, CancellationToken ct);
     Task<ExpertProfileDto?> GetByUserIdAsync(int userId, CancellationToken ct);

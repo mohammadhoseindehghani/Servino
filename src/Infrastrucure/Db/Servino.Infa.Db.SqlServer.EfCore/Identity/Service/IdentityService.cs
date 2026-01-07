@@ -2,7 +2,6 @@
 using IPE.SmsIrClient.Models.Requests;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
-
 using Servino.Domain.Core._common;
 using Servino.Domain.Core.UserAgg.Contracts.Service;
 using Servino.Domain.Core.UserAgg.Dtos.Identity;
@@ -14,6 +13,7 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Identity.Service;
 public class IdentityService(
     UserManager<IdentityUser> userManager,
     SignInManager<IdentityUser> signInManager, 
+    RoleManager<IdentityRole> roleManager,
     ISmsService smsService,
     IMemoryCache cache,
     IUserService userService) : IIdentityService
@@ -190,6 +190,103 @@ public class IdentityService(
         {
             Succeeded = false,
             Message = "سرویس گوگل هنوز فعال نشده است."
+        };
+    }
+
+    public async Task LockUserAsync(string identityId, CancellationToken ct)
+    {
+        var user = await userManager.FindByIdAsync(identityId);
+        if (user != null)
+        {
+            await userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+            await userManager.UpdateSecurityStampAsync(user);
+        }
+    }
+
+    public async Task<Result<bool>> AdminChangePasswordAsync(string identityId, string newPassword, CancellationToken ct)
+    {
+        var user = await userManager.FindByIdAsync(identityId);
+        if (user == null) return Result<bool>.Failure("کاربر یافت نشد.");
+
+        var token = await userManager.GeneratePasswordResetTokenAsync(user);
+        var result = await userManager.ResetPasswordAsync(user, token, newPassword);
+
+        return result.Succeeded
+            ? Result<bool>.Success(true)
+            : Result<bool>.Failure("خطا در تغییر رمز عبور.");
+    }
+    public async Task<Result<bool>> DeactivateUserAsync(string identityId, CancellationToken ct)
+    {
+        var user = await userManager.FindByIdAsync(identityId);
+        if (user == null) return Result<bool>.Failure("کاربر در سامانه هویت یافت نشد.");
+
+        var randomCode = new Random().Next(10000, 99999);
+        var deletedEmail = $"deleted_{randomCode}_{user.Email}";
+
+        user.UserName = deletedEmail;
+        user.NormalizedUserName = deletedEmail.ToUpper();
+
+        user.Email = deletedEmail;
+        user.NormalizedEmail = deletedEmail.ToUpper();
+
+        user.PhoneNumber = null;
+        user.PhoneNumberConfirmed = false;
+        user.EmailConfirmed = false;
+
+        user.LockoutEnabled = true;
+        user.LockoutEnd = DateTimeOffset.MaxValue;
+
+        user.SecurityStamp = Guid.NewGuid().ToString();
+
+        var result = await userManager.UpdateAsync(user);
+
+        if (!result.Succeeded)
+        {
+            return Result<bool>.Failure(string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+
+        return Result<bool>.Success(true);
+    }
+
+    public async Task<IdentityResultDto> RegisterWithEmailAsync(RegisterDto registerDto, string role, CancellationToken ct)
+    {
+        var user = new IdentityUser
+        {
+            UserName = registerDto.Email,
+            Email = registerDto.Email,
+            PhoneNumber = registerDto.PhoneNumber,
+            EmailConfirmed = true 
+        };
+
+        var result = await userManager.CreateAsync(user, registerDto.Password);
+
+        if (!result.Succeeded)
+        {
+            return new IdentityResultDto
+            {
+                Succeeded = false,
+                Message = string.Join(", ", result.Errors.Select(e => e.Description))
+            };
+        }
+
+        var targetRole = string.IsNullOrEmpty(role) ? "Customer" : role;
+
+        if (!await roleManager.RoleExistsAsync(targetRole))
+        {
+            targetRole = "Customer";
+        }
+
+        await userManager.AddToRoleAsync(user, targetRole);
+
+        if (string.IsNullOrEmpty(role))
+        {
+            await signInManager.SignInAsync(user, isPersistent: false);
+        }
+
+        return new IdentityResultDto
+        {
+            Succeeded = true,
+            Id = user.Id
         };
     }
 }

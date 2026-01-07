@@ -14,4 +14,8 @@ public interface IIdentityService
 
     Task<Result<bool>> ChangeEmailAsync(string identityId, string newEmail, CancellationToken ct);
     Task<string?> GetEmailByIdentityIdAsync(string identityId, CancellationToken ct);
+    Task<Result<bool>> AdminChangePasswordAsync(string identityId, string newPassword, CancellationToken ct);
+    Task LockUserAsync(string identityId, CancellationToken ct);
+    Task<Result<bool>> DeactivateUserAsync(string identityId, CancellationToken ct);
+    Task<IdentityResultDto> RegisterWithEmailAsync(RegisterDto registerDto, string role, CancellationToken ct);
 }

@@ -71,45 +71,24 @@ public class UserRepository(AppDbContext context) : IUserRepository
         return dto;
     }
 
-    public async Task<bool> UpdateProfileAsync(UpdateProfileDto command, string role, CancellationToken ct)
+    public async Task<bool> UpdateProfileAsync(UpdateUserDto command, CancellationToken ct)
     {
-        try
-        {
-            var user = await context.Users
-                .Include(u => u.Expert)
-                .FirstOrDefaultAsync(u => u.Id == command.Id && !u.IsDeleted, ct);
+        var user = await context.Users
+            .FirstOrDefaultAsync(u => u.Id == command.Id && !u.IsDeleted, ct);
 
-            if (user == null) return false;
+        if (user == null) return false;
 
-            user.FirstName = command.FirstName;
-            user.LastName = command.LastName;
-            user.CityId = command.CityId;
+        user.FirstName = command.FirstName;
+        user.LastName = command.LastName;
+        user.CityId = command.CityId;
+        user.MobileNumber = command.Mobile; 
 
-            if (!string.IsNullOrEmpty(command.ProfileImagePath))
-                user.ProfileImagePath = command.ProfileImagePath;
+        if (!string.IsNullOrEmpty(command.ProfileImagePath))
+            user.ProfileImagePath = command.ProfileImagePath;
 
-            user.UpdatedAt = DateTime.Now;
+        user.UpdatedAt = DateTime.Now;
 
-            if (role == "Expert" && user.Expert != null)
-            {
-                user.Expert.Bio = command.Bio;
-                user.Expert.Address = command.Address;
-                user.Expert.BankCardNumber = command.BankCardNumber;
-                user.Expert.ShebaNumber = command.ShebaNumber;
-            }
-
-            if (!context.ChangeTracker.HasChanges())
-                return true;
-
-            await context.SaveChangesAsync(ct);
-            return true;
-        }
-        catch (Exception ex)
-        {
-
-            Console.WriteLine(ex.Message);
-            return false;
-        }
+        return await context.SaveChangesAsync(ct) > 0;
     }
     public Task<bool> CityExistsAsync(int cityId, CancellationToken ct)
     {
@@ -158,12 +137,17 @@ public class UserRepository(AppDbContext context) : IUserRepository
 
     public async Task<bool> DeleteAsync(int id, CancellationToken ct)
     {
+        var randomSuffix = new Random().Next(10000, 99999).ToString();
+
         var affectedRows = await context.Users
             .Where(u => u.Id == id)
             .ExecuteUpdateAsync(setters => setters
-                .SetProperty(u => u.IsDeleted, true)
-                .SetProperty(u => u.DeletedAt, DateTime.Now),
-                ct);
+                    .SetProperty(u => u.IsDeleted, true)
+                    .SetProperty(u => u.DeletedAt, DateTime.Now)
+                    .SetProperty(u => u.IsActive, false) 
+                    .SetProperty(u => u.Email, u => "deleted_" + randomSuffix + "_" + u.Email)
+                    .SetProperty(u => u.MobileNumber, u => "del_" + randomSuffix + "_" + u.MobileNumber)
+                , ct);
 
         return affectedRows > 0;
     }
@@ -204,9 +188,10 @@ public class UserRepository(AppDbContext context) : IUserRepository
         var query = context.Users
             .AsNoTracking()
             .Include(u => u.City)
-            .Include(u => u.Admin)
-            .Include(u => u.Expert)
-            .Include(u => u.Customer)
+            .Include(u => u.Expert)   
+            .Include(u => u.Customer) 
+            .Include(u => u.Admin)    
+            .Where(u => !u.IsDeleted) 
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search.SearchKey))
@@ -216,7 +201,6 @@ public class UserRepository(AppDbContext context) : IUserRepository
                 u.Email.Contains(search.SearchKey) ||
                 u.MobileNumber.Contains(search.SearchKey));
         }
-
 
         var pagedUsers = await query
             .OrderByDescending(u => u.CreatedAt)
@@ -234,7 +218,10 @@ public class UserRepository(AppDbContext context) : IUserRepository
             Balance = u.Balance,
             IsActive = u.IsActive,
             RegisterDate = u.CreatedAt,
-            ImageUrl = u.ProfileImagePath!
+            ImageUrl = u.ProfileImagePath,
+
+            Role = u.Admin != null ? "Admin" :
+                (u.Expert != null ? "Expert" : "Customer")
         }).ToList();
 
         return result;
