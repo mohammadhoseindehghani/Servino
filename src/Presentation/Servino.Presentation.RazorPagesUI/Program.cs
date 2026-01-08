@@ -20,6 +20,9 @@ using Servino.Domain.Core.LocationAgg.Contracts.Service;
 using Servino.Domain.Core.RequestAgg.Contracts.AppService;
 using Servino.Domain.Core.RequestAgg.Contracts.Data;
 using Servino.Domain.Core.RequestAgg.Contracts.Service;
+using Servino.Domain.Core.SuggestionAgg.Contracts.AppService;
+using Servino.Domain.Core.SuggestionAgg.Contracts.Data;
+using Servino.Domain.Core.SuggestionAgg.Contracts.Service;
 using Servino.Domain.Core.UserAgg.Contracts.AppService;
 using Servino.Domain.Core.UserAgg.Contracts.Data;
 using Servino.Domain.Core.UserAgg.Contracts.Service;
@@ -77,6 +80,7 @@ builder.Services.AddScoped<IProvinceRepository, ProvinceRepository>();
 builder.Services.AddScoped<ICityRepository, CityRepository>();
 builder.Services.AddScoped<IRequestRepository, RequestRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ISuggestionRepository, SuggestionRepository>();
 
 
 builder.Services.AddScoped<IIdentityService, IdentityService>();
@@ -90,6 +94,7 @@ builder.Services.AddScoped<IProvinceService, ProvinceService>();
 builder.Services.AddScoped<ICityService, CityService>();
 builder.Services.AddScoped<IRequestService, RequestService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<ISuggestionService, SuggestionService>();
 
 
 builder.Services.AddScoped<IUserAppService, UserAppService>();
@@ -101,6 +106,7 @@ builder.Services.AddScoped<IProvinceAppService, ProvinceAppService>();
 builder.Services.AddScoped<ICityAppService, CityAppService>();
 builder.Services.AddScoped<IRequestAppService, RequestAppService>();
 builder.Services.AddScoped<ICustomerAppService, CustomerAppService>();
+builder.Services.AddScoped<ISuggestionAppService, SuggestionAppService>();
 
 
 builder.Services.AddScoped<IFileService, FileService>();
