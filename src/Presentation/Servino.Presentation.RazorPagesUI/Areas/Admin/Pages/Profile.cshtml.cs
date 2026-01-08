@@ -15,7 +15,7 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
         public UserProfileDto Profile { get; set; } = new();
 
         [BindProperty]
-        public UpdateProfileDto UpdateCommand { get; set; } = new();
+        public UpdateUserDto UpdateCommand { get; set; } = new();
 
         [BindProperty]
         public IFormFile? Upload { get; set; }
@@ -83,14 +83,14 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
                 UpdateCommand.ProfileImagePath = newPath;
             }
 
-            //var updateResult = await userAppService.UpdateUserProfileAsync(UpdateCommand, "Admin", CancellationToken.None);
+            var updateResult = await userAppService.UpdateUserProfileAsync(UpdateCommand, CancellationToken.None);
 
-            //if (!updateResult.IsSuccess)
-            //{
-            //    ErrorMessage = updateResult.Message ?? "خطا در ذخیره تغییرات.";
-            //    await LoadProfile(userId);
-            //    return Page();
-            //}
+            if (!updateResult.IsSuccess)
+            {
+                ErrorMessage = updateResult.Message ?? "خطا در ذخیره تغییرات.";
+                await LoadProfile(userId);
+                return Page();
+            }
 
             SuccessMessage = "پروفایل با موفقیت بروزرسانی شد.";
             await LoadProfile(userId);
@@ -105,7 +105,7 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
             {
                 Profile = result.Data;
 
-                UpdateCommand = new UpdateProfileDto
+                UpdateCommand = new UpdateUserDto()
                 {
                     Id = Profile.Id,
                     FirstName = Profile.FirstName,
@@ -118,7 +118,7 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
             {
                 ErrorMessage = "اطلاعات پروفایل یافت نشد.";
                 Profile = new UserProfileDto();
-                UpdateCommand = new UpdateProfileDto { Id = userId };
+                UpdateCommand = new UpdateUserDto() { Id = userId };
             }
         }
     }

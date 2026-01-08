@@ -1,139 +1,131 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Servino.Domain.Core.LocationAgg.Contracts.AppService;
 using Servino.Domain.Core.UserAgg.Contracts.AppService;
 using Servino.Domain.Core.UserAgg.Dtos;
-using Servino.Domain.Core.UserAgg.Dtos.Identity;
 using Servino.Presentation.RazorPagesUI.Services.File;
 
 namespace Servino.Presentation.RazorPagesUI.Areas.Customer.Pages
 {
     [Authorize(Roles = "Customer")]
-    public class ProfileModel(IUserAppService userAppService, IFileService fileService) : PageModel
+    public class ProfileModel(
+        ICustomerAppService customerAppService,
+        IFileService fileService,
+        IProvinceAppService provinceAppService,
+        ICityAppService cityAppService
+        ) : PageModel
     {
-        public UserProfileDto Profile { get; set; } = new();
+        [BindProperty]
+        public UpdateCustomerProfileDto Input { get; set; } = new();
 
-        [TempData]
-        public string? SuccessMessage { get; set; }
+        public CustomerProfileDto DisplayData { get; set; } = new();
+        public string CityName { get; set; } = "تعیین نشده";
 
-        [TempData]
-        public string? ErrorMessage { get; set; }
+        public SelectList Provinces { get; set; }
+
+        public int? CurrentProvinceId { get; set; }
+
+        [TempData] public string? SuccessMessage { get; set; }
+        [TempData] public string? ErrorMessage { get; set; }
 
         private int GetCurrentUserId()
         {
-            var userIdStr = User.FindFirst("userId")?.Value;
-            if (int.TryParse(userIdStr, out int userId))
-                return userId;
-            return 0;
+            var userIdStr = User.FindFirst("UserId")?.Value;
+            return int.TryParse(userIdStr, out int userId) ? userId : 0;
         }
 
-        public async Task<IActionResult> OnGetAsync()
+        public async Task<IActionResult> OnGetAsync(CancellationToken ct)
         {
             var userId = GetCurrentUserId();
             if (userId == 0) return RedirectToPage("/Auth/Login/Index");
 
-            await LoadProfile(userId);
+            await LoadData(userId, ct);
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(string firstName, string lastName, int cityId, IFormFile? upload)
+        public async Task<IActionResult> OnPostAsync(IFormFile? upload, CancellationToken ct)
         {
             var userId = GetCurrentUserId();
             if (userId == 0) return Unauthorized();
 
-            if (string.IsNullOrWhiteSpace(firstName))
+            if (!ModelState.IsValid)
             {
-                ErrorMessage = "نام الزامی است.";
-                await LoadProfile(userId);
+                await LoadData(userId, ct);
                 return Page();
             }
-
-            if (string.IsNullOrWhiteSpace(lastName))
-            {
-                ErrorMessage = "نام خانوادگی الزامی است.";
-                await LoadProfile(userId);
-                return Page();
-            }
-
-            if (cityId == 0)
-            {
-                ErrorMessage = "انتخاب شهر الزامی است.";
-                await LoadProfile(userId);
-                return Page();
-            }
-
-            var currentProfileResult = await userAppService.GetUserProfileAsync(userId, "Customer", CancellationToken.None);
-            string? profileImagePath = currentProfileResult.IsSuccess ? currentProfileResult.Data?.ProfileImagePath : null;
 
             if (upload != null && upload.Length > 0)
             {
-                if (upload.Length > 5 * 1024 * 1024)
+                var newPath = await fileService.Upload(upload, "profiles", ct);
+                if (newPath != null)
                 {
-                    ErrorMessage = "حجم فایل بیشتر از ۵ مگابایت است.";
-                    await LoadProfile(userId);
-                    return Page();
+                    Input.ProfileImagePath = newPath;
                 }
-
-                var allowedExtensions = new[] { ".png", ".jpg", ".jpeg" };
-                var extension = Path.GetExtension(upload.FileName).ToLowerInvariant();
-                if (!allowedExtensions.Contains(extension))
-                {
-                    ErrorMessage = "فرمت فایل مجاز نیست (فقط JPG, JPEG, PNG).";
-                    await LoadProfile(userId);
-                    return Page();
-                }
-
-                if (!string.IsNullOrEmpty(profileImagePath) && profileImagePath.StartsWith("/Files/"))
-                {
-                    await fileService.DeleteFile(profileImagePath, CancellationToken.None);
-                }
-
-                var newPath = await fileService.Upload(upload, "profiles", CancellationToken.None);
-                if (newPath == null)
-                {
-                    ErrorMessage = "خطا در آپلود فایل.";
-                    await LoadProfile(userId);
-                    return Page();
-                }
-
-                profileImagePath = newPath;
-            }
-
-            var updateCommand = new UpdateProfileDto
-            {
-                Id = userId,
-                FirstName = firstName.Trim(),
-                LastName = lastName.Trim(),
-                CityId = cityId,
-                ProfileImagePath = profileImagePath
-            };
-
-            //var updateResult = await userAppService.UpdateUserProfileAsync(updateCommand, "Customer", CancellationToken.None);
-
-            //if (!updateResult.IsSuccess)
-            //{
-            //    ErrorMessage = updateResult.Message ?? "خطا در ذخیره تغییرات.";
-            //    await LoadProfile(userId);
-            //    return Page();
-            //}
-
-            SuccessMessage = "پروفایل با موفقیت بروزرسانی شد.";
-            return RedirectToPage();
-        }
-
-        private async Task LoadProfile(int userId)
-        {
-            var result = await userAppService.GetUserProfileAsync(userId, "Customer", CancellationToken.None);
-
-            if (result.IsSuccess && result.Data != null)
-            {
-                Profile = result.Data;
             }
             else
             {
-                ErrorMessage = "اطلاعات پروفایل یافت نشد.";
-                Profile = new UserProfileDto();
+                var currentProfile = await customerAppService.GetByUserIdAsync(userId, ct);
+                if (currentProfile.IsSuccess)
+                {
+                    Input.ProfileImagePath = currentProfile.Data.ProfileImagePath;
+                }
             }
+
+            Input.UserId = userId;
+
+            var result = await customerAppService.UpdateProfile(Input, ct);
+
+            if (result.IsSuccess)
+            {
+                SuccessMessage = "پروفایل شما با موفقیت بروزرسانی شد.";
+                return RedirectToPage();
+            }
+            else
+            {
+                ErrorMessage = result.Message;
+                await LoadData(userId, ct);
+                return Page();
+            }
+        }
+
+        public async Task<JsonResult> OnGetGetCities(int provinceId, CancellationToken ct)
+        {
+            var cities = await cityAppService.GetCitiesByProvinceIdAsync(provinceId, ct);
+            return new JsonResult(cities);
+        }
+
+        private async Task LoadData(int userId, CancellationToken ct)
+        {
+            var result = await customerAppService.GetByUserIdAsync(userId, ct);
+
+            if (result.IsSuccess && result.Data != null)
+            {
+                DisplayData = result.Data;
+
+                Input = new UpdateCustomerProfileDto
+                {
+                    UserId = userId,
+                    FirstName = result.Data.FirstName,
+                    LastName = result.Data.LastName,
+                    CityId = result.Data.CityId,
+                    ProfileImagePath = result.Data.ProfileImagePath
+                };
+
+                if (Input.CityId.HasValue && Input.CityId > 0)
+                {
+                    var cityRes = await cityAppService.GetByIdAsync(Input.CityId.Value, ct);
+                    if (cityRes.IsSuccess)
+                    {
+                        CityName = cityRes.Data.Title;
+                        CurrentProvinceId = cityRes.Data.ProvinceId;
+                    }
+                }
+            }
+
+            var provincesList = await provinceAppService.GetAllForDropdownAsync(ct);
+            Provinces = new SelectList(provincesList, "Id", "Title", CurrentProvinceId);
         }
     }
 }

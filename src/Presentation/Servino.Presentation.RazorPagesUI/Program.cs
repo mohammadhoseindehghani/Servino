@@ -100,6 +100,7 @@ builder.Services.AddScoped<IExpertAppService, ExpertAppService>();
 builder.Services.AddScoped<IProvinceAppService, ProvinceAppService>();
 builder.Services.AddScoped<ICityAppService, CityAppService>();
 builder.Services.AddScoped<IRequestAppService, RequestAppService>();
+builder.Services.AddScoped<ICustomerAppService, CustomerAppService>();
 
 
 builder.Services.AddScoped<IFileService, FileService>();

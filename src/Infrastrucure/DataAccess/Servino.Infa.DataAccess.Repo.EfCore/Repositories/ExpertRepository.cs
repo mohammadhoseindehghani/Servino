@@ -14,10 +14,6 @@ public class ExpertRepository(AppDbContext context) : IExpertRepository
         context.Experts.Add(expert);
         return await context.SaveChangesAsync(ct)>0;
     }
-    public async Task<int> SaveChangesAsync(CancellationToken ct)
-    {
-        return await context.SaveChangesAsync(ct);
-    }
 
     public async Task<int> GetIdByUserIdAsync(int userId, CancellationToken ct)
     {
