@@ -23,4 +23,5 @@ public interface IUserAppService
     Task<Result<List<UserSummaryDto>>> GetUsersListAsync(PaginationRequestDto search, CancellationToken ct);
     Task<Result<bool>> DeleteUserAsync(int userId, CancellationToken ct);
     Task<Result<bool>> AdminUpdateUserAsync(AdminUpdateUserDto command, CancellationToken ct);
+    Task<Result<bool>> ChangePasswordAsync(ChangePasswordDto command, CancellationToken ct);
 }

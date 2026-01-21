@@ -18,4 +18,6 @@ public interface IIdentityService
     Task LockUserAsync(string identityId, CancellationToken ct);
     Task<Result<bool>> DeactivateUserAsync(string identityId, CancellationToken ct);
     Task<IdentityResultDto> RegisterWithEmailAsync(RegisterDto registerDto, string role, CancellationToken ct);
+    Task<Result<bool>> ChangePasswordAsync(string identityId, string currentPassword, string newPassword, CancellationToken ct);
+
 }

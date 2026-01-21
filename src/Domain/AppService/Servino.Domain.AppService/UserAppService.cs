@@ -238,6 +238,23 @@ public class UserAppService(
             return Result<bool>.Failure($"خطای سیستمی: {ex.Message}");
         }
     }
+
+    public async Task<Result<bool>> ChangePasswordAsync(ChangePasswordDto command, CancellationToken ct)
+    {
+        var user = await userService.GetByIdAsync(command.UserId, ct);
+        if (user == null)
+            return Result<bool>.Failure("کاربر یافت نشد.");
+
+        var result = await identityService.ChangePasswordAsync(
+            user.IdentityId,
+            command.CurrentPassword,
+            command.NewPassword,
+            ct
+        );
+
+        return result;
+    }
+
     public async Task<Result<bool>> UpdateEmailAsync(int userId, string newEmail, CancellationToken ct)
     {
         var user = await userService.GetByIdAsync(userId, ct);

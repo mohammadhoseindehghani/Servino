@@ -285,4 +285,26 @@ public class IdentityService(
             Id = user.Id
         };
     }
+
+    public async Task<Result<bool>> ChangePasswordAsync(string identityId, string currentPassword, string newPassword, CancellationToken ct)
+    {
+        var user = await userManager.FindByIdAsync(identityId);
+        if (user == null)
+            return Result<bool>.Failure("حساب کاربری یافت نشد.");
+
+        var result = await userManager.ChangePasswordAsync(
+            user,
+            currentPassword,
+            newPassword
+        );
+
+        if (!result.Succeeded)
+        {
+            var error = string.Join(", ", result.Errors.Select(e => e.Description));
+            return Result<bool>.Failure(error);
+        }
+
+        await signInManager.RefreshSignInAsync(user);
+        return Result<bool>.Success(true, "رمز عبور با موفقیت تغییر کرد.");
+    }
 }
