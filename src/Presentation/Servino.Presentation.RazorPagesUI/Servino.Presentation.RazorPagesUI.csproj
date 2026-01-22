@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\framework\Servino.Framework\Servino.Framework.csproj" />
     <ProjectReference Include="..\..\Domain\AppService\Servino.Domain.AppService\Servino.Domain.AppService.csproj" />
     <ProjectReference Include="..\..\Domain\Service\Servino.Domain.Servcie\Servino.Domain.Service.csproj" />
     <ProjectReference Include="..\..\Infrastrucure\DataAccess\Servino.Infa.DataAccess.Repo.EfCore\Servino.Infa.DataAccess.Repo.EfCore.csproj" />

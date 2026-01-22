@@ -11,6 +11,7 @@ using Servino.Domain.Core.UserAgg.Contracts.AppService;
 using Servino.Presentation.RazorPagesUI.Extensions;
 using Servino.Presentation.RazorPagesUI.Services.File;
 using System.ComponentModel.DataAnnotations;
+using Servino.Framework.Extensions;
 
 namespace Servino.Presentation.RazorPagesUI.Pages.Services
 {
@@ -94,7 +95,7 @@ namespace Servino.Presentation.RazorPagesUI.Pages.Services
                 Description = Input.Description,
                 Address = Input.Address,
                 CityId = Input.CityId,
-                DateRequired = Input.DateRequired, 
+                DateRequired = Input.DateRequired.ToGregorianDateTime()!.Value, 
                 HomeServiceId = Input.HomeServiceId,
                 CustomerId = customerId,
                 ImagePaths = uploadedPaths
@@ -106,7 +107,7 @@ namespace Servino.Presentation.RazorPagesUI.Pages.Services
             {
                 logger.LogInformation($"Request created successfully. CustomerId = {customerId}");
                 SuccessMessage = "سفارش شما با موفقیت ثبت شد. منتظر پیشنهاد متخصصین باشید.";
-                return RedirectToPage("/Customer/MyRequests"); 
+                return RedirectToPage("/MyRequests", new { area = "Customer" });
             }
             else
             {
@@ -166,7 +167,7 @@ namespace Servino.Presentation.RazorPagesUI.Pages.Services
             public int CityId { get; set; }
 
             [Required(ErrorMessage = "تاریخ انجام کار الزامی است")]
-            public DateTime DateRequired { get; set; } = DateTime.Now.AddDays(1);
+            public string DateRequired { get; set; } 
 
             public List<IFormFile>? Images { get; set; }
         }

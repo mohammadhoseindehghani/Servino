@@ -6,20 +6,24 @@
 }
 
 @section VendorStyles {
-    <link rel="stylesheet" href="~/vendor/libs/select2/select2.dist.css" />
     <link rel="stylesheet" href="~/vendor/libs/flatpickr/flatpickr.dist.css" />
+    <link rel="stylesheet" href="~/vendor/libs/select2/select2.dist.css" />
 }
+
 
 @section VendorScripts {
-
-    <script src="https://lib.arvancloud.ir/jquery/3.6.3/jquery.js"></script>
-
+    <script src="~/vendor/libs/jquery/jquery.dist.js"></script>
+    <script src="~/vendor/libs/cleavejs/cleave.dist.js"></script>
+    <script src="~/vendor/libs/cleavejs/cleave-phone.dist.js"></script>
+    <script src="~/vendor/libs/moment/moment.dist.js"></script>
+    <script src="~/vendor/libs/jdate/jdate.min.dist.js"></script>
+    <script src="~/vendor/libs/flatpickr/flatpickr-jdate.dist.js"></script>
+    <script src="~/vendor/libs/flatpickr/l10n/fa.dist.js"></script>
     <script src="~/vendor/libs/select2/select2.dist.js"></script>
     <script src="~/vendor/libs/select2/i18n/fa.dist.js"></script>
-    <script src="~/vendor/libs/flatpickr/flatpickr.dist.js"></script>
-    @* برای تاریخ شمسی فلت‌پیکر *@
-    @* <script src="https://npmcdn.com/flatpickr/dist/l10n/fa.js"></script> *@ 
 }
+
+
 
 <section class="section-py bg-body first-section-offset">
     <div class="container">
@@ -95,11 +99,15 @@
                                     <span asp-validation-for="Input.Address" class="text-danger"></span>
                                 </div>
 
+
                                 <div class="col-md-6">
-                                    <label class="form-label" asp-for="Input.DateRequired">تاریخ مورد نیاز <span class="text-danger">*</span></label>
-                                    <input type="date" class="form-control" asp-for="Input.DateRequired" />
+                                    <label class="form-label" asp-for="Input.DateRequired">تاریخ انجام خدمت <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control dob-picker" asp-for="Input.DateRequired" placeholder="انتخاب تاریخ" />
                                     <span asp-validation-for="Input.DateRequired" class="text-danger"></span>
                                 </div>
+
+
+
 
                                 <div class="col-md-6">
                                     <label class="form-label">افزودن تصویر (اختیاری)</label>
@@ -126,6 +134,9 @@
 </section>
 
 @section PageScripts {
+    
+    <script src="~/js/form-layouts.dist.js"></script>
+
     <script>
         $(document).ready(function () {
             $('.select2').select2({
@@ -138,7 +149,7 @@
                 var provinceId = $(this).val();
                 var $citySelect = $('#citySelect');
 
-                console.log("استان تغییر کرد. شناسه:", provinceId); 
+                console.log("استان تغییر کرد. شناسه:", provinceId);
 
                 $citySelect.empty().append('<option value="">در حال بارگذاری...</option>');
                 $citySelect.prop('disabled', true);
@@ -151,7 +162,7 @@
                         url: "@Url.Page("", "GetCities")",
                         data: { provinceId: provinceId },
                         success: function (data) {
-                            console.log("شهرهای دریافتی:", data); 
+                            console.log("شهرهای دریافتی:", data);
 
                             $citySelect.empty();
                             $citySelect.append('<option value="">انتخاب شهر...</option>');
