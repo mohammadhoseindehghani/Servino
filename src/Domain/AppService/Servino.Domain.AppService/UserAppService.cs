@@ -141,37 +141,6 @@ public class UserAppService(
         return Result<LoginResultDto>.Success(result);
     }
 
-
-    public async Task<Result<UserProfileDto>> GetUserProfileAsync(int userId, string role, CancellationToken ct)
-    {
-        var baseProfile = await userService.GetProfileByIdAsync(userId, role, ct);
-        if (baseProfile == null)
-            return Result<UserProfileDto>.Failure("پروفایل یافت نشد.");
-
-        var user = await userService.GetByIdAsync(userId, ct);
-        if (user == null) return Result<UserProfileDto>.Failure("کاربر یافت نشد.");
-
-        var currentEmail = await identityService.GetEmailByIdentityIdAsync(user.IdentityId, ct);
-
-        var profile = new UserProfileDto
-        {
-            Id = baseProfile.Id,
-            FirstName = baseProfile.FirstName,
-            LastName = baseProfile.LastName,
-            Email = currentEmail ?? baseProfile.Email,
-            MobileNumber = baseProfile.MobileNumber,
-            CityId = baseProfile.CityId,
-            CityName = baseProfile.CityName,
-            ProfileImagePath = baseProfile.ProfileImagePath,
-            Balance = baseProfile.Balance,
-            RegisterDate = baseProfile.RegisterDate,
-            Role = role,
-            ExpertInfo = baseProfile.ExpertInfo
-        };
-
-        return Result<UserProfileDto>.Success(profile);
-    }
-
     public async Task<Result<bool>> UpdateUserProfileAsync(UpdateUserDto command, CancellationToken ct)
     {
         var success = await userService.UpdateProfileAsync(command, ct);

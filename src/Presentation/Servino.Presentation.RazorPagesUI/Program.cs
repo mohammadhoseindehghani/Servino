@@ -81,6 +81,7 @@ builder.Services.AddScoped<ICityRepository, CityRepository>();
 builder.Services.AddScoped<IRequestRepository, RequestRepository>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ISuggestionRepository, SuggestionRepository>();
+builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 
 
 builder.Services.AddScoped<IIdentityService, IdentityService>();
@@ -95,6 +96,7 @@ builder.Services.AddScoped<ICityService, CityService>();
 builder.Services.AddScoped<IRequestService, RequestService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<ISuggestionService, SuggestionService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 
 builder.Services.AddScoped<IUserAppService, UserAppService>();
@@ -107,6 +109,7 @@ builder.Services.AddScoped<ICityAppService, CityAppService>();
 builder.Services.AddScoped<IRequestAppService, RequestAppService>();
 builder.Services.AddScoped<ICustomerAppService, CustomerAppService>();
 builder.Services.AddScoped<ISuggestionAppService, SuggestionAppService>();
+builder.Services.AddScoped<IAdminAppService, AdminAppService>();
 
 
 builder.Services.AddScoped<IFileService, FileService>();

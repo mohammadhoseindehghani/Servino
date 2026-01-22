@@ -8,11 +8,6 @@ namespace Servino.Domain.Service;
 
 public class UserService(IUserRepository userRepo) : IUserService
 {
-    public async Task<UserProfileDto?> GetProfileByIdAsync(int userId, string role, CancellationToken ct)
-    {
-        return await userRepo.GetProfileByIdAsync(userId, role, ct);
-    }
-
     public async Task<bool> UpdateProfileAsync(UpdateUserDto command, CancellationToken ct)
     {
         return await userRepo.UpdateProfileAsync(command, ct);

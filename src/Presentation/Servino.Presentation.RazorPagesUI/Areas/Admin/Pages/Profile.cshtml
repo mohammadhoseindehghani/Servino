@@ -63,7 +63,7 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">شماره موبایل:</label>
-                        <p class="fs-5 ltr text-end">@Model.Profile.MobileNumber</p>
+                        <p class="fs-5 ltr text-end">@Model.Profile.Phone</p>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">ایمیل:</label>
@@ -83,98 +83,4 @@
     </div>
 </div>
 
-<div class="modal fade" id="editAdminModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-label-primary">
-                <h5 class="modal-title">ویرایش اطلاعات ادمین</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
 
-            <form method="post" enctype="multipart/form-data">
-                <div class="modal-body">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" asp-for="UpdateCommand.Id" />
-
-                    <div class="d-flex align-items-start align-items-sm-center gap-4 mb-4">
-                        <img src="@(string.IsNullOrEmpty(Model.Profile.ProfileImagePath) ? "/img/avatars/14.png" : Model.Profile.ProfileImagePath)"
-                             alt="user-avatar" class="d-block w-px-100 h-px-100 rounded" id="modalAvatar" />
-
-                        <div class="button-wrapper">
-                            <label for="upload" class="btn btn-primary me-2 mb-3" tabindex="0">
-                                <span class="d-none d-sm-block">انتخاب عکس جدید</span>
-                                <i class="ti ti-upload d-block d-sm-none"></i>
-                                <input type="file" id="upload" asp-for="Upload" class="account-file-input" hidden accept="image/png,image/jpeg,image/jpg" onchange="previewImage(this)" />
-                            </label>
-                            <div class="text-muted small">JPG, GIF or PNG. Max size of 5MB</div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="UpdateCommand.FirstName" class="form-label">نام</label>
-                            <input type="text" asp-for="UpdateCommand.FirstName" class="form-control" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="UpdateCommand.LastName" class="form-label">نام خانوادگی</label>
-                            <input type="text" asp-for="UpdateCommand.LastName" class="form-control" />
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="UpdateCommand.CityId" class="form-label">شهر</label>
-                            <select class="form-select select2" asp-for="UpdateCommand.CityId" style="width:100%">
-                                <option value="">انتخاب کنید...</option>
-                                <option value="1">تهران</option>
-                                <option value="2">اصفهان</option>
-                                <option value="3">شیراز</option>
-                                <option value="4">مشهد</option>
-                                <option value="5">تبریز</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">موبایل</label>
-                            <input type="text" class="form-control" value="@Model.Profile.MobileNumber" disabled />
-                            <small class="text-muted">تغییر شماره موبایل فقط از طریق پشتیبانی امکان‌پذیر است.</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">انصراف</button>
-                    <button type="submit" class="btn btn-primary">ذخیره تغییرات</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-@section PageScripts {
-    <script>
-        $(document).ready(function () {
-            $('.select2').select2({
-                language: "fa",
-                dir: "rtl",
-                dropdownParent: $('#editAdminModal')
-            });
-        });
-
-        function previewImage(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    $('#modalAvatar').attr('src', e.target.result);
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        @if (!ModelState.IsValid || !string.IsNullOrEmpty(Model.ErrorMessage))
-        {
-                <text>
-                    var myModal = new bootstrap.Modal(document.getElementByUserId('editAdminModal'));
-                    myModal.show();
-                </text>
-        }
-    </script>
-}

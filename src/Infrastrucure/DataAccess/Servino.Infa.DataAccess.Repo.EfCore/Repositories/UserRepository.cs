@@ -10,54 +10,6 @@ namespace Servino.Infa.DataAccess.Repo.EfCore.Repositories;
 
 public class UserRepository(AppDbContext context) : IUserRepository
 {
-    public async Task<UserProfileDto?> GetProfileByIdAsync(int userId, string role, CancellationToken ct)
-    {
-        IQueryable<User> query = role switch
-        {
-            "Expert" => context.Users.AsNoTracking()
-                .Where(u => u.Id == userId && !u.IsDeleted)
-                .Include(u => u.City)
-                .Include(u => u.Expert),
-            "Customer" => context.Users.AsNoTracking()
-                .Where(u => u.Id == userId && !u.IsDeleted)
-                .Include(u => u.City)
-                .Include(u => u.Customer),
-            _ => context.Users.AsNoTracking().Where(u => u.Id == userId && !u.IsDeleted).Include(u => u.City)
-        };
-
-        var user = await query.FirstOrDefaultAsync(ct);
-        if (user == null)
-            return null;
-
-        var dto = new UserProfileDto
-        {
-            Id = user.Id,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            Email = user.Email,
-            MobileNumber = user.MobileNumber,
-            CityId = user.CityId,
-            CityName = user.City?.Title,
-            ProfileImagePath = user.ProfileImagePath,
-            Balance = user.Balance,
-            RegisterDate = user.CreatedAt,
-            Role = role
-        };
-
-        if (role == "Expert" && user.Expert != null)
-        {
-            dto.ExpertInfo = new ExpertProfileInfo
-            {
-                Bio = user.Expert.Bio,
-                Address = user.Expert.Address,
-                BankCardNumber = user.Expert.BankCardNumber,
-                ShebaNumber = user.Expert.ShebaNumber,
-                AverageScore = user.Expert.AverageScore
-            };
-        }
-        return dto;
-    }
-
     public async Task<bool> UpdateProfileAsync(UpdateUserDto command, CancellationToken ct)
     {
         var affectedRows = await context.Users
