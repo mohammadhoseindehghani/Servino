@@ -10,34 +10,49 @@ namespace Servino.Infa.DataAccess.Repo.EfCore.Repositories;
 
 public class RequestRepository(AppDbContext context) : IRequestRepository
 {
-    public async Task<int> CreateAsync(CreateRequestDto command, CancellationToken ct)
+    public async Task<int> CreateAsync(CreateRequestDto dto, CancellationToken ct)
     {
-        var request = MapToEntity(command);
-        await context.Requests.AddAsync(request, ct);
+        var request = new Request
+        {
+            Title = dto.Title,
+            Description = dto.Description,
+            Address = dto.Address,
+            CityId = dto.CityId,
+            DateRequired = dto.DateRequired,
+            CustomerId = dto.CustomerId,
+            HomeServiceId = dto.HomeServiceId,
+            Status = RequestStatus.WaitingForExperts,
+            CreatedAt = DateTime.UtcNow,
+            Images = dto.ImagePaths?
+                .Select(p => new RequestImage { ImagePath = p })
+                .ToList()
+        };
+
+        context.Requests.Add(request);
         await context.SaveChangesAsync(ct);
 
         return request.Id;
     }
 
+
     public async Task<bool> UpdateAsync(UpdateRequestDto command, CancellationToken ct)
     {
-        var request = await context.Requests
-            .FirstOrDefaultAsync(r => r.Id == command.Id, ct);
-
-        if (request == null) return false;
-
-        request.Title = command.Title;
-        request.Description = command.Description;
-        request.Address = command.Address;
-        request.CityId = command.CityId;
-        request.DateRequired = command.DateRequired;
-        request.Status = command.Status;
-        request.WinnerSuggestionId = command.WinnerSuggestionId;
-        request.DateDone = command.DateDone;
-        request.UpdatedAt = DateTime.Now;
-
-        return await context.SaveChangesAsync(ct) > 0;
+        var affectedRows = await context.Requests
+            .Where(r => r.Id == command.Id && !r.IsDeleted)
+            .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(r => r.Title, command.Title)
+                    .SetProperty(r => r.Description, command.Description)
+                    .SetProperty(r => r.Address, command.Address)
+                    .SetProperty(r => r.CityId, command.CityId)
+                    .SetProperty(r => r.DateRequired, command.DateRequired)
+                    .SetProperty(r => r.Status, command.Status)
+                    .SetProperty(r => r.WinnerSuggestionId, command.WinnerSuggestionId)
+                    .SetProperty(r => r.DateDone, command.DateDone)
+                    .SetProperty(r => r.UpdatedAt, DateTime.UtcNow),
+                ct);
+        return affectedRows > 0;
     }
+
 
     public async Task<RequestFullDto?> GetByIdAsync(int id, CancellationToken ct)
     {
@@ -161,51 +176,5 @@ public class RequestRepository(AppDbContext context) : IRequestRepository
     {
         return await context.Requests
             .AnyAsync(r => r.Id == requestId && r.CustomerId == customerId, ct);
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    private Request MapToEntity(CreateRequestDto dto)
-    {
-        var request = new Request
-        {
-            Title = dto.Title,
-            Description = dto.Description,
-            Address = dto.Address,
-            CityId = dto.CityId,
-            DateRequired = dto.DateRequired,
-            CustomerId = dto.CustomerId,
-            HomeServiceId = dto.HomeServiceId,
-            Status = RequestStatus.WaitingForExperts,
-            CreatedAt = DateTime.Now
-        };
-
-        if (dto.ImagePaths != null && dto.ImagePaths.Any())
-        {
-            request.Images = dto.ImagePaths.Select(path => new RequestImage
-            {
-                ImagePath = path
-            }).ToList();
-        }
-
-        return request;
     }
 }

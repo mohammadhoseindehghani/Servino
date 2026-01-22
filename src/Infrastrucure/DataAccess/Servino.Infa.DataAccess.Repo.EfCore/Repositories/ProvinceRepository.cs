@@ -18,21 +18,26 @@ public class ProvinceRepository(AppDbContext context) : IProvinceRepository
 
     public async Task<bool> UpdateAsync(int id, string title, CancellationToken ct)
     {
-        var province = await context.Provinces.FirstOrDefaultAsync(p => p.Id == id, ct);
-        if (province == null) return false;
+        var affectedRows = await context.Provinces
+            .Where(p => p.Id == id && !p.IsDeleted)
+            .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(p => p.Title, title)
+                    .SetProperty(p => p.UpdatedAt, DateTime.UtcNow),
+                ct);
 
-        province.Title = title;
-        return await context.SaveChangesAsync(ct) > 0;
+        return affectedRows > 0;
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken ct)
     {
-        var province = await context.Provinces.FirstOrDefaultAsync(p => p.Id == id, ct);
-        if (province == null) return false;
+        var affectedRows = await context.Provinces
+            .Where(p => p.Id == id && !p.IsDeleted)
+            .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(p => p.IsDeleted, true)
+                    .SetProperty(p => p.DeletedAt, DateTime.UtcNow),
+                ct);
 
-        province.IsDeleted = true;
-        province.DeletedAt = DateTime.Now;
-        return await context.SaveChangesAsync(ct) > 0;
+        return affectedRows > 0;
     }
 
     public async Task<ProvinceDto?> GetByIdAsync(int id, CancellationToken ct)

@@ -21,7 +21,7 @@ public class HomeServiceRepository(AppDbContext context, ILogger<HomeServiceRepo
                 Id = hs.Id,
                 Title = hs.Title,
                 CategoryName = hs.Category.Title,
-                BasePrice = hs.BasePrice.ToString("N0"),
+                BasePrice = hs.BasePrice,
                 VisitCount = hs.VisitCount,
                 ImagePath = hs.ImagePath
             })
@@ -59,10 +59,8 @@ public class HomeServiceRepository(AppDbContext context, ILogger<HomeServiceRepo
                 .SetProperty(hs => hs.CategoryId, command.CategoryId)
                 .SetProperty(hs => hs.ShortDescription, command.ShortDescription)
                 .SetProperty(hs => hs.ImagePath, command.ImagePath) 
-                                                                 
                 .SetProperty(hs => hs.UpdatedAt, DateTime.Now),
                 ct);
-
         return affectedRows > 0;
     }
 
@@ -112,7 +110,7 @@ public class HomeServiceRepository(AppDbContext context, ILogger<HomeServiceRepo
                 Id = s.Id,
                 Title = s.Title,
                 CategoryName = s.Category.Title,
-                BasePrice = s.BasePrice.ToString("N0"),
+                BasePrice = s.BasePrice,
                 VisitCount = s.VisitCount,
                 ImagePath = s.ImagePath 
             })

@@ -18,22 +18,27 @@ public class CityRepository(AppDbContext context) : ICityRepository
 
     public async Task<bool> UpdateAsync(int id, string title, int provinceId, CancellationToken ct)
     {
-        var city = await context.Cities.FirstOrDefaultAsync(c => c.Id == id, ct);
-        if (city == null) return false;
+        var affectedRows = await context.Cities
+            .Where(c => c.Id == id && !c.IsDeleted)
+            .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(c => c.Title, title)
+                    .SetProperty(c => c.ProvinceId, provinceId)
+                    .SetProperty(c => c.UpdatedAt, DateTime.UtcNow),
+                ct);
 
-        city.Title = title;
-        city.ProvinceId = provinceId;
-        return await context.SaveChangesAsync(ct) > 0;
+        return affectedRows > 0;
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken ct)
     {
-        var city = await context.Cities.FirstOrDefaultAsync(c => c.Id == id, ct);
-        if (city == null) return false;
+        var affectedRows = await context.Cities
+            .Where(c => c.Id == id && !c.IsDeleted)
+            .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(c => c.IsDeleted, true)
+                    .SetProperty(c => c.DeletedAt, DateTime.UtcNow),
+                ct);
 
-        city.IsDeleted = true;
-        city.DeletedAt = DateTime.Now;
-        return await context.SaveChangesAsync(ct) > 0;
+        return affectedRows > 0;
     }
 
     public async Task<CityDto?> GetByIdAsync(int id, CancellationToken ct)

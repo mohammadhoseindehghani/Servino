@@ -39,18 +39,19 @@ public class CustomerRepository(AppDbContext context) : ICustomerRepository
             ).FirstOrDefaultAsync(ct);
     }
 
-    public async Task<bool> UpdateProfile(UpdateCustomerProfileDto command, CancellationToken ct)
+    public async Task<bool> UpdateProfile(UpdateCustomerProfileDto dto, CancellationToken ct)
     {
-        var customer = await context.Customers.Include(c => c.User)
-            .FirstOrDefaultAsync(c => c.UserId == command.UserId, ct);
-
-        if (customer == null) return false;
-
-        customer.User.FirstName = command.FirstName ?? customer.User.FirstName;
-        customer.User.LastName = command.LastName ?? customer.User.LastName;
-        customer.User.CityId = command.CityId ?? customer.User.CityId;
-        customer.User.ProfileImagePath = command.ProfileImagePath ?? customer.User.ProfileImagePath;
-        await context.SaveChangesAsync(ct);
-        return true;
+        var affectedRows = await context.Users
+            .Where(u => u.Id == dto.UserId)
+            .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(u => u.FirstName, u => dto.FirstName ?? u.FirstName)
+                    .SetProperty(u => u.LastName, u => dto.LastName ?? u.LastName)
+                    .SetProperty(u => u.CityId, u => dto.CityId ?? u.CityId)
+                    .SetProperty(u => u.ProfileImagePath,
+                        u => dto.ProfileImagePath ?? u.ProfileImagePath)
+                    .SetProperty(u => u.UpdatedAt, DateTime.UtcNow),
+                ct);
+        return affectedRows > 0;
     }
+
 }

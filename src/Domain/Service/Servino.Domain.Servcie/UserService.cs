@@ -45,8 +45,30 @@ public class UserService(IUserRepository userRepo) : IUserService
 
     public async Task<List<UserSummaryDto>> GetAllAsync(PaginationRequestDto search, CancellationToken ct)
     {
-        return await userRepo.GetAllAsync(search, ct);
+        var projections = await userRepo.GetAllAsync(search, ct);
+
+        return projections.Select(p => new UserSummaryDto
+        {
+            Id = p.Id,
+            FullName = $"{p.FirstName} {p.LastName}",
+            Email = p.Email,
+            Mobile = p.MobileNumber,
+            CityName = p.CityTitle ?? "تعیین نشده",
+            Balance = p.Balance,
+            IsActive = p.IsActive,
+            RegisterDate = p.CreatedAt,
+            ImageUrl = p.ProfileImagePath,
+            Role = DetermineRole(p.HasAdmin, p.HasExpert, p.HasCustomer)
+        }).ToList();
     }
+
+    private static string DetermineRole(bool hasAdmin, bool hasExpert, bool hasCustomer)
+    {
+        if (hasAdmin) return "Admin";
+        if (hasExpert) return "Expert";
+        return hasCustomer ? "Customer" : "Unknown";
+    }
+
 
     public async Task<bool> ChangeBalanceAsync(int userId, decimal amount, CancellationToken ct)
     {

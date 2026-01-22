@@ -39,13 +39,14 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
 
     public async Task<bool> DeleteAsync(int id, CancellationToken ct)
     {
-        var category = await context.Categories.FirstOrDefaultAsync(c => c.Id == id, ct);
-        if (category == null) return false;
+        var affectedRows = await context.Categories
+            .Where(c => c.Id == id && !c.IsDeleted)
+            .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(c => c.IsDeleted, true)
+                    .SetProperty(c => c.DeletedAt, DateTime.UtcNow),
+                ct);
 
-        category.IsDeleted = true;
-        category.DeletedAt = DateTime.Now;
-
-        return await context.SaveChangesAsync(ct) > 0;
+        return affectedRows > 0;
     }
 
     public async Task<CategoryDto?> GetByIdAsync(int id, CancellationToken ct)
@@ -79,7 +80,7 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
             {
                 Id = c.Id,
                 Title = c.Title,
-                ParentTitle = c.Parent != null ? c.Parent.Title : "-",
+                ParentTitle = c.Parent!.Title,
                 SubCategoriesCount = c.SubCategories.Count,
                 IsActive = c.IsActive,
                 ImagePath = c.ImagePath

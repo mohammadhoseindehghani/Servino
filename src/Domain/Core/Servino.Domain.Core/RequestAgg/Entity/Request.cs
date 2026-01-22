@@ -29,6 +29,6 @@ public class Request : BaseEntity
     public Customer Customer { get; set; }
     public HomeService HomeService { get; set; }
     public Suggestion? WinnerSuggestion { get; set; } 
-    public ICollection<RequestImage> Images { get; set; }  
+    public ICollection<RequestImage>? Images { get; set; }  
     public ICollection<Suggestion> Suggestions { get; set; }
 }

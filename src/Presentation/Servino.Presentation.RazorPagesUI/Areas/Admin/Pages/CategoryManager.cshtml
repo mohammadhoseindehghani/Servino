@@ -271,47 +271,41 @@
 
         let editOffcanvas;
 
-        document.addEventListener("DOMContentLoaded", function () {
-            var element = document.getElementByUserId('editCategoryOffcanvas');
-            if (element) {
-                editOffcanvas = new bootstrap.Offcanvas(element);
-            }
-        });
-
-        function openEditModal(id) {
-            if (!editOffcanvas) {
-                var element = document.getElementByUserId('editCategoryOffcanvas');
-                editOffcanvas = new bootstrap.Offcanvas(element);
-            }
-
-            editOffcanvas.show();
-
-            document.getElementByUserId('editLoader').style.display = 'block';
-            document.getElementByUserId('editForm').style.display = 'none';
-
-            fetch(`?handler=RowData&id=${id}`)
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .then(data => {
-                    document.getElementByUserId('editUserId').value = data.id;
-                    document.getElementByUserId('editTitle').value = data.title;
-
-                    const parentSelect = document.getElementByUserId('editParentUserId');
-                    if (data.parentUserId) {
-                        parentSelect.value = data.parentUserId;
-                    } else {
-                        parentSelect.value = "";
-                    }
-
-                    document.getElementByUserId('editLoader').style.display = 'none';
-                    document.getElementByUserId('editForm').style.display = 'block';
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire('خطا', 'مشکلی در دریافت اطلاعات رخ داد.', 'error');
-                    editOffcanvas.hide();
-                });
+    document.addEventListener("DOMContentLoaded", function () {
+        const element = document.getElementById('editCategoryOffcanvas');
+        if (element) {
+            editOffcanvas = new bootstrap.Offcanvas(element);
         }
+    });
+
+    function openEditModal(id) {
+
+        if (!editOffcanvas) {
+            const element = document.getElementById('editCategoryOffcanvas');
+            editOffcanvas = new bootstrap.Offcanvas(element);
+        }
+
+        editOffcanvas.show();
+
+        document.getElementById('editLoader').style.display = 'block';
+        document.getElementById('editForm').style.display = 'none';
+
+        fetch(`?handler=RowData&id=${id}`)
+            .then(res => {
+                if (!res.ok) throw new Error("خطا در دریافت داده");
+                return res.json();
+            })
+            .then(data => {
+                document.getElementById('editId').value = data.id;
+                document.getElementById('editTitle').value = data.title;
+                document.getElementById('editParentId').value = data.parentId ?? "";
+
+                document.getElementById('editLoader').style.display = 'none';
+                document.getElementById('editForm').style.display = 'block';
+            })
+            .catch(() => {
+                Swal.fire('خطا', 'مشکلی در دریافت اطلاعات رخ داد.', 'error');
+                editOffcanvas.hide();
+            });
+    }
     </script>

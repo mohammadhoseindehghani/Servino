@@ -42,23 +42,52 @@ public class ExpertRepository(AppDbContext context) : IExpertRepository
             ).FirstOrDefaultAsync(ct);
     }
 
-    public async Task<bool> UpdateProfile(UpdateExpertProfileDto command, CancellationToken ct)
+
+    //add rollback or Stored Procedure 
+    public async Task<bool> UpdateProfile(UpdateExpertProfileDto dto, CancellationToken ct)
     {
-        var expert = await context.Experts.Include(e => e.User)
-            .FirstOrDefaultAsync(e => e.UserId == command.UserId, ct);
+        var expertRows = await context.Experts
+            .Where(e => e.UserId == dto.UserId)
+            .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(e => e.Address, e => dto.Address ?? e.Address)
+                    .SetProperty(e => e.BankCardNumber, e => dto.BankCardNumber ?? e.BankCardNumber)
+                    .SetProperty(e => e.ShebaNumber, e => dto.ShebaNumber ?? e.ShebaNumber)
+                    .SetProperty(e => e.Bio, e => dto.Bio ?? e.Bio)
+                    .SetProperty(e => e.UpdatedAt, DateTime.UtcNow),
+                ct);
 
-        if (expert == null) return false;
+        var userRows = await context.Users
+            .Where(u => u.Id == dto.UserId)
+            .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(u => u.FirstName, u => dto.FirstName ?? u.FirstName)
+                    .SetProperty(u => u.LastName, u => dto.LastName ?? u.LastName)
+                    .SetProperty(u => u.CityId, u => dto.CityId ?? u.CityId)
+                    .SetProperty(u => u.ProfileImagePath,
+                        u => dto.ProfileImagePath ?? u.ProfileImagePath)
+                    .SetProperty(u => u.UpdatedAt, DateTime.UtcNow),
+                ct);
 
-        expert.Address = command.Address ?? expert.Address;
-        expert.BankCardNumber = command.BankCardNumber ?? expert.BankCardNumber;
-        expert.ShebaNumber = command.ShebaNumber ?? expert.ShebaNumber;
-        expert.Bio = command.Bio ?? expert.Bio;
-
-        expert.User.FirstName = command.FirstName ?? expert.User.FirstName;
-        expert.User.LastName = command.LastName ?? expert.User.LastName;
-        expert.User.CityId = command.CityId ?? expert.User.CityId;
-        expert.User.ProfileImagePath = command.ProfileImagePath ?? expert.User.ProfileImagePath;
-        await context.SaveChangesAsync(ct);
-        return true;
+        return expertRows > 0 && userRows > 0;
     }
+
+
+    //public async Task<bool> UpdateProfile(UpdateExpertProfileDto command, CancellationToken ct)
+    //{
+    //    var expert = await context.Experts.Include(e => e.User)
+    //        .FirstOrDefaultAsync(e => e.UserId == command.UserId, ct);
+
+    //    if (expert == null) return false;
+
+    //    expert.Address = command.Address ?? expert.Address;
+    //    expert.BankCardNumber = command.BankCardNumber ?? expert.BankCardNumber;
+    //    expert.ShebaNumber = command.ShebaNumber ?? expert.ShebaNumber;
+    //    expert.Bio = command.Bio ?? expert.Bio;
+
+    //    expert.User.FirstName = command.FirstName ?? expert.User.FirstName;
+    //    expert.User.LastName = command.LastName ?? expert.User.LastName;
+    //    expert.User.CityId = command.CityId ?? expert.User.CityId;
+    //    expert.User.ProfileImagePath = command.ProfileImagePath ?? expert.User.ProfileImagePath;
+    //    await context.SaveChangesAsync(ct);
+    //    return true;
+    //}
 }

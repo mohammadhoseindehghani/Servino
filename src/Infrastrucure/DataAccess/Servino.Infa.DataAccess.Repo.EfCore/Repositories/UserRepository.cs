@@ -12,31 +12,18 @@ public class UserRepository(AppDbContext context) : IUserRepository
 {
     public async Task<UserProfileDto?> GetProfileByIdAsync(int userId, string role, CancellationToken ct)
     {
-        IQueryable<User> query;
-
-        if (role == "Expert")
+        IQueryable<User> query = role switch
         {
-            query = context.Users
-                .AsNoTracking()
+            "Expert" => context.Users.AsNoTracking()
                 .Where(u => u.Id == userId && !u.IsDeleted)
                 .Include(u => u.City)
-                .Include(u => u.Expert);
-        }
-        else if (role == "Customer")
-        {
-            query = context.Users
-                .AsNoTracking()
+                .Include(u => u.Expert),
+            "Customer" => context.Users.AsNoTracking()
                 .Where(u => u.Id == userId && !u.IsDeleted)
                 .Include(u => u.City)
-                .Include(u => u.Customer);
-        }
-        else 
-        {
-            query = context.Users
-                .AsNoTracking()
-                .Where(u => u.Id == userId && !u.IsDeleted)
-                .Include(u => u.City);
-        }
+                .Include(u => u.Customer),
+            _ => context.Users.AsNoTracking().Where(u => u.Id == userId && !u.IsDeleted).Include(u => u.City)
+        };
 
         var user = await query.FirstOrDefaultAsync(ct);
         if (user == null)
@@ -73,26 +60,18 @@ public class UserRepository(AppDbContext context) : IUserRepository
 
     public async Task<bool> UpdateProfileAsync(UpdateUserDto command, CancellationToken ct)
     {
-        var user = await context.Users
-            .FirstOrDefaultAsync(u => u.Id == command.Id && !u.IsDeleted, ct);
-
-        if (user == null) return false;
-
-        user.FirstName = command.FirstName;
-        user.LastName = command.LastName;
-        user.CityId = command.CityId;
-        user.MobileNumber = command.Mobile; 
-
-        if (!string.IsNullOrEmpty(command.ProfileImagePath))
-            user.ProfileImagePath = command.ProfileImagePath;
-
-        user.UpdatedAt = DateTime.Now;
-
-        return await context.SaveChangesAsync(ct) > 0;
-    }
-    public Task<bool> CityExistsAsync(int cityId, CancellationToken ct)
-    {
-        throw new NotImplementedException();
+        var affectedRows = await context.Users
+            .Where(u => u.Id == command.Id && !u.IsDeleted)
+            .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(u => u.FirstName, command.FirstName)
+                    .SetProperty(u => u.LastName, command.LastName)
+                    .SetProperty(u => u.CityId, command.CityId)
+                    .SetProperty(u => u.MobileNumber, command.Mobile)
+                    .SetProperty(u => u.ProfileImagePath,
+                        u => command.ProfileImagePath ?? u.ProfileImagePath)
+                    .SetProperty(u => u.UpdatedAt, DateTime.UtcNow),
+                ct);
+        return affectedRows > 0;
     }
 
     public async Task<bool> CreateAsync(CreateUserDto command, CancellationToken ct)
@@ -114,41 +93,33 @@ public class UserRepository(AppDbContext context) : IUserRepository
         return await context.SaveChangesAsync(ct) > 0;
     }
 
-
     public async Task<bool> UpdateAsync(UpdateUserDto command, CancellationToken ct)
     {
-        var user = await context.Users.FirstOrDefaultAsync(u => u.Id == command.Id, ct);
-        if (user == null) return false;
-
-        user.FirstName = command.FirstName;
-        user.LastName = command.LastName;
-        user.MobileNumber = command.Mobile;
-        user.CityId = command.CityId;
-
-        if (!string.IsNullOrEmpty(command.ProfileImagePath))
-        {
-            user.ProfileImagePath = command.ProfileImagePath;
-        }
-
-        user.UpdatedAt = DateTime.Now;
-
-        return await context.SaveChangesAsync(ct) > 0;
+        var affectedRows = await context.Users
+            .Where(u => u.Id == command.Id)
+            .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(u => u.FirstName, command.FirstName)
+                    .SetProperty(u => u.LastName, command.LastName)
+                    .SetProperty(u => u.MobileNumber, command.Mobile)
+                    .SetProperty(u => u.CityId, command.CityId)
+                    .SetProperty(u => u.ProfileImagePath,
+                        u => command.ProfileImagePath ?? u.ProfileImagePath)
+                    .SetProperty(u => u.UpdatedAt, DateTime.UtcNow),
+                ct);
+        return affectedRows > 0;
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken ct)
     {
-        var randomSuffix = new Random().Next(10000, 99999).ToString();
-
         var affectedRows = await context.Users
-            .Where(u => u.Id == id)
+            .Where(u => u.Id == id && !u.IsDeleted)
             .ExecuteUpdateAsync(setters => setters
                     .SetProperty(u => u.IsDeleted, true)
-                    .SetProperty(u => u.DeletedAt, DateTime.Now)
-                    .SetProperty(u => u.IsActive, false) 
-                    .SetProperty(u => u.Email, u => "deleted_" + randomSuffix + "_" + u.Email)
-                    .SetProperty(u => u.MobileNumber, u => "del_" + randomSuffix + "_" + u.MobileNumber)
-                , ct);
-
+                    .SetProperty(u => u.DeletedAt, DateTime.UtcNow)
+                    .SetProperty(u => u.IsActive, false)
+                    .SetProperty(u => u.Email, u => "deleted_" + u.Id + "_" + u.Email)
+                    .SetProperty(u => u.MobileNumber, u => "deleted_" + u.Id + "_" + u.MobileNumber),
+                ct);
         return affectedRows > 0;
     }
 
@@ -182,16 +153,11 @@ public class UserRepository(AppDbContext context) : IUserRepository
         return id;  
     }
 
-
-    public async Task<List<UserSummaryDto>> GetAllAsync(PaginationRequestDto search, CancellationToken ct)
+    public async Task<List<UserSummaryProjectionDto>> GetAllAsync(PaginationRequestDto search, CancellationToken ct)
     {
         var query = context.Users
             .AsNoTracking()
-            .Include(u => u.City)
-            .Include(u => u.Expert)   
-            .Include(u => u.Customer) 
-            .Include(u => u.Admin)    
-            .Where(u => !u.IsDeleted) 
+            .Where(u => !u.IsDeleted)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search.SearchKey))
@@ -202,29 +168,27 @@ public class UserRepository(AppDbContext context) : IUserRepository
                 u.MobileNumber.Contains(search.SearchKey));
         }
 
-        var pagedUsers = await query
+        return await query
             .OrderByDescending(u => u.CreatedAt)
             .Skip((search.PageNumber - 1) * search.PageSize)
             .Take(search.PageSize)
+            .Select(u => new UserSummaryProjectionDto
+            {
+                Id = u.Id,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                Email = u.Email,
+                MobileNumber = u.MobileNumber,
+                CityTitle = u.City != null ? u.City.Title : null,
+                Balance = u.Balance,
+                IsActive = u.IsActive,
+                CreatedAt = u.CreatedAt,
+                ProfileImagePath = u.ProfileImagePath,
+                HasAdmin = u.Admin != null,
+                HasExpert = u.Expert != null,
+                HasCustomer = u.Customer != null
+            })
             .ToListAsync(ct);
-
-        var result = pagedUsers.Select(u => new UserSummaryDto
-        {
-            Id = u.Id,
-            FullName = $"{u.FirstName} {u.LastName}",
-            Email = u.Email,
-            Mobile = u.MobileNumber,
-            CityName = u.City?.Title ?? "تعیین نشده",
-            Balance = u.Balance,
-            IsActive = u.IsActive,
-            RegisterDate = u.CreatedAt,
-            ImageUrl = u.ProfileImagePath,
-
-            Role = u.Admin != null ? "Admin" :
-                (u.Expert != null ? "Expert" : "Customer")
-        }).ToList();
-
-        return result;
     }
 
     public async Task<bool> ChangeBalanceAsync(int userId, decimal amount, CancellationToken ct)

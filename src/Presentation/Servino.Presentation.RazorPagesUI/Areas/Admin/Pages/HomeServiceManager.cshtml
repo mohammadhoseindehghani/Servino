@@ -269,42 +269,44 @@
 
          let editOffcanvas;
 
-         document.addEventListener("DOMContentLoaded", function () {
-             var element = document.getElementByUserId('editServiceOffcanvas');
-             if (element) {
-                 editOffcanvas = new bootstrap.Offcanvas(element);
-             }
-         });
+    document.addEventListener("DOMContentLoaded", function () {
+        const element = document.getElementById('editServiceOffcanvas');
+        if (element) {
+            editOffcanvas = new bootstrap.Offcanvas(element);
+        }
+    });
 
-         function openEditModal(id) {
-             if (!editOffcanvas) {
-                 var element = document.getElementByUserId('editServiceOffcanvas');
-                 editOffcanvas = new bootstrap.Offcanvas(element);
-             }
+    function openEditModal(id) {
 
-             editOffcanvas.show();
+        if (!editOffcanvas) {
+            const element = document.getElementById('editServiceOffcanvas');
+            editOffcanvas = new bootstrap.Offcanvas(element);
+        }
 
-             document.getElementByUserId('editLoader').style.display = 'block';
-             document.getElementByUserId('editForm').style.display = 'none';
+        editOffcanvas.show();
 
-             fetch(`?handler=RowData&id=${id}`)
-                 .then(response => {
-                     if (!response.ok) throw new Error('Network response was not ok');
-                     return response.json();
-                 })
-                 .then(data => {
-                     document.getElementByUserId('editUserId').value = data.id;
-                     document.getElementByUserId('editTitle').value = data.title;
-                     document.getElementByUserId('editDesc').value = data.shortDescription;
-                     document.getElementByUserId('editCategory').value = data.categoryUserId;
-                     document.getElementByUserId('editPrice').value = data.basePrice;
+        document.getElementById('editLoader').style.display = 'block';
+        document.getElementById('editForm').style.display = 'none';
 
-                     document.getElementByUserId('editLoader').style.display = 'none';
-                     document.getElementByUserId('editForm').style.display = 'block';
-                 })
-                 .catch(error => {
-                     console.error('Error:', error);
-                     Swal.fire('خطا', 'مشکلی در دریافت اطلاعات رخ داد.', 'error');
-                 });
-         }
+        fetch(`?handler=RowData&id=${id}`)
+            .then(res => {
+                if (!res.ok) throw new Error('خطا در دریافت اطلاعات');
+                return res.json();
+            })
+            .then(data => {
+                document.getElementById('editId').value = data.id;
+                document.getElementById('editTitle').value = data.title;
+                document.getElementById('editDesc').value = data.shortDescription ?? '';
+                document.getElementById('editCategory').value = data.categoryId;
+                document.getElementById('editPrice').value = data.basePrice;
+
+                document.getElementById('editLoader').style.display = 'none';
+                document.getElementById('editForm').style.display = 'block';
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire('خطا', 'مشکلی در دریافت اطلاعات رخ داد.', 'error');
+                editOffcanvas.hide();
+            });
+    }
 </script>

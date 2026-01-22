@@ -59,8 +59,8 @@ public class CommentRepository(AppDbContext context) : ICommentRepository
                 Rating = c.Rating,
                 IsApproved = c.IsApproved,
                 CreatedAt = c.CreatedAt,
-                CustomerName = c.Customer != null ? $"{c.Customer.User.FirstName} {c.Customer.User.LastName}" : "Unknown",
-                ExpertName = c.Expert != null ? $"{c.Expert.User.FirstName} {c.Expert.User.LastName}" : "Unknown"
+                CustomerName = c.Customer == null ? null : c.Customer.User.FirstName + " " + c.Customer.User.LastName,
+                ExpertName = c.Expert == null ? null : c.Expert.User.FirstName + " " + c.Expert.User.LastName
             })
             .ToListAsync(ct);
     }
@@ -90,19 +90,17 @@ public class CommentRepository(AppDbContext context) : ICommentRepository
                 Rating = c.Rating,
                 IsApproved = c.IsApproved,
                 CreatedAt = c.CreatedAt,
-                CustomerName = c.Customer != null ? $"{c.Customer.User.FirstName} {c.Customer.User.LastName}" : "Unknown",
-                ExpertName = c.Expert != null ? $"{c.Expert.User.FirstName} {c.Expert.User.LastName}" : "Unknown"
+                CustomerName = c.Customer == null ? null : c.Customer.User.FirstName + " " + c.Customer.User.LastName,
+                ExpertName = c.Expert == null ? null : c.Expert.User.FirstName + " " + c.Expert.User.LastName
             })
             .ToListAsync(ct);
     }
 
-    public async Task<CommentDto> GetByIdAsync(int id, CancellationToken ct)
+    public async Task<CommentDto?> GetByIdAsync(int id, CancellationToken ct)
     {
         return await context.Comments
             .AsNoTracking()
             .Where(c => c.Id == id)
-            .Include(c => c.Customer)
-            .Include(c => c.Expert)
             .Select(c => new CommentDto
             {
                 Id = c.Id,
@@ -111,34 +109,30 @@ public class CommentRepository(AppDbContext context) : ICommentRepository
                 Rating = c.Rating,
                 IsApproved = c.IsApproved,
                 CreatedAt = c.CreatedAt,
-                CustomerName = c.Customer != null ? $"{c.Customer.User.FirstName} {c.Customer.User.LastName}" : "Unknown",
-                ExpertName = c.Expert != null ? $"{c.Expert.User.FirstName} {c.Expert.User.LastName}" : "Unknown"
+                CustomerName = c.Customer == null ? null : c.Customer.User.FirstName + " " + c.Customer.User.LastName,
+                ExpertName = c.Expert == null ? null : c.Expert.User.FirstName + " " + c.Expert.User.LastName
             })
             .FirstOrDefaultAsync(ct);
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken ct)
     {
-        var comment = await context.Comments.FindAsync([id], cancellationToken: ct);
+        var affectedRows = await context.Comments
+            .Where(c => c.Id == id)
+            .ExecuteDeleteAsync(ct);
 
-        if (comment is null)
-            return false;
-
-        context.Comments.Remove(comment);
-        await context.SaveChangesAsync(ct);
-        return true;
+        return affectedRows > 0;
     }
 
     public async Task<bool> ChangeApprovalStatusAsync(int id, bool isApproved, CancellationToken ct)
     {
-        var comment = await context.Comments.FindAsync([id], cancellationToken: ct);
+        var affectedRows = await context.Comments
+            .Where(c => c.Id == id)
+            .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(c => c.IsApproved, isApproved)
+                    .SetProperty(c => c.UpdatedAt, DateTime.UtcNow),
+                ct);
 
-        if (comment is null)
-            return false;
-
-        comment.IsApproved = isApproved;
-
-        await context.SaveChangesAsync(ct);
-        return true;
+        return affectedRows > 0;
     }
 }
