@@ -21,7 +21,8 @@ namespace Servino.Presentation.RazorPagesUI.Pages.Services
             IProvinceAppService provinceAppService,
             ICityAppService cityAppService,
             IUserAppService userAppService,
-            IFileService fileService) : PageModel
+            IFileService fileService,
+            ILogger<CreateRequestModel> logger) : PageModel
     {
         public string ServiceTitle { get; set; }
         public string ServiceImage { get; set; }
@@ -103,11 +104,13 @@ namespace Servino.Presentation.RazorPagesUI.Pages.Services
 
             if (result.IsSuccess)
             {
+                logger.LogInformation($"Request created successfully. CustomerId = {customerId}");
                 SuccessMessage = "سفارش شما با موفقیت ثبت شد. منتظر پیشنهاد متخصصین باشید.";
                 return RedirectToPage("/Customer/MyRequests"); 
             }
             else
             {
+                logger.LogWarning($"Request creation failed. Message = {result.Message}");
                 ErrorMessage = result.Message;
                 await RepopulatePageData(Input.HomeServiceId, ct);
                 return Page();

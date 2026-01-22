@@ -3,6 +3,8 @@ using Servino.Domain.Core.UserAgg.Contracts.AppService;
 using Servino.Domain.Core.UserAgg.Contracts.Service;
 using Servino.Domain.Core.UserAgg.Dtos;
 using Servino.Domain.Core.UserAgg.Dtos.Identity;
+using Microsoft.Extensions.Logging;
+
 
 namespace Servino.Domain.AppService;
 
@@ -10,7 +12,8 @@ public class UserAppService(
     IIdentityService identityService,
     IUserService userService,
     IExpertService expertService,
-    ICustomerService customerService) : IUserAppService
+    ICustomerService customerService,
+    ILogger<UserAppService> logger) : IUserAppService
 {
 
     public async Task<Result<bool>> CreateUserByAdminAsync(CreateUserByAdminDto command, CancellationToken ct)

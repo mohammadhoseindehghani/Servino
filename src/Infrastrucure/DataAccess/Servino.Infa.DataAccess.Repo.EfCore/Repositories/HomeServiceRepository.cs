@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Servino.Domain.Core._common;
 using Servino.Domain.Core.HomeServiceAgg.Contracts.Data;
 using Servino.Domain.Core.HomeServiceAgg.Dtos;
@@ -7,19 +8,28 @@ using Servino.Infa.Db.SqlServer.EfCore.DbContexts;
 
 namespace Servino.Infa.DataAccess.Repo.EfCore.Repositories;
 
-public class HomeServiceRepository(AppDbContext context) : IHomeServiceRepository
+public class HomeServiceRepository(AppDbContext context, ILogger<HomeServiceRepository> logger) : IHomeServiceRepository
 {
     public async Task<List<HomeServiceSummaryDto>> GetAllActiveServicesAsync(CancellationToken ct)
     {
-        return await context.HomeServices.Select(hs => new HomeServiceSummaryDto()
-        {
-            Id = hs.Id,
-            Title = hs.Title,
-            CategoryName = hs.Category.Title,
-            BasePrice = hs.BasePrice.ToString("N0"),
-            VisitCount = hs.VisitCount,
-            ImagePath = hs.ImagePath
-        }).ToListAsync(ct);
+        logger.LogInformation($"[Repo] GetAllActiveServices started");
+
+        var result = await context.HomeServices
+            .Where(hs => hs.IsActive && !hs.IsDeleted)
+            .Select(hs => new HomeServiceSummaryDto
+            {
+                Id = hs.Id,
+                Title = hs.Title,
+                CategoryName = hs.Category.Title,
+                BasePrice = hs.BasePrice.ToString("N0"),
+                VisitCount = hs.VisitCount,
+                ImagePath = hs.ImagePath
+            })
+            .ToListAsync(ct);
+
+        logger.LogInformation($"[Repo] GetAllActiveServices finished. Count={result.Count}");
+
+        return result;
     }
 
     public async Task<bool> CreateAsync(HomeServiceDto command, CancellationToken ct)
