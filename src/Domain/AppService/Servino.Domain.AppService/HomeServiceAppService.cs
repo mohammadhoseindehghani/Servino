@@ -22,10 +22,8 @@ public class HomeServiceAppService(IHomeServiceService homeServiceService) : IHo
 
             var isCreated = await homeServiceService.CreateAsync(command, ct);
 
-            if (!isCreated)
-                return Result<bool>.Failure("خطایی در ثبت خدمت رخ داد.");
-
-            return Result<bool>.Success(true, "خدمت جدید با موفقیت ثبت شد.");
+            return !isCreated ? Result<bool>.Failure("خطایی در ثبت خدمت رخ داد.") 
+                : Result<bool>.Success(true, "خدمت جدید با موفقیت ثبت شد.");
         }
         catch (Exception ex)
         {
@@ -45,10 +43,8 @@ public class HomeServiceAppService(IHomeServiceService homeServiceService) : IHo
 
             var isUpdated = await homeServiceService.UpdateAsync(command, ct);
 
-            if (!isUpdated)
-                return Result<bool>.Failure("خدمت یافت نشد یا ویرایش انجام نشد.");
-
-            return Result<bool>.Success(true, "خدمت با موفقیت ویرایش شد.");
+            return !isUpdated ? Result<bool>.Failure("خدمت یافت نشد یا ویرایش انجام نشد.") 
+                : Result<bool>.Success(true, "خدمت با موفقیت ویرایش شد.");
         }
         catch (Exception ex)
         {
@@ -63,10 +59,8 @@ public class HomeServiceAppService(IHomeServiceService homeServiceService) : IHo
 
             var isDeleted = await homeServiceService.DeleteAsync(id, ct);
 
-            if (!isDeleted)
-                return Result<bool>.Failure("خدمت یافت نشد.");
-
-            return Result<bool>.Success(true, "خدمت با موفقیت حذف شد.");
+            return !isDeleted ? Result<bool>.Failure("خدمت یافت نشد.") 
+                : Result<bool>.Success(true, "خدمت با موفقیت حذف شد.");
         }
         catch (Exception ex)
         {
@@ -80,10 +74,8 @@ public class HomeServiceAppService(IHomeServiceService homeServiceService) : IHo
         {
             var service = await homeServiceService.GetByIdAsync(id, ct);
 
-            if (service is null)
-                return Result<HomeServiceDto>.Failure("خدمت مورد نظر یافت نشد.", "404");
-
-            return Result<HomeServiceDto>.Success(service);
+            return service is null ? Result<HomeServiceDto>.Failure("خدمت مورد نظر یافت نشد.", "404") 
+                : Result<HomeServiceDto>.Success(service);
         }
         catch (Exception ex)
         {

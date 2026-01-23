@@ -118,10 +118,8 @@ public class UserAppService(
     {
         var result = await identityService.LoginWithPasswordAsync(command, ct);
 
-        if (!result.Succeeded)
-            return Result<LoginResultDto>.Failure(result.Message ?? "نام کاربری یا رمز عبور اشتباه است.");
-
-        return Result<LoginResultDto>.Success(result);
+        return !result.Succeeded ? Result<LoginResultDto>.Failure(result.Message ?? "نام کاربری یا رمز عبور اشتباه است.") 
+            : Result<LoginResultDto>.Success(result);
     }
 
 
@@ -135,19 +133,15 @@ public class UserAppService(
     {
         var result = await identityService.VerifyOtpAndLoginAsync(command, ct);
 
-        if (!result.Succeeded)
-            return Result<LoginResultDto>.Failure(result.Message ?? "کد وارد شده نامعتبر است.");
-
-        return Result<LoginResultDto>.Success(result);
+        return !result.Succeeded ? Result<LoginResultDto>.Failure(result.Message ?? "کد وارد شده نامعتبر است.") 
+            : Result<LoginResultDto>.Success(result);
     }
 
     public async Task<Result<bool>> UpdateUserProfileAsync(UpdateUserDto command, CancellationToken ct)
     {
         var success = await userService.UpdateProfileAsync(command, ct);
-        if (!success)
-            return Result<bool>.Failure("خطا در بروزرسانی اطلاعات پروفایل.");
-
-        return Result<bool>.Success(true, "پروفایل با موفقیت بروزرسانی شد.");
+        return !success ? Result<bool>.Failure("خطا در بروزرسانی اطلاعات پروفایل.") 
+            : Result<bool>.Success(true, "پروفایل با موفقیت بروزرسانی شد.");
     }
 
     public async Task<Result<bool>> AdminUpdateUserAsync(AdminUpdateUserDto command, CancellationToken ct)
@@ -161,7 +155,7 @@ public class UserAppService(
                 FirstName = command.FirstName,
                 LastName = command.LastName,
                 Mobile = command.Mobile,
-                CityId = (command.CityId > 0) ? command.CityId : existingUser.CityId
+                CityId = (command.CityId > 0) ? command.CityId : existingUser?.CityId
                 // ProfileImagePath 
             };
 
@@ -255,30 +249,29 @@ public class UserAppService(
     public async Task<Result<LoginResultDto>> LoginWithGoogleAsync(LoginWithGoogleDto command, CancellationToken ct)
     {
         var result = await identityService.LoginWithGoogleAsync(command, ct);
-        if (!result.Succeeded)
-            return Result<LoginResultDto>.Failure(result.Message ?? "خطا در ورود با گوگل.");
-        return Result<LoginResultDto>.Success(result);
+        return !result.Succeeded ? Result<LoginResultDto>.Failure(result.Message ?? "خطا در ورود با گوگل.") 
+            : Result<LoginResultDto>.Success(result);
     }
 
     public async Task<Result<UserDetailDto>> GetUserProfileAsync(int userId, CancellationToken ct)
     {
         var user = await userService.GetByIdAsync(userId, ct);
-        if (user == null) return Result<UserDetailDto>.Failure("کاربر یافت نشد.", "404");
-        return Result<UserDetailDto>.Success(user);
+        return user == null ? Result<UserDetailDto>.Failure("کاربر یافت نشد.", "404") 
+            : Result<UserDetailDto>.Success(user);
     }
 
     public async Task<Result<bool>> EditUserProfileAsync(UpdateUserDto command, CancellationToken ct)
     {
         var isUpdated = await userService.UpdateAsync(command, ct);
-        if (!isUpdated) return Result<bool>.Failure("ویرایش انجام نشد یا کاربر وجود ندارد.");
-        return Result<bool>.Success(true, "اطلاعات با موفقیت ویرایش شد.");
+        return !isUpdated ? Result<bool>.Failure("ویرایش انجام نشد یا کاربر وجود ندارد.") 
+            : Result<bool>.Success(true, "اطلاعات با موفقیت ویرایش شد.");
     }
 
     public async Task<Result<bool>> ChangeUserBalanceAsync(int userId, decimal amount, CancellationToken ct)
     {
         var result = await userService.ChangeBalanceAsync(userId, amount, ct);
-        if (!result) return Result<bool>.Failure("خطا در تغییر موجودی.");
-        return Result<bool>.Success(true, amount > 0 ? "شارژ انجام شد." : "برداشت انجام شد.");
+        return !result ? Result<bool>.Failure("خطا در تغییر موجودی.") 
+            : Result<bool>.Success(true, amount > 0 ? "شارژ انجام شد." : "برداشت انجام شد.");
     }
 
     public async Task<Result<List<UserSummaryDto>>> GetUsersListAsync(PaginationRequestDto search, CancellationToken ct)
@@ -302,10 +295,8 @@ public class UserAppService(
 
             var dbResult = await userService.DeleteAsync(userId, ct);
 
-            if (!dbResult)
-                return Result<bool>.Failure("کاربر در دیتابیس اصلی یافت نشد اما اکانت سیستمی غیرفعال شد.");
-
-            return Result<bool>.Success(true, "کاربر با موفقیت حذف و اطلاعات تماس او آزاد شد.");
+            return !dbResult ? Result<bool>.Failure("کاربر در دیتابیس اصلی یافت نشد اما اکانت سیستمی غیرفعال شد.") 
+                : Result<bool>.Success(true, "کاربر با موفقیت حذف و اطلاعات تماس او آزاد شد.");
         }
         catch (Exception ex)
         {

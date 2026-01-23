@@ -23,7 +23,7 @@ public class CommentService(ICommentRepository commentRepo) : ICommentService
     }
 
 
-    public async Task<CommentDto> GetByIdAsync(int id, CancellationToken ct)
+    public async Task<CommentDto?> GetByIdAsync(int id, CancellationToken ct)
     {
         return await commentRepo.GetByIdAsync(id, ct);
     }

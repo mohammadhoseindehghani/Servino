@@ -19,12 +19,8 @@ public class CategoryAppService(ICategoryService categoryService) : ICategoryApp
 
             var isCreated = await categoryService.CreateAsync(command, ct);
 
-            if (!isCreated)
-            {
-                return Result<bool>.Failure("خطایی در ایجاد دسته‌بندی رخ داد. ممکن است عنوان تکراری باشد.");
-            }
-
-            return Result<bool>.Success(true, "دسته‌بندی با موفقیت ایجاد شد.");
+            return !isCreated ? Result<bool>.Failure("خطایی در ایجاد دسته‌بندی رخ داد. ممکن است عنوان تکراری باشد.") 
+                : Result<bool>.Success(true, "دسته‌بندی با موفقیت ایجاد شد.");
         }
         catch (Exception ex)
         {
@@ -38,12 +34,8 @@ public class CategoryAppService(ICategoryService categoryService) : ICategoryApp
         {
             var isUpdated = await categoryService.UpdateAsync(command, ct);
 
-            if (!isUpdated)
-            {
-                return Result<bool>.Failure("دسته‌بندی یافت نشد یا ویرایش انجام نشد.");
-            }
-
-            return Result<bool>.Success(true, "دسته‌بندی با موفقیت ویرایش شد.");
+            return !isUpdated ? Result<bool>.Failure("دسته‌بندی یافت نشد یا ویرایش انجام نشد.") 
+                : Result<bool>.Success(true, "دسته‌بندی با موفقیت ویرایش شد.");
         }
         catch (Exception ex)
         {
@@ -57,12 +49,8 @@ public class CategoryAppService(ICategoryService categoryService) : ICategoryApp
         {
             var isDeleted = await categoryService.DeleteAsync(id, ct);
 
-            if (!isDeleted)
-            {
-                return Result<bool>.Failure("دسته‌بندی یافت نشد یا قابل حذف نیست (ممکن است دارای زیرمجموعه باشد).");
-            }
-
-            return Result<bool>.Success(true, "دسته‌بندی با موفقیت حذف شد.");
+            return !isDeleted ? Result<bool>.Failure("دسته‌بندی یافت نشد یا قابل حذف نیست (ممکن است دارای زیرمجموعه باشد).") 
+                : Result<bool>.Success(true, "دسته‌بندی با موفقیت حذف شد.");
         }
         catch (Exception ex)
         {
@@ -76,12 +64,8 @@ public class CategoryAppService(ICategoryService categoryService) : ICategoryApp
         {
             var category = await categoryService.GetByIdAsync(id, ct);
 
-            if (category is null)
-            {
-                return Result<CategoryDto>.Failure("دسته‌بندی مورد نظر یافت نشد.", "404");
-            }
-
-            return Result<CategoryDto>.Success(category);
+            return category is null ? Result<CategoryDto>.Failure("دسته‌بندی مورد نظر یافت نشد.", "404") 
+                : Result<CategoryDto>.Success(category);
         }
         catch (Exception ex)
         {
@@ -109,7 +93,7 @@ public class CategoryAppService(ICategoryService categoryService) : ICategoryApp
         var exists = await categoryService.IsCategoryExistAndActiveAsync(categoryId, ct);
         if (!exists)
         {
-            return new List<ServiceClientDto>();
+            return [];
         }
 
         return await categoryService.GetServicesByCategoryIdAsync(categoryId, ct);

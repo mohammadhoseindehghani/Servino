@@ -13,12 +13,8 @@ public class CommentAppService(ICommentService commentService) : ICommentAppServ
 
         var isCreated = await commentService.AddAsync(command, ct);
 
-        if (!isCreated)
-        {
-            return Result<bool>.Failure("خطایی در ثبت دیدگاه رخ داده است.", "Create_Error");
-        }
-
-        return Result<bool>.Success(true, "دیدگاه شما با موفقیت ثبت شد و پس از تایید نمایش داده می‌شود.");
+        return !isCreated ? Result<bool>.Failure("خطایی در ثبت دیدگاه رخ داده است.", "Create_Error") 
+            : Result<bool>.Success(true, "دیدگاه شما با موفقیت ثبت شد و پس از تایید نمایش داده می‌شود.");
     }
 
     public async Task<Result<List<CommentDto>>> GetAllAsync(PaginationRequestDto pagination, CancellationToken ct)
@@ -37,22 +33,16 @@ public class CommentAppService(ICommentService commentService) : ICommentAppServ
     {
         var comment = await commentService.GetByIdAsync(id, ct);
 
-        if (comment is null)
-        {
-            return Result<CommentDto>.Failure("دیدگاه مورد نظر یافت نشد.", "404");
-        }
-        return Result<CommentDto>.Success(comment);
+        return comment is null ? Result<CommentDto>.Failure("دیدگاه مورد نظر یافت نشد.", "404") 
+            : Result<CommentDto>.Success(comment);
     }
 
     public async Task<Result<bool>> DeleteAsync(int id, CancellationToken ct)
     {
         var isDeleted = await commentService.DeleteAsync(id, ct);
 
-        if (!isDeleted)
-        {
-            return Result<bool>.Failure("دیدگاه یافت نشد یا حذف نشد.", "Delete_Error");
-        }
-        return Result<bool>.Success(true, "دیدگاه با موفقیت حذف شد.");
+        return !isDeleted ? Result<bool>.Failure("دیدگاه یافت نشد یا حذف نشد.", "Delete_Error") 
+            : Result<bool>.Success(true, "دیدگاه با موفقیت حذف شد.");
     }
 
     public async Task<Result<bool>> ChangeApprovalStatusAsync(int id, bool isApproved, CancellationToken ct)

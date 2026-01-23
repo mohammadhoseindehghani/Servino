@@ -51,10 +51,8 @@ public class RequestAppService(
 
             var isUpdated = await requestService.UpdateAsync(command, ct);
 
-            if (!isUpdated)
-                return Result<bool>.Failure("عملیات ویرایش انجام نشد.");
-
-            return Result<bool>.Success(true, "درخواست با موفقیت ویرایش شد.");
+            return !isUpdated ? Result<bool>.Failure("عملیات ویرایش انجام نشد.") 
+                : Result<bool>.Success(true, "درخواست با موفقیت ویرایش شد.");
         }
         catch (Exception ex)
         {
@@ -67,10 +65,8 @@ public class RequestAppService(
         try
         {
             var request = await requestService.GetByIdAsync(id, ct);
-            if (request == null)
-                return Result<RequestFullDto>.Failure("درخواست یافت نشد.", "404");
-
-            return Result<RequestFullDto>.Success(request);
+            return request == null ? Result<RequestFullDto>.Failure("درخواست یافت نشد.", "404") 
+                : Result<RequestFullDto>.Success(request);
         }
         catch (Exception ex)
         {
@@ -83,10 +79,8 @@ public class RequestAppService(
         try
         {
             var details = await requestService.GetDetailsByIdAsync(id, ct);
-            if (details == null)
-                return Result<RequestDetailDto>.Failure("جزئیات درخواست یافت نشد.", "404");
-
-            return Result<RequestDetailDto>.Success(details);
+            return details == null ? Result<RequestDetailDto>.Failure("جزئیات درخواست یافت نشد.", "404") 
+                : Result<RequestDetailDto>.Success(details);
         }
         catch (Exception ex)
         {
@@ -112,13 +106,13 @@ public class RequestAppService(
         var expertProfile = await expertService.GetByUserId(expertId, ct); 
         if (expertProfile == null || expertProfile.CityId == null)
         {
-            return new List<RequestSummaryDto>();
+            return [];
         }
 
         var skillIds = await expertHomeServiceService.GetSelectedServiceIdsAsync(expertProfile.ExpertId, ct);
-        if (skillIds == null || !skillIds.Any())
+        if (skillIds == null! || !skillIds.Any())
         {
-            return new List<RequestSummaryDto>();
+            return [];
         }
 
         return await requestService.GetAvailableForExpertAsync(skillIds, expertProfile.CityId.Value, ct);
