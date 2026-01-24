@@ -10,8 +10,8 @@ public class CustomerRepository(AppDbContext context) : ICustomerRepository
 {
     public async Task<bool> CreateAsync(int userId, CancellationToken ct)
     {
-        var expert = new Expert { UserId = userId };
-        context.Experts.Add(expert);
+        var customer = new Customer() { UserId = userId };
+        context.Customers.Add(customer);
         return await context.SaveChangesAsync(ct) > 0;
     }
     public async Task<int> GetCustomerIdByUserIdAsync(int userId, CancellationToken ct)

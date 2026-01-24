@@ -18,33 +18,14 @@
     <script src="~/vendor/libs/sweetalert2/sweetalert2.dist.js"></script>
 }
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            Swal.fire({
-                title: 'موفق!',
-                text: '@Html.Raw(TempData["SuccessMessage"])', 
-                icon: 'success',
-                confirmButtonText: 'باشه'
-            });
-        });
-    </script>
+@{
+    var success = TempData["SuccessMessage"] as string;
+    var error = TempData["ErrorMessage"] as string;
 }
 
-@if (TempData["ErrorMessage"] != null)
-{
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            Swal.fire({
-                title: 'خطا!',
-                text: '@Html.Raw(TempData["ErrorMessage"])', 
-                icon: 'error',
-                confirmButtonText: 'باشه'
-            });
-        });
-    </script>
-}
+
+
+
 
 <h4 class="py-3 mb-4">
     <span class="text-muted fw-light">مدیریت محتوا /</span> دسته‌بندی‌های خدمات
@@ -241,8 +222,35 @@
     </div>
 </div>
 
-
+@if (!string.IsNullOrEmpty(success))
+{
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            Swal.fire({
+                title: 'موفق!',
+                text: '@Html.Raw(success)',
+                icon: 'success',
+                confirmButtonText: 'باشه'
+            });
+        });
+    </script>
+}
+
+@if (!string.IsNullOrEmpty(error))
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            Swal.fire({
+                title: 'خطا!',
+                text: '@Html.Raw(error)',
+                icon: 'error',
+                confirmButtonText: 'باشه'
+            });
+        });
+    </script>
+}
+
+<script>
         document.querySelectorAll('.confirm-delete').forEach(btn => {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -308,4 +316,4 @@
                 editOffcanvas.hide();
             });
     }
-    </script>
+</script>

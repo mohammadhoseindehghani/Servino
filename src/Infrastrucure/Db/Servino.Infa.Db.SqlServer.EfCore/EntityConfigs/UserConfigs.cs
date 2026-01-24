@@ -22,7 +22,7 @@ public class UserConfigs : IEntityTypeConfiguration<User>
 
         builder.Property(u => u.MobileNumber)
             .IsRequired()
-            .HasMaxLength(11);
+            .HasMaxLength(32);
 
         builder.Property(u => u.Email)
             .IsRequired()

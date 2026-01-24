@@ -2,12 +2,16 @@
 using Servino.Domain.Core.UserAgg.Contracts.Data;
 using Servino.Domain.Core.UserAgg.Contracts.Service;
 using Servino.Domain.Core.UserAgg.Dtos;
-using Servino.Domain.Core.UserAgg.Dtos.Identity;
 
 namespace Servino.Domain.Service;
 
 public class UserService(IUserRepository userRepo) : IUserService
 {
+    public async Task<bool> IsMobileExistAsync(string mobile, CancellationToken ct)
+    {
+        return await userRepo.IsMobileExistAsync(mobile, ct);
+    }
+
     public async Task<bool> UpdateProfileAsync(UpdateUserDto command, CancellationToken ct)
     {
         return await userRepo.UpdateProfileAsync(command, ct);

@@ -6,12 +6,14 @@ using Servino.Domain.Core.CategoryAgg.Contracts.AppService;
 using Servino.Domain.Core.CategoryAgg.Dtos;
 using Servino.Presentation.RazorPagesUI.Services.File;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 {
+    [Authorize(Roles = "Admin")]
     public class CategoryManagerModel(
-          ICategoryAppService categoryAppService,
-          IFileService fileService) : PageModel
+           ICategoryAppService categoryAppService,
+           IFileService fileService) : PageModel
     {
         public List<CategorySummaryDto> Categories { get; set; } = [];
         public SelectList ParentCategories { get; set; }
@@ -44,8 +46,7 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
             if (!TryValidateModel(CreateInput, nameof(CreateInput)))
             {
                 ErrorMessage = "اطلاعات وارد شده معتبر نیست.";
-                await LoadDataAsync(ct);
-                return Page();
+                return RedirectToPage(new { PageNumber, SearchKey });
             }
 
             string? imagePath = null;
@@ -58,8 +59,7 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
                 catch (Exception ex)
                 {
                     ErrorMessage = "خطا در آپلود تصویر: " + ex.Message;
-                    await LoadDataAsync(ct);
-                    return Page();
+                    return RedirectToPage(new { PageNumber, SearchKey });
                 }
             }
 
@@ -75,15 +75,16 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
             if (result.IsSuccess)
             {
                 SuccessMessage = result.Message;
-                return RedirectToPage(new { PageNumber, SearchKey });
             }
             else
             {
-                if (imagePath != null) await fileService.DeleteFile(imagePath, ct);
+                if (imagePath != null)
+                    await fileService.DeleteFile(imagePath, ct);
+
                 ErrorMessage = result.Message;
-                await LoadDataAsync(ct);
-                return Page();
             }
+
+            return RedirectToPage(new { PageNumber, SearchKey });
         }
 
         public async Task<IActionResult> OnPostEditAsync(CancellationToken ct)
@@ -96,27 +97,25 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
                 return RedirectToPage(new { PageNumber, SearchKey });
             }
 
-            var currentCategoryResult = await categoryAppService.GetByIdAsync(EditInput.Id, ct);
-            if (!currentCategoryResult.IsSuccess)
+            var current = await categoryAppService.GetByIdAsync(EditInput.Id, ct);
+            if (!current.IsSuccess)
             {
                 ErrorMessage = "دسته‌بندی یافت نشد.";
                 return RedirectToPage(new { PageNumber, SearchKey });
             }
 
-            string? newImagePath = currentCategoryResult.Data.ImagePath;
+            string? newImage = current.Data.ImagePath;
 
             if (EditInput.ImageFile != null)
             {
                 try
                 {
-                    newImagePath = await fileService.Upload(EditInput.ImageFile, "categories", ct);
+                    newImage = await fileService.Upload(EditInput.ImageFile, "categories", ct);
 
-                    if (!string.IsNullOrEmpty(currentCategoryResult.Data.ImagePath))
-                    {
-                        await fileService.DeleteFile(currentCategoryResult.Data.ImagePath, ct);
-                    }
+                    if (!string.IsNullOrEmpty(current.Data.ImagePath))
+                        await fileService.DeleteFile(current.Data.ImagePath, ct);
                 }
-                catch (Exception)
+                catch
                 {
                     ErrorMessage = "خطا در آپلود تصویر جدید.";
                     return RedirectToPage(new { PageNumber, SearchKey });
@@ -128,7 +127,7 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
                 Id = EditInput.Id,
                 Title = EditInput.Title,
                 ParentId = EditInput.ParentId,
-                ImagePath = newImagePath
+                ImagePath = newImage
             };
 
             var result = await categoryAppService.UpdateAsync(command, ct);
@@ -143,15 +142,14 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 
         public async Task<IActionResult> OnPostDeleteAsync(int id, CancellationToken ct)
         {
-            var catResult = await categoryAppService.GetByIdAsync(id, ct);
+            var cat = await categoryAppService.GetByIdAsync(id, ct);
             var result = await categoryAppService.DeleteAsync(id, ct);
 
             if (result.IsSuccess)
             {
-                if (catResult.IsSuccess && !string.IsNullOrEmpty(catResult.Data.ImagePath))
-                {
-                    await fileService.DeleteFile(catResult.Data.ImagePath, ct);
-                }
+                if (cat.IsSuccess && !string.IsNullOrEmpty(cat.Data.ImagePath))
+                    await fileService.DeleteFile(cat.Data.ImagePath, ct);
+
                 SuccessMessage = result.Message;
             }
             else
@@ -179,7 +177,7 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
             };
 
             Categories = await categoryAppService.GetAllAsync(pagination, ct);
-            var allParents = await categoryAppService.GetAllAsync(new PaginationRequestDto { PageSize = 100 }, ct);
+            var allParents = await categoryAppService.GetAllAsync(new PaginationRequestDto { PageSize = 200 }, ct);
             ParentCategories = new SelectList(allParents, nameof(CategorySummaryDto.Id), nameof(CategorySummaryDto.Title));
         }
 
@@ -189,7 +187,6 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
             public string? Title { get; set; }
             public int? ParentId { get; set; }
             public IFormFile? ImageFile { get; set; }
-            public bool IsActive { get; set; } = true;
         }
 
         public class EditCategoryModel
@@ -201,7 +198,6 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 
             public int? ParentId { get; set; }
             public IFormFile? ImageFile { get; set; }
-            public bool IsActive { get; set; }
         }
     }
 }

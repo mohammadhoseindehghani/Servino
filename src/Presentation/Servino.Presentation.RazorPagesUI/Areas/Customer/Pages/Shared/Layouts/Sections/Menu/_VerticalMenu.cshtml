@@ -29,7 +29,12 @@
 
 
         <!-- Front Pages -->
-
+        <li class='menu-item@(currentPage == "/" ? " active" : "")'>
+            <a  asp-page="/" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-database"></i>
+                <div data-i18n="صفحه اصلی">صفحه اصلی</div>
+            </a>
+        </li>
 
         <li class='menu-item@(currentPage == "/Dashboard" ? " active" : "")'>
             <a asp-area="Customer" asp-page="/Dashboard" class="menu-link">
@@ -37,12 +42,20 @@
                 <div data-i18n="داشبرد">داشبرد</div>
             </a>
         </li>
+
         <li class='menu-item@(currentPage == "/Profile" ? " active" : "")'>
             <a asp-area="Customer" asp-page="/Profile" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-database"></i>
                 <div data-i18n="پروفایل">پروفایل</div>
             </a>
         </li>
+        <li class='menu-item@(currentPage == "/MyRequests" ? " active" : "")'>
+            <a asp-area="Customer" asp-page="/MyRequests" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-database"></i>
+                <div data-i18n="درخواست های من">درخواست های من</div>
+            </a>
+        </li>
+
         <li class='menu-item@(currentPage == "/UserCRUD" ? " active" : "")'>
             <a asp-area="Customer" asp-page="/UserCRUD" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-database"></i>

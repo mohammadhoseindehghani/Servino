@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Servino.Domain.Core._common;
 using Servino.Domain.Core.UserAgg.Contracts.AppService;
@@ -6,6 +7,7 @@ using Servino.Domain.Core.UserAgg.Dtos;
 
 namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 {
+    [Authorize(Roles = "Admin")]
     public class UserManagerModel(
             IUserAppService userAppService,
             IExpertAppService expertAppService 

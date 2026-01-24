@@ -6,6 +6,7 @@ namespace Servino.Domain.Core.UserAgg.Contracts.Data;
 
 public interface IUserRepository
 {
+    Task<bool> IsMobileExistAsync(string mobile, CancellationToken ct);
     Task<bool> UpdateProfileAsync(UpdateUserDto command, CancellationToken ct);
 
     Task<bool> CreateAsync(CreateUserDto command, CancellationToken ct);

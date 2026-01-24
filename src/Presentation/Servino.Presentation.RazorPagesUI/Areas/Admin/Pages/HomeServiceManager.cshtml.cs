@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Servino.Domain.Core._common;
@@ -9,6 +10,7 @@ using Servino.Presentation.RazorPagesUI.Services.File;
 
 namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 {
+    [Authorize(Roles = "Admin")]
     public class HomeServiceManagerModel(
         IHomeServiceAppService homeServiceAppService,
         ICategoryAppService categoryAppService,

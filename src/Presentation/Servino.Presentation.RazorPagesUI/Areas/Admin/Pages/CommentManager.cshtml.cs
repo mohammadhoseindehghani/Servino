@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Servino.Domain.Core._common;
@@ -6,6 +7,7 @@ using Servino.Domain.Core.CommentAgg.Dtos;
 
 namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 {
+    [Authorize(Roles = "Admin")]
     public class CommentManagerModel(ICommentAppService commentService) : PageModel
     {
         public List<CommentDto> Comments { get; set; } = [];

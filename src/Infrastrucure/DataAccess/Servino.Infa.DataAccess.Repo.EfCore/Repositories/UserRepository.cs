@@ -9,6 +9,11 @@ namespace Servino.Infa.DataAccess.Repo.EfCore.Repositories;
 
 public class UserRepository(AppDbContext context) : IUserRepository
 {
+    public async Task<bool> IsMobileExistAsync(string mobile, CancellationToken ct)
+    {
+        return await context.Users.AnyAsync(u => u.MobileNumber == mobile, ct);
+    }
+
     public async Task<bool> UpdateProfileAsync(UpdateUserDto command, CancellationToken ct)
     {
         var affectedRows = await context.Users

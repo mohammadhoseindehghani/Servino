@@ -16,10 +16,15 @@ public class UserAppService(
     ILogger<UserAppService> logger) : IUserAppService
 {
 
-    public async Task<Result<bool>> CreateUserByAdminAsync(CreateUserByAdminDto command, CancellationToken ct)
+    public async Task<Result<bool>> CreateUserByAdminAsync(
+        CreateUserByAdminDto command,
+        CancellationToken ct)
     {
         if (await userService.IsEmailExistAsync(command.Email, ct))
             return Result<bool>.Failure("این ایمیل قبلاً ثبت شده است.");
+
+        if (await userService.IsMobileExistAsync(command.Mobile, ct))
+            return Result<bool>.Failure("این شماره موبایل قبلاً ثبت شده است.");
 
         var registerDto = new RegisterDto
         {
@@ -28,7 +33,8 @@ public class UserAppService(
             PhoneNumber = command.Mobile
         };
 
-        var identityResult = await identityService.RegisterWithEmailAsync(registerDto, command.Role, ct);
+        var identityResult =
+            await identityService.RegisterWithEmailAsync(registerDto, command.Role, ct);
 
         if (!identityResult.Succeeded)
             return Result<bool>.Failure(identityResult.Message ?? "خطا در سیستم هویت‌سنجی");
@@ -42,24 +48,31 @@ public class UserAppService(
                 Email = command.Email,
                 Mobile = command.Mobile,
                 IdentityId = identityResult.Id!,
-                CityId = 1 
+                CityId = 1
             };
 
             var userCreated = await userService.CreateAsync(createUserDto, ct);
-            if (!userCreated) throw new Exception("خطا در ذخیره کاربر");
 
-            var userId = await userService.GetIdByIdentityIdAsync(identityResult.Id!, ct);
+            if (!userCreated)
+            {
+                await identityService.DeleteUserAsync(identityResult.Id!, ct);
+                return Result<bool>.Failure("خطا در ذخیره اطلاعات کاربر.");
+            }
+
+            var userId =
+                await userService.GetIdByIdentityIdAsync(identityResult.Id!, ct);
 
             switch (command.Role)
             {
                 case "Expert":
                     await expertService.CreateAsync(userId, ct);
                     break;
+
                 case "Customer":
                     await customerService.CreateAsync(userId, ct);
                     break;
-                case "Admin":
 
+                case "Admin":
                     break;
             }
 
@@ -67,10 +80,16 @@ public class UserAppService(
         }
         catch (Exception ex)
         {
+            logger.LogError(ex,
+                "Error while creating user by admin. Email: {Email}",
+                command.Email);
+
             await identityService.DeleteUserAsync(identityResult.Id!, ct);
-            return Result<bool>.Failure($"خطای سیستمی: {ex.Message}");
+
+            return Result<bool>.Failure("خطای سیستمی در ایجاد کاربر. لطفاً مجدداً تلاش کنید.");
         }
     }
+
 
     public async Task<Result<bool>> RegisterUserAsync(RegisterDto command, CancellationToken ct)
     {
