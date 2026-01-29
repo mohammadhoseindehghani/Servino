@@ -14,19 +14,23 @@
 
 <h4 class="py-3 mb-4"><span class="text-muted fw-light">مدیریت /</span> کاربران</h4>
 
-@if (Model.SuccessMessage != null)
+@if (!string.IsNullOrEmpty(Model.MessageText))
 {
-    <div class="alert alert-success alert-dismissible" role="alert">
-        @Model.SuccessMessage
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-@if (Model.ErrorMessage != null)
-{
-    <div class="alert alert-danger alert-dismissible" role="alert">
-        @Model.ErrorMessage
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            Swal.fire({
+                title: '@(Model.MessageType == "success" ? "موفق!" : "خطا!")',
+                text: '@Html.Raw(Model.MessageText)',
+                icon: '@(Model.MessageType == "success" ? "success" : "error")',
+                confirmButtonText: 'باشه'
+            }).then(() => {
+                const url = new URL(window.location);
+                url.searchParams.delete('msg');
+                url.searchParams.delete('text');
+                window.history.replaceState({}, '', url);
+            });
+        });
+    </script>
 }
 
 <div class="card">

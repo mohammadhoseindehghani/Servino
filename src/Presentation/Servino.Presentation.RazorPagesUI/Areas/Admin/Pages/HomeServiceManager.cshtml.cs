@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Servino.Domain.Core._common;
 using Servino.Domain.Core.CategoryAgg.Contracts.AppService;
+using Servino.Domain.Core.CategoryAgg.Dtos;
 using Servino.Domain.Core.HomeServiceAgg.Contracts.AppService;
 using Servino.Domain.Core.HomeServiceAgg.Dtos;
 using Servino.Presentation.RazorPagesUI.Services.File;
@@ -14,17 +15,18 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
     public class HomeServiceManagerModel(
         IHomeServiceAppService homeServiceAppService,
         ICategoryAppService categoryAppService,
-        IFileService fileService) : PageModel
+        IFileService fileService)
+        : PageModel
     {
         public List<HomeServiceSummaryDto> Services { get; set; } = [];
-
-        public SelectList Categories { get; set; }
+        public SelectList Categories { get; set; } 
 
         [BindProperty(SupportsGet = true)]
         public string? SearchKey { get; set; }
 
         [BindProperty(SupportsGet = true)]
         public int PageNumber { get; set; } = 1;
+
         public int PageSize { get; set; } = 10;
 
         [BindProperty]
@@ -33,21 +35,33 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
         [BindProperty]
         public EditHomeServiceModel EditInput { get; set; } = new();
 
-        [TempData] public string? SuccessMessage { get; set; }
-        [TempData] public string? ErrorMessage { get; set; }
+        public string? MessageText { get; private set; }
+        public string? MessageType { get; private set; }
 
-        public async Task OnGet(CancellationToken ct)
+        public async Task OnGet(string? msg, string? text, CancellationToken ct)
         {
+            if (!string.IsNullOrEmpty(msg) && !string.IsNullOrEmpty(text))
+            {
+                MessageType = msg;
+                MessageText = text;
+            }
+
             await LoadDataAsync(ct);
         }
 
         public async Task<IActionResult> OnPostCreateAsync(CancellationToken ct)
         {
-
             string? imagePath = null;
             if (CreateInput.ImageFile != null)
             {
-                imagePath = await fileService.Upload(CreateInput.ImageFile, "services", ct);
+                try
+                {
+                    imagePath = await fileService.Upload(CreateInput.ImageFile, "services", ct);
+                }
+                catch
+                {
+                    return RedirectToPage(new { PageNumber, SearchKey, msg = "danger", text = "خطا در آپلود تصویر." });
+                }
             }
 
             var command = new HomeServiceDto
@@ -61,33 +75,39 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 
             var result = await homeServiceAppService.CreateAsync(command, ct);
 
-            if (result.IsSuccess)
-                SuccessMessage = result.Message;
-            else
-            {
-                if (imagePath != null) await fileService.DeleteFile(imagePath, ct);
-                ErrorMessage = result.Message;
-            }
+            if (!result.IsSuccess && imagePath != null)
+                await fileService.DeleteFile(imagePath, ct);
 
-            return RedirectToPage(new { PageNumber, SearchKey });
+            return RedirectToPage(new
+            {
+                PageNumber,
+                SearchKey,
+                msg = result.IsSuccess ? "success" : "danger",
+                text = result.Message ?? (result.IsSuccess ? "خدمت با موفقیت ایجاد شد." : "خطایی رخ داد.")
+            });
         }
 
         public async Task<IActionResult> OnPostEditAsync(CancellationToken ct)
         {
-            var currentServiceResult = await homeServiceAppService.GetByIdAsync(EditInput.Id, ct);
-            if (!currentServiceResult.IsSuccess)
+            var current = await homeServiceAppService.GetByIdAsync(EditInput.Id, ct);
+            if (!current.IsSuccess)
             {
-                ErrorMessage = "سرویس یافت نشد.";
-                return RedirectToPage(new { PageNumber, SearchKey });
+                return RedirectToPage(new { PageNumber, SearchKey, msg = "danger", text = "سرویس یافت نشد." });
             }
 
-            string? newImagePath = currentServiceResult.Data.ImagePath;
-
+            string? newImagePath = current.Data.ImagePath;
             if (EditInput.ImageFile != null)
             {
-                newImagePath = await fileService.Upload(EditInput.ImageFile, "services", ct);
-
-                await fileService.DeleteFile(currentServiceResult.Data.ImagePath, ct);
+                try
+                {
+                    newImagePath = await fileService.Upload(EditInput.ImageFile, "services", ct);
+                    if (!string.IsNullOrEmpty(current.Data.ImagePath))
+                        await fileService.DeleteFile(current.Data.ImagePath, ct);
+                }
+                catch
+                {
+                    return RedirectToPage(new { PageNumber, SearchKey, msg = "danger", text = "خطا در آپلود تصویر جدید." });
+                }
             }
 
             var command = new HomeServiceDto
@@ -102,34 +122,32 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 
             var result = await homeServiceAppService.UpdateAsync(command, ct);
 
-            if (result.IsSuccess)
-                SuccessMessage = result.Message;
-            else
-                ErrorMessage = result.Message;
-
-            return RedirectToPage(new { PageNumber, SearchKey });
+            return RedirectToPage(new
+            {
+                PageNumber,
+                SearchKey,
+                msg = result.IsSuccess ? "success" : "danger",
+                text = result.Message ?? (result.IsSuccess ? "خدمت با موفقیت ویرایش شد." : "خطایی رخ داد.")
+            });
         }
 
         public async Task<IActionResult> OnPostDeleteAsync(int id, CancellationToken ct)
         {
             var serviceResult = await homeServiceAppService.GetByIdAsync(id, ct);
-
             var result = await homeServiceAppService.DeleteAsync(id, ct);
 
-            if (result.IsSuccess)
+            if (result.IsSuccess && serviceResult.IsSuccess && !string.IsNullOrEmpty(serviceResult.Data.ImagePath))
             {
-                if (serviceResult.IsSuccess && !string.IsNullOrEmpty(serviceResult.Data.ImagePath))
-                {
-                    await fileService.DeleteFile(serviceResult.Data.ImagePath, ct);
-                }
-                SuccessMessage = result.Message;
-            }
-            else
-            {
-                ErrorMessage = result.Message;
+                await fileService.DeleteFile(serviceResult.Data.ImagePath, ct);
             }
 
-            return RedirectToPage(new { PageNumber, SearchKey });
+            return RedirectToPage(new
+            {
+                PageNumber,
+                SearchKey,
+                msg = result.IsSuccess ? "success" : "danger",
+                text = result.Message ?? (result.IsSuccess ? "خدمت با موفقیت حذف شد." : "خطایی رخ داد.")
+            });
         }
 
         public async Task<IActionResult> OnGetRowDataAsync(int id, CancellationToken ct)
@@ -150,11 +168,9 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 
             var result = await homeServiceAppService.GetAllAsync(pagination, ct);
             Services = result.IsSuccess ? result.Data! : [];
-            var catPagination = new PaginationRequestDto { PageSize = 100 };
-            var cats = await categoryAppService.GetAllAsync(catPagination, ct);
 
-            if (cats == null) cats = new();
-            Categories = new SelectList(cats, "Id", "Title");
+            var cats = await categoryAppService.GetAllAsync(new PaginationRequestDto { PageSize = 100 }, ct);
+            Categories = new SelectList(cats ?? new List<CategorySummaryDto>(), "Id", "Title");
         }
 
         public class CreateHomeServiceModel

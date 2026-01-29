@@ -8,10 +8,8 @@ using Servino.Domain.Core.UserAgg.Dtos;
 namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 {
     [Authorize(Roles = "Admin")]
-    public class UserManagerModel(
-            IUserAppService userAppService,
-            IExpertAppService expertAppService 
-            ) : PageModel
+    public class UserManagerModel(IUserAppService userAppService, IExpertAppService expertAppService)
+        : PageModel
     {
         public List<UserSummaryDto> Users { get; set; } = [];
 
@@ -20,6 +18,7 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 
         [BindProperty(SupportsGet = true)]
         public int PageNumber { get; set; } = 1;
+
         public int PageSize { get; set; } = 10;
 
         [BindProperty]
@@ -35,22 +34,36 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
         public List<int> SelectedServiceIds { get; set; } = [];
 
         [BindProperty]
-        public int TargetExpertId { get; set; } 
+        public int TargetExpertId { get; set; }
 
-        [TempData] public string? SuccessMessage { get; set; }
-        [TempData] public string? ErrorMessage { get; set; }
+        public string? MessageText { get; private set; }
+        public string? MessageType { get; private set; } 
 
-        public async Task OnGet(CancellationToken ct)
+        public async Task OnGet(string? msg, string? text, CancellationToken ct)
         {
+            if (!string.IsNullOrEmpty(msg) && !string.IsNullOrEmpty(text))
+            {
+                MessageType = msg;
+                MessageText = text;
+            }
+
             var pagination = new PaginationRequestDto
             {
                 PageNumber = PageNumber,
                 PageSize = PageSize,
                 SearchKey = SearchKey
             };
+
             var result = await userAppService.GetUsersListAsync(pagination, ct);
-            if (result.IsSuccess) Users = result.Data ?? [];
-            else ErrorMessage = result.Message;
+            if (result.IsSuccess)
+            {
+                Users = result.Data ?? [];
+            }
+            else
+            {
+                MessageType = "danger";
+                MessageText = result.Message;
+            }
         }
 
         public async Task<IActionResult> OnPostCreateAsync(CancellationToken ct)
@@ -62,63 +75,92 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
                 string.IsNullOrWhiteSpace(CreateModel.Password) ||
                 string.IsNullOrWhiteSpace(CreateModel.Role))
             {
-                ErrorMessage = "تمامی فیلدها الزامی هستند.";
-                return RedirectToPage();
+                return RedirectToPage(new { msg = "danger", text = "تمامی فیلدها الزامی هستند." });
             }
 
             var result = await userAppService.CreateUserByAdminAsync(CreateModel, ct);
-
-            if (result.IsSuccess) SuccessMessage = result.Message;
-            else ErrorMessage = result.Message;
-
-            return RedirectToPage();
+            return RedirectToPage(new
+            {
+                msg = result.IsSuccess ? "success" : "danger",
+                text = result.Message ?? (result.IsSuccess ? "کاربر با موفقیت ایجاد شد." : "خطایی رخ داد.")
+            });
         }
 
         public async Task<IActionResult> OnPostEditAsync(CancellationToken ct)
         {
             var result = await userAppService.AdminUpdateUserAsync(EditModel, ct);
-
-            if (result.IsSuccess) SuccessMessage = result.Message;
-            else ErrorMessage = result.Message;
-
-            return RedirectToPage(new { PageNumber, SearchKey });
+            return RedirectToPage(new
+            {
+                PageNumber,
+                SearchKey,
+                msg = result.IsSuccess ? "success" : "danger",
+                text = result.Message ?? (result.IsSuccess ? "تغییرات با موفقیت ذخیره شد." : "خطایی رخ داد.")
+            });
         }
 
         public async Task<IActionResult> OnPostDeleteAsync(int id, CancellationToken ct)
         {
             var result = await userAppService.DeleteUserAsync(id, ct);
-            if (result.IsSuccess) SuccessMessage = result.Message;
-            else ErrorMessage = result.Message;
-            return RedirectToPage(new { PageNumber, SearchKey });
+            return RedirectToPage(new
+            {
+                PageNumber,
+                SearchKey,
+                msg = result.IsSuccess ? "success" : "danger",
+                text = result.Message ?? (result.IsSuccess ? "کاربر با موفقیت حذف شد." : "خطایی رخ داد.")
+            });
         }
 
         public async Task<IActionResult> OnPostChargeAsync(CancellationToken ct)
         {
-            if (ChargeModel.UserId == 0 || ChargeModel.Amount == 0) return RedirectToPage();
+            if (ChargeModel.UserId == 0 || ChargeModel.Amount <= 0)
+            {
+                return RedirectToPage(new
+                {
+                    PageNumber,
+                    SearchKey,
+                    msg = "danger",
+                    text = "مبلغ یا کاربر معتبر نیست."
+                });
+            }
+
             var result = await userAppService.ChangeUserBalanceAsync(ChargeModel.UserId, ChargeModel.Amount, ct);
-            if (result.IsSuccess) SuccessMessage = result.Message;
-            else ErrorMessage = result.Message;
-            return RedirectToPage(new { PageNumber, SearchKey });
+            return RedirectToPage(new
+            {
+                PageNumber,
+                SearchKey,
+                msg = result.IsSuccess ? "success" : "danger",
+                text = result.Message ?? (result.IsSuccess ? "حساب با موفقیت شارژ شد." : "خطایی رخ داد.")
+            });
         }
 
         public async Task<JsonResult> OnGetExpertServicesAsync(int userId, CancellationToken ct)
         {
             var result = await expertAppService.GetServicesForEditAsync(userId, ct);
             if (!result.IsSuccess) return new JsonResult(new List<ExpertServiceItemDto>());
-
             return new JsonResult(result.Data);
         }
 
         public async Task<IActionResult> OnPostUpdateServicesAsync(CancellationToken ct)
         {
-            if (TargetExpertId == 0) return RedirectToPage();
+            if (TargetExpertId == 0)
+            {
+                return RedirectToPage(new
+                {
+                    PageNumber,
+                    SearchKey,
+                    msg = "danger",
+                    text = "متخصص معتبر نیست."
+                });
+            }
 
             var result = await expertAppService.UpdateServicesAsync(TargetExpertId, SelectedServiceIds, ct);
-
-            if (result.IsSuccess) SuccessMessage = "خدمات متخصص با موفقیت بروزرسانی شد.";
-            else ErrorMessage = result.Message;
-
-            return RedirectToPage(new { PageNumber, SearchKey });
+            return RedirectToPage(new
+            {
+                PageNumber,
+                SearchKey,
+                msg = result.IsSuccess ? "success" : "danger",
+                text = result.IsSuccess ? "خدمات متخصص با موفقیت بروزرسانی شد." : result.Message
+            });
         }
 
         public class ChargeBalanceModel

@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Servino.Domain.AppService;
 using Servino.Domain.Core._common;
 using Servino.Domain.Core.CategoryAgg.Contracts.AppService;
 using Servino.Domain.Core.CategoryAgg.Dtos;
 using Servino.Presentation.RazorPagesUI.Services.File;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 {
@@ -31,22 +32,31 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
         [BindProperty]
         public EditCategoryModel EditInput { get; set; } = new();
 
-        [TempData] public string? SuccessMessage { get; set; }
-        [TempData] public string? ErrorMessage { get; set; }
+        public string? MessageText { get; private set; }
+        public string? MessageType { get; private set; } 
 
-        public async Task OnGet(CancellationToken ct)
+        public async Task OnGet(string? msg, string? text, CancellationToken ct)
         {
+            if (!string.IsNullOrEmpty(msg) && !string.IsNullOrEmpty(text))
+            {
+                MessageType = msg;
+                MessageText = text;
+            }
+
             await LoadDataAsync(ct);
         }
-
         public async Task<IActionResult> OnPostCreateAsync(CancellationToken ct)
         {
             ModelState.Clear();
-
             if (!TryValidateModel(CreateInput, nameof(CreateInput)))
             {
-                ErrorMessage = "اطلاعات وارد شده معتبر نیست.";
-                return RedirectToPage(new { PageNumber, SearchKey });
+                return RedirectToPage(new
+                {
+                    PageNumber,
+                    SearchKey,
+                    msg = "danger",
+                    text = "اطلاعات وارد شده معتبر نیست."
+                });
             }
 
             string? imagePath = null;
@@ -58,8 +68,13 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
                 }
                 catch (Exception ex)
                 {
-                    ErrorMessage = "خطا در آپلود تصویر: " + ex.Message;
-                    return RedirectToPage(new { PageNumber, SearchKey });
+                    return RedirectToPage(new
+                    {
+                        PageNumber,
+                        SearchKey,
+                        msg = "danger",
+                        text = "خطا در آپلود تصویر: " + ex.Message
+                    });
                 }
             }
 
@@ -71,54 +86,64 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
             };
 
             var result = await categoryAppService.CreateAsync(command, ct);
-
-            if (result.IsSuccess)
+            if (!result.IsSuccess && imagePath != null)
             {
-                SuccessMessage = result.Message;
-            }
-            else
-            {
-                if (imagePath != null)
-                    await fileService.DeleteFile(imagePath, ct);
-
-                ErrorMessage = result.Message;
+                await fileService.DeleteFile(imagePath, ct);
             }
 
-            return RedirectToPage(new { PageNumber, SearchKey });
+            return RedirectToPage(new
+            {
+                PageNumber,
+                SearchKey,
+                msg = result.IsSuccess ? "success" : "danger",
+                text = result.Message ?? (result.IsSuccess ? "دسته‌بندی با موفقیت ایجاد شد." : "خطایی رخ داد.")
+            });
         }
 
         public async Task<IActionResult> OnPostEditAsync(CancellationToken ct)
         {
             ModelState.Clear();
-
             if (!TryValidateModel(EditInput, nameof(EditInput)))
             {
-                ErrorMessage = "اطلاعات وارد شده برای ویرایش معتبر نیست.";
-                return RedirectToPage(new { PageNumber, SearchKey });
+                return RedirectToPage(new
+                {
+                    PageNumber,
+                    SearchKey,
+                    msg = "danger",
+                    text = "اطلاعات وارد شده برای ویرایش معتبر نیست."
+                });
             }
 
             var current = await categoryAppService.GetByIdAsync(EditInput.Id, ct);
             if (!current.IsSuccess)
             {
-                ErrorMessage = "دسته‌بندی یافت نشد.";
-                return RedirectToPage(new { PageNumber, SearchKey });
+                return RedirectToPage(new
+                {
+                    PageNumber,
+                    SearchKey,
+                    msg = "danger",
+                    text = "دسته‌بندی یافت نشد."
+                });
             }
 
             string? newImage = current.Data.ImagePath;
-
             if (EditInput.ImageFile != null)
             {
                 try
                 {
                     newImage = await fileService.Upload(EditInput.ImageFile, "categories", ct);
-
                     if (!string.IsNullOrEmpty(current.Data.ImagePath))
                         await fileService.DeleteFile(current.Data.ImagePath, ct);
                 }
                 catch
                 {
-                    ErrorMessage = "خطا در آپلود تصویر جدید.";
-                    return RedirectToPage(new { PageNumber, SearchKey });
+                    return RedirectToPage(new
+                    {
+                        PageNumber,
+                        SearchKey,
+                        msg = "danger",
+                        text = "خطا در آپلود تصویر جدید."
+                    });
                 }
             }
 
@@ -132,12 +157,13 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 
             var result = await categoryAppService.UpdateAsync(command, ct);
 
-            if (result.IsSuccess)
-                SuccessMessage = result.Message;
-            else
-                ErrorMessage = result.Message;
-
-            return RedirectToPage(new { PageNumber, SearchKey });
+            return RedirectToPage(new
+            {
+                PageNumber,
+                SearchKey,
+                msg = result.IsSuccess ? "success" : "danger",
+                text = result.Message ?? (result.IsSuccess ? "دسته‌بندی با موفقیت ویرایش شد." : "خطایی رخ داد.")
+            });
         }
 
         public async Task<IActionResult> OnPostDeleteAsync(int id, CancellationToken ct)
@@ -145,19 +171,18 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
             var cat = await categoryAppService.GetByIdAsync(id, ct);
             var result = await categoryAppService.DeleteAsync(id, ct);
 
-            if (result.IsSuccess)
+            if (result.IsSuccess && cat.IsSuccess && !string.IsNullOrEmpty(cat.Data.ImagePath))
             {
-                if (cat.IsSuccess && !string.IsNullOrEmpty(cat.Data.ImagePath))
-                    await fileService.DeleteFile(cat.Data.ImagePath, ct);
-
-                SuccessMessage = result.Message;
-            }
-            else
-            {
-                ErrorMessage = result.Message;
+                await fileService.DeleteFile(cat.Data.ImagePath, ct);
             }
 
-            return RedirectToPage(new { PageNumber, SearchKey });
+            return RedirectToPage(new
+            {
+                PageNumber,
+                SearchKey,
+                msg = result.IsSuccess ? "success" : "danger",
+                text = result.Message ?? (result.IsSuccess ? "دسته‌بندی با موفقیت حذف شد." : "خطایی رخ داد.")
+            });
         }
 
         public async Task<IActionResult> OnGetRowDataAsync(int id, CancellationToken ct)
@@ -177,6 +202,7 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
             };
 
             Categories = await categoryAppService.GetAllAsync(pagination, ct);
+
             var allParents = await categoryAppService.GetAllAsync(new PaginationRequestDto { PageSize = 200 }, ct);
             ParentCategories = new SelectList(allParents, nameof(CategorySummaryDto.Id), nameof(CategorySummaryDto.Title));
         }
@@ -192,10 +218,8 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
         public class EditCategoryModel
         {
             public int Id { get; set; }
-
             [Required(ErrorMessage = "عنوان الزامی است")]
             public string? Title { get; set; }
-
             public int? ParentId { get; set; }
             public IFormFile? ImageFile { get; set; }
         }
