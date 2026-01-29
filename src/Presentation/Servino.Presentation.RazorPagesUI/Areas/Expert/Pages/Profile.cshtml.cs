@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Servino.Domain.Core._common;
+using Servino.Domain.Core.LocationAgg.Contracts.AppService;
 using Servino.Domain.Core.UserAgg.Contracts.AppService;
 using Servino.Domain.Core.UserAgg.Dtos;
 using Servino.Presentation.RazorPagesUI.Services.File;
@@ -13,37 +15,36 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Expert.Pages
     public class ProfileModel(
             IExpertAppService expertAppService,
             IUserAppService userAppService,
-            IFileService fileService) : PageModel
+            IFileService fileService,
+            IProvinceAppService provinceAppService,
+            ICityAppService cityAppService) : PageModel
     {
         public ExpertProfileDto ExpertProfile { get; set; } = new();
 
         [BindProperty]
         public UpdateExpertProfileInput Input { get; set; } = new();
 
-        [TempData] public string? SuccessMessage { get; set; }
-        [TempData] public string? ErrorMessage { get; set; }
+        public SelectList Provinces { get; set; } 
 
-        public async Task<IActionResult> OnGet(CancellationToken ct)
+        public int? CurrentProvinceId { get; set; }
+
+        public string CityName { get; set; } = "تعیین نشده";
+
+        public string? MessageText { get; private set; }
+        public string? MessageType { get; private set; }
+
+        public async Task<IActionResult> OnGet(string? msg, string? text, CancellationToken ct)
         {
+            if (!string.IsNullOrEmpty(msg) && !string.IsNullOrEmpty(text))
+            {
+                MessageType = msg;
+                MessageText = text;
+            }
+
             var userId = await GetCurrentUserIdAsync(ct);
             if (userId == 0) return RedirectToPage("/Auth/Login/Index");
 
-            var profileResult = await expertAppService.GetByUserId(userId, ct);
-            if (!profileResult.IsSuccess) return RedirectToPage("/Index");
-
-            ExpertProfile = profileResult.Data;
-
-            Input = new UpdateExpertProfileInput
-            {
-                FirstName = ExpertProfile.FirstName,
-                LastName = ExpertProfile.LastName,
-                CityId = ExpertProfile.CityId,
-                Bio = ExpertProfile.Bio,
-                Address = ExpertProfile.Address,
-                BankCardNumber = ExpertProfile.BankCardNumber,
-                ShebaNumber = ExpertProfile.ShebaNumber
-            };
-
+            await LoadProfile(userId, ct);
             return Page();
         }
 
@@ -54,10 +55,15 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Expert.Pages
 
             if (!ModelState.IsValid)
             {
-                ErrorMessage = "اطلاعات وارد شده معتبر نیست. لطفاً ورودی‌ها را بررسی کنید.";
-                var profileResult = await expertAppService.GetByUserId(userId, ct);
-                if (profileResult.IsSuccess) ExpertProfile = profileResult.Data;
-                return Page();
+                var errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage));
+                var errorText = string.Join(" ", errors);
+
+                await LoadProfile(userId, ct);
+                return RedirectToPage(new
+                {
+                    msg = "danger",
+                    text = string.IsNullOrEmpty(errorText) ? "اطلاعات وارد شده معتبر نیست. لطفاً ورودی‌ها را بررسی کنید." : errorText
+                });
             }
 
             string? imagePath = null;
@@ -74,9 +80,12 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Expert.Pages
                 }
                 catch (Exception ex)
                 {
-                    ErrorMessage = "خطا در آپلود عکس: " + ex.Message;
-                    if (currentProfileResult.IsSuccess) ExpertProfile = currentProfileResult.Data;
-                    return Page();
+                    await LoadProfile(userId, ct);
+                    return RedirectToPage(new
+                    {
+                        msg = "danger",
+                        text = "خطا در آپلود عکس: " + ex.Message
+                    });
                 }
             }
 
@@ -97,22 +106,68 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Expert.Pages
 
             if (result.IsSuccess)
             {
-                SuccessMessage = "پروفایل با موفقیت بروزرسانی شد.";
-                return RedirectToPage();
+                return RedirectToPage(new
+                {
+                    msg = "success",
+                    text = "پروفایل با موفقیت بروزرسانی شد."
+                });
             }
 
-            ErrorMessage = result.Message;
-            if (currentProfileResult.IsSuccess) ExpertProfile = currentProfileResult.Data;
-            return Page();
+            await LoadProfile(userId, ct);
+            return RedirectToPage(new
+            {
+                msg = "danger",
+                text = result.Message ?? "خطایی در بروزرسانی پروفایل رخ داد."
+            });
+        }
+
+        public async Task<JsonResult> OnGetGetCities(int provinceId, CancellationToken ct)
+        {
+            var cities = await cityAppService.GetCitiesByProvinceIdAsync(provinceId, ct);
+            return new JsonResult(cities);
+        }
+
+        private async Task LoadProfile(int userId, CancellationToken ct)
+        {
+            var profileResult = await expertAppService.GetByUserId(userId, ct);
+            if (profileResult.IsSuccess && profileResult.Data != null)
+            {
+                ExpertProfile = profileResult.Data;
+
+                Input = new UpdateExpertProfileInput
+                {
+                    FirstName = ExpertProfile.FirstName,
+                    LastName = ExpertProfile.LastName,
+                    CityId = ExpertProfile.CityId,
+                    Bio = ExpertProfile.Bio,
+                    Address = ExpertProfile.Address,
+                    BankCardNumber = ExpertProfile.BankCardNumber,
+                    ShebaNumber = ExpertProfile.ShebaNumber
+                };
+
+                if (Input.CityId.HasValue && Input.CityId > 0)
+                {
+                    var cityRes = await cityAppService.GetByIdAsync(Input.CityId.Value, ct);
+                    if (cityRes.IsSuccess)
+                    {
+                        CityName = cityRes.Data.Title;
+                        CurrentProvinceId = cityRes.Data.ProvinceId;
+                    }
+                }
+            }
+
+            var provincesList = await provinceAppService.GetAllForDropdownAsync(ct);
+            Provinces = new SelectList(provincesList, "Id", "Title", CurrentProvinceId);
         }
 
         private async Task<int> GetCurrentUserIdAsync(CancellationToken ct)
         {
             var userName = User.Identity?.Name;
             if (string.IsNullOrEmpty(userName)) return 0;
+
             var search = new PaginationRequestDto { SearchKey = userName };
             var listResult = await userAppService.GetUsersListAsync(search, ct);
-            return listResult.IsSuccess && listResult.Data.Any() ? listResult.Data.First().Id : 0;
+            return listResult.IsSuccess && listResult.Data?.Any() == true ? listResult.Data.First().Id : 0;
         }
 
         public class UpdateExpertProfileInput

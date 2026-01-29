@@ -10,20 +10,37 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Customer.Pages
     public class SecurityModel(IUserAppService userAppService) : PageModel
     {
         [BindProperty]
-        public string CurrentPassword { get; set; } = default!;
+        public string CurrentPassword { get; set; } 
 
         [BindProperty]
-        public string NewPassword { get; set; } = default!;
+        public string NewPassword { get; set; } 
 
         [BindProperty]
-        public string ConfirmPassword { get; set; } = default!;
+        public string ConfirmPassword { get; set; } 
+
+        public string? MessageText { get; private set; }
+        public string? MessageType { get; private set; } 
+
+        public async Task<IActionResult> OnGet(string? msg, string? text, CancellationToken ct)
+        {
+            if (!string.IsNullOrEmpty(msg) && !string.IsNullOrEmpty(text))
+            {
+                MessageType = msg;
+                MessageText = text;
+            }
+
+            return Page();
+        }
 
         public async Task<IActionResult> OnPostChangePasswordAsync(CancellationToken ct)
         {
             if (NewPassword != ConfirmPassword)
             {
-                ModelState.AddModelError("", "رمز جدید و تکرار آن یکسان نیست.");
-                return Page();
+                return RedirectToPage(new
+                {
+                    msg = "danger",
+                    text = "رمز جدید و تکرار آن یکسان نیست."
+                });
             }
 
             var userId = int.Parse(User.FindFirst("UserId")!.Value);
@@ -40,12 +57,18 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Customer.Pages
 
             if (!result.IsSuccess)
             {
-                ModelState.AddModelError("", result.Message!);
-                return Page();
+                return RedirectToPage(new
+                {
+                    msg = "danger",
+                    text = result.Message ?? "خطایی در تغییر رمز عبور رخ داد."
+                });
             }
 
-            TempData["Success"] = result.Message;
-            return RedirectToPage();
+            return RedirectToPage(new
+            {
+                msg = "success",
+                text = result.Message ?? "رمز عبور با موفقیت بروزرسانی شد."
+            });
         }
     }
 }

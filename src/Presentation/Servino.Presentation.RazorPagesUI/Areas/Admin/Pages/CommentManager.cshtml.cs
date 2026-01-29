@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Servino.Domain.Core._common;
@@ -20,13 +20,17 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 
         public int PageSize { get; set; } = 10;
 
-        [TempData]
-        public string? SuccessMessage { get; set; }
-        [TempData]
-        public string? ErrorMessage { get; set; }
+        public string? MessageText { get; private set; }
+        public string? MessageType { get; private set; } 
 
-        public async Task OnGet(CancellationToken ct)
+        public async Task OnGet(string? msg, string? text, CancellationToken ct)
         {
+            if (!string.IsNullOrEmpty(msg) && !string.IsNullOrEmpty(text))
+            {
+                MessageType = msg;
+                MessageText = text;
+            }
+
             var pagination = new PaginationRequestDto
             {
                 PageNumber = PageNumber,
@@ -35,43 +39,41 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
             };
 
             var result = await commentService.GetAllAsync(pagination, ct);
-
             if (result.IsSuccess)
             {
                 Comments = result.Data ?? [];
             }
             else
             {
-                ErrorMessage = result.Message;
+                MessageType = "danger";
+                MessageText = result.Message;
             }
         }
 
         public async Task<IActionResult> OnPostDeleteAsync(int id, CancellationToken ct)
         {
             var result = await commentService.DeleteAsync(id, ct);
-            if (result.IsSuccess)
+
+            return RedirectToPage(new
             {
-                SuccessMessage = result.Message;
-            }
-            else
-            {
-                ErrorMessage = result.Message;
-            }
-            return RedirectToPage(new { PageNumber, SearchKey });
+                PageNumber,
+                SearchKey,
+                msg = result.IsSuccess ? "success" : "danger",
+                text = result.Message ?? (result.IsSuccess ? "نظر با موفقیت حذف شد." : "خطایی رخ داد.")
+            });
         }
 
         public async Task<IActionResult> OnPostChangeStatusAsync(int id, bool isApproved, CancellationToken ct)
         {
             var result = await commentService.ChangeApprovalStatusAsync(id, isApproved, ct);
-            if (result.IsSuccess)
+
+            return RedirectToPage(new
             {
-                SuccessMessage = result.Message;
-            }
-            else
-            {
-                ErrorMessage = result.Message;
-            }
-            return RedirectToPage(new { PageNumber, SearchKey });
+                PageNumber,
+                SearchKey,
+                msg = result.IsSuccess ? "success" : "danger",
+                text = result.Message ?? (result.IsSuccess ? "وضعیت نظر با موفقیت تغییر کرد." : "خطایی رخ داد.")
+            });
         }
     }
 }

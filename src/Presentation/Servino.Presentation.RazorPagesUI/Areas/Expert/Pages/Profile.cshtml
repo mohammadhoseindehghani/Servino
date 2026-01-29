@@ -4,29 +4,31 @@
     Layout = "Layouts/_ContentNavbarLayout";
     ViewData["Title"] = "پروفایل متخصص";
 }
-
 @section VendorStyles {
     <link rel="stylesheet" href="~/vendor/libs/select2/select2.dist.css" />
     <link rel="stylesheet" href="~/vendor/libs/sweetalert2/sweetalert2.dist.css" />
 }
 @section VendorScripts {
     <script src="~/vendor/libs/select2/select2.dist.js"></script>
+    <script src="~/vendor/libs/select2/i18n/fa.dist.js"></script>
     <script src="~/vendor/libs/sweetalert2/sweetalert2.dist.js"></script>
 }
 
-@if (TempData["SuccessMessage"] != null)
+@if (!string.IsNullOrEmpty(Model.MessageText))
 {
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            Swal.fire({ title: 'موفق!', text: '@Html.Raw(TempData["SuccessMessage"])', icon: 'success', confirmButtonText: 'باشه' });
-        });
-    </script>
-}
-@if (TempData["ErrorMessage"] != null)
-{
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            Swal.fire({ title: 'خطا!', text: '@Html.Raw(TempData["ErrorMessage"])', icon: 'error', confirmButtonText: 'باشه' });
+        document.addEventListener("DOMContentLoaded", function () {
+            Swal.fire({
+                title: '@(Model.MessageType == "success" ? "موفق!" : "خطا!")',
+                text: '@Html.Raw(Model.MessageText)',
+                icon: '@(Model.MessageType == "success" ? "success" : "error")',
+                confirmButtonText: 'باشه'
+            }).then(() => {
+                const url = new URL(window.location);
+                url.searchParams.delete('msg');
+                url.searchParams.delete('text');
+                window.history.replaceState({}, '', url);
+            });
         });
     </script>
 }
@@ -34,14 +36,12 @@
 <h4 class="py-3 mb-4">
     <span class="text-muted fw-light">تنظیمات /</span> پروفایل متخصص
 </h4>
-
 <div class="row">
     <div class="col-md-12">
         <ul class="nav nav-pills flex-column flex-md-row mb-4">
             <li class="nav-item"><a class="nav-link active" href="javascript:void(0);"><i class="ti-xs ti ti-user me-1"></i> مشخصات فردی</a></li>
-            <li class="nav-item"><a class="nav-link" asp-page="./MyServices"><i class="ti-xs ti ti-tools me-1"></i> خدمات من</a></li>
+            <li class="nav-item"><a class="nav-link" asp-page="./HomeServices"><i class="ti-xs ti ti-tools me-1"></i> خدمات من</a></li>
         </ul>
-
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">اطلاعات حساب</h5>
@@ -76,34 +76,7 @@
                     </div>
                     <div class="col-md-6 mb-4">
                         <label class="form-label fw-bold text-muted">شهر:</label>
-                        <p class="mb-0 fs-5">
-                            @switch (Model.ExpertProfile.CityId)
-                            {
-                                case 1:
-                                    <text>تهران</text>
-                                    ; break;
-                                case 2:
-
-                                    <text>اصفهان</text>
-                                    ; break;
-                                case 3:
-
-                                    <text>شیراز</text>
-                                    ; break;
-                                case 4:
-
-                                    <text>مشهد</text>
-                                    ; break;
-                                case 5:
-
-                                    <text>تبریز</text>
-                                    ; break;
-                                default:
-
-                                    <text>-</text>
-                                    ; break;
-                            }
-                        </p>
+                        <p class="mb-0 fs-5">@Model.CityName</p>
                     </div>
                     <div class="col-md-6 mb-4">
                         <label class="form-label fw-bold text-muted">آدرس:</label>
@@ -126,7 +99,6 @@
         </div>
     </div>
 </div>
-
 <div class="modal fade" id="editExpertModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
@@ -150,56 +122,43 @@
                             <div class="text-muted small">فرمت‌های مجاز: JPG, PNG. حداکثر 5MB</div>
                         </div>
                     </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                    <div class="row g-3">
+                        <div class="col-md-6">
                             <label class="form-label">نام <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" asp-for="Input.FirstName" />
-                            <span asp-validation-for="Input.FirstName" class="text-danger"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6">
                             <label class="form-label">نام خانوادگی <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" asp-for="Input.LastName" />
-                            <span asp-validation-for="Input.LastName" class="text-danger"></span>
                         </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">شماره موبایل (غیرقابل تغییر)</label>
-                            <input type="text" class="form-control dir-ltr" value="@Model.ExpertProfile.Phone" disabled />
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">شهر</label>
-                            <select class="form-select select2-modal" asp-for="Input.CityId" style="width:100%">
-                                <option value="">انتخاب کنید...</option>
-                                <option value="1">تهران</option>
-                                <option value="2">اصفهان</option>
-                                <option value="3">شیراز</option>
-                                <option value="4">مشهد</option>
-                                <option value="5">تبریز</option>
+                        <div class="col-md-6">
+                            <label class="form-label">استان</label>
+                            <select id="provinceSelect" class="form-select select2-modal" asp-items="Model.Provinces" style="width:100%">
+                                <option value="">انتخاب استان...</option>
                             </select>
                         </div>
-
-                        <div class="col-md-12 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">شهر</label>
+                            <select id="citySelect" class="form-select select2-modal" asp-for="Input.CityId" style="width:100%" data-selected="@Model.Input.CityId">
+                                <option value="">ابتدا استان را انتخاب کنید</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
                             <label class="form-label">آدرس کامل</label>
                             <input type="text" class="form-control" asp-for="Input.Address" placeholder="نام خیابان، کوچه، پلاک..." />
                         </div>
-
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6">
                             <label class="form-label">شماره کارت</label>
                             <input type="text" class="form-control dir-ltr" asp-for="Input.BankCardNumber" placeholder="xxxx-xxxx-xxxx-xxxx" maxlength="16" />
-                            <span asp-validation-for="Input.BankCardNumber" class="text-danger"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6">
                             <label class="form-label">شماره شبا</label>
                             <div class="input-group">
                                 <span class="input-group-text">IR</span>
                                 <input type="text" class="form-control dir-ltr" asp-for="Input.ShebaNumber" placeholder="۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰" maxlength="24" />
                             </div>
-                            <span asp-validation-for="Input.ShebaNumber" class="text-danger"></span>
                         </div>
-
-                        <div class="col-md-12 mb-3">
+                        <div class="col-md-12">
                             <label class="form-label">درباره من (بیوگرافی)</label>
                             <textarea class="form-control" rows="4" asp-for="Input.Bio" placeholder="توضیحی کوتاه درباره تخصص و تجربیات خود بنویسید..."></textarea>
                         </div>
@@ -220,9 +179,49 @@
             $('.select2-modal').select2({
                 language: "fa",
                 dir: "rtl",
-                dropdownParent: $('#editExpertModal')
+                dropdownParent: $('#editExpertModal'),
+                width: '100%'
+            });
+
+            var initialProvinceId = '@Model.CurrentProvinceId';
+            var currentCityId = '@Model.Input.CityId';
+            if (initialProvinceId) {
+                loadCities(initialProvinceId, currentCityId);
+            }
+
+            $('#provinceSelect').on('change', function () {
+                var provinceId = $(this).val();
+                loadCities(provinceId, null);
             });
         });
+
+        function loadCities(provinceId, selectedCityId) {
+            var $citySelect = $('#citySelect');
+            $citySelect.empty().append('<option value="">در حال بارگذاری...</option>');
+            $citySelect.prop('disabled', true);
+
+            if (provinceId) {
+                $.ajax({
+                    url: '?handler=GetCities',
+                    data: { provinceId: provinceId },
+                    success: function (data) {
+                        $citySelect.empty().append('<option value="">انتخاب شهر...</option>');
+                        $.each(data, function (index, item) {
+                            var isSelected = (selectedCityId && item.id == selectedCityId) ? 'selected' : '';
+                            $citySelect.append(`<option value="${item.id}" ${isSelected}>${item.title}</option>`);
+                        });
+                        $citySelect.prop('disabled', false);
+                        $citySelect.trigger('change');
+                    },
+                    error: function () {
+                        $citySelect.empty().append('<option value="">خطا در دریافت اطلاعات</option>');
+                    }
+                });
+            } else {
+                $citySelect.empty().append('<option value="">ابتدا استان را انتخاب کنید</option>');
+                $citySelect.prop('disabled', true);
+            }
+        }
 
         function previewImage(input) {
             if (input.files && input.files[0]) {

@@ -19,19 +19,22 @@
     <script src="~/vendor/libs/sweetalert2/sweetalert2.dist.js"></script>
 }
 
-@if (TempData["SuccessMessage"] != null)
+@if (!string.IsNullOrEmpty(Model.MessageText))
 {
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            Swal.fire({ title: 'موفق!', text: '@TempData["SuccessMessage"]', icon: 'success', confirmButtonText: 'باشه', customClass: { confirmButton: 'btn btn-primary' } });
-        });
-    </script>
-}
-@if (TempData["ErrorMessage"] != null)
-{
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            Swal.fire({ title: 'خطا!', text: '@TempData["ErrorMessage"]', icon: 'error', confirmButtonText: 'باشه', customClass: { confirmButton: 'btn btn-primary' } });
+        document.addEventListener("DOMContentLoaded", function () {
+            Swal.fire({
+                title: '@(Model.MessageType == "success" ? "موفق!" : "خطا!")',
+                text: '@Html.Raw(Model.MessageText)',
+                icon: '@(Model.MessageType == "success" ? "success" : "error")',
+                confirmButtonText: 'باشه',
+                customClass: { confirmButton: 'btn btn-primary' }
+            }).then(() => {
+                const url = new URL(window.location);
+                url.searchParams.delete('msg');
+                url.searchParams.delete('text');
+                window.history.replaceState({}, '', url);
+            });
         });
     </script>
 }

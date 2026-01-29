@@ -17,6 +17,29 @@
     <script src="~/vendor/libs/datatables-bs5/i18n/fa.dist.js"></script>
     <script src="~/vendor/libs/sweetalert2/sweetalert2.dist.js"></script>
 }
+
+
+@if (!string.IsNullOrEmpty(Model.MessageText))
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            Swal.fire({
+                title: '@(Model.MessageType == "success" ? "موفق!" : "خطا!")',
+                text: '@Html.Raw(Model.MessageText)',
+                icon: '@(Model.MessageType == "success" ? "success" : "error")',
+                confirmButtonText: 'باشه'
+            }).then(() => {
+                // پاک کردن پارامترهای msg و text از URL بدون رفرش صفحه
+                const url = new URL(window.location);
+                url.searchParams.delete('msg');
+                url.searchParams.delete('text');
+                window.history.replaceState({}, '', url);
+            });
+        });
+    </script>
+}
+
+
 <h4 class="py-3 mb-4">
     <span class="text-muted fw-light">مدیریت محتوا /</span> خدمات خانگی
 </h4>

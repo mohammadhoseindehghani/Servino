@@ -9,30 +9,37 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Expert.Pages
 {
     [Authorize(Roles = "Expert")]
     public class HomeServicesModel(
-            IExpertAppService expertAppService,
-            IUserAppService userAppService) : PageModel
+             IExpertAppService expertAppService,
+             IUserAppService userAppService) : PageModel
     {
         public List<ExpertServiceItemDto> ServiceItems { get; set; } = [];
 
         [BindProperty]
         public List<int> SelectedServiceIds { get; set; } = [];
 
-        [TempData] public string? SuccessMessage { get; set; }
-        [TempData] public string? ErrorMessage { get; set; }
+        public string? MessageText { get; private set; }
+        public string? MessageType { get; private set; } 
 
-        public async Task<IActionResult> OnGet(CancellationToken ct)
+        public async Task<IActionResult> OnGet(string? msg, string? text, CancellationToken ct)
         {
+            if (!string.IsNullOrEmpty(msg) && !string.IsNullOrEmpty(text))
+            {
+                MessageType = msg;
+                MessageText = text;
+            }
+
             var userId = await GetCurrentUserIdAsync(ct);
             if (userId == 0) return RedirectToPage("/Auth/Login/Index");
 
             var servicesResult = await expertAppService.GetServicesForEditAsync(userId, ct);
             if (servicesResult.IsSuccess)
             {
-                ServiceItems = servicesResult.Data;
+                ServiceItems = servicesResult.Data ?? [];
             }
             else
             {
-                ErrorMessage = "خطا در دریافت لیست خدمات.";
+                MessageType = "danger";
+                MessageText = "خطا در دریافت لیست خدمات.";
             }
 
             return Page();
@@ -45,26 +52,23 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Expert.Pages
 
             var result = await expertAppService.UpdateServicesAsync(userId, SelectedServiceIds, ct);
 
-            if (result.IsSuccess)
+            return RedirectToPage(new
             {
-                SuccessMessage = "لیست خدمات با موفقیت ذخیره شد.";
-                var servicesResult = await expertAppService.GetServicesForEditAsync(userId, ct);
-                if (servicesResult.IsSuccess) ServiceItems = servicesResult.Data;
-
-                return Page();
-            }
-
-            ErrorMessage = result.Message;
-            return Page();
+                msg = result.IsSuccess ? "success" : "danger",
+                text = result.IsSuccess
+                    ? "لیست خدمات با موفقیت ذخیره شد."
+                    : result.Message ?? "خطایی در ذخیره خدمات رخ داد."
+            });
         }
 
         private async Task<int> GetCurrentUserIdAsync(CancellationToken ct)
         {
             var userName = User.Identity?.Name;
             if (string.IsNullOrEmpty(userName)) return 0;
+
             var search = new PaginationRequestDto { SearchKey = userName };
             var listResult = await userAppService.GetUsersListAsync(search, ct);
-            return listResult.IsSuccess && listResult.Data.Any() ? listResult.Data.First().Id : 0;
+            return listResult.IsSuccess && listResult.Data?.Any() == true ? listResult.Data.First().Id : 0;
         }
     }
 }

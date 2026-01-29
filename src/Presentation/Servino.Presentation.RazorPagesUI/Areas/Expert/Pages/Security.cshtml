@@ -1,42 +1,45 @@
 ﻿@page
 @model Servino.Presentation.RazorPagesUI.Areas.Expert.Pages.SecurityModel
-
 @{
     Layout = "Layouts/_ContentNavbarLayout";
     ViewData["Title"] = "امنیت حساب";
+}
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/sweetalert2/sweetalert2.dist.css" />
+}
+@section VendorScripts {
+    <script src="~/vendor/libs/sweetalert2/sweetalert2.dist.js"></script>
+}
+
+@if (!string.IsNullOrEmpty(Model.MessageText))
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            Swal.fire({
+                title: '@(Model.MessageType == "success" ? "موفق!" : "خطا!")',
+                text: '@Html.Raw(Model.MessageText)',
+                icon: '@(Model.MessageType == "success" ? "success" : "error")',
+                confirmButtonText: 'باشه'
+            }).then(() => {
+                const url = new URL(window.location);
+                url.searchParams.delete('msg');
+                url.searchParams.delete('text');
+                window.history.replaceState({}, '', url);
+            });
+        });
+    </script>
 }
 
 <h4 class="py-3 mb-4">
     <span class="text-muted fw-light">تنظیمات حساب /</span>
     امنیت حساب
 </h4>
-
 <div class="row">
     <div class="col-md-12">
-
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="alert alert-success">
-                @TempData["SuccessMessage"]
-            </div>
-        }
-
-        @if (!ViewData.ModelState.IsValid)
-        {
-            <div class="alert alert-danger">
-                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    <div>@error.ErrorMessage</div>
-                }
-            </div>
-        }
-
         <div class="card mb-4">
             <h5 class="card-header">تغییر رمز عبور</h5>
-
             <div class="card-body">
                 <form method="post" asp-page-handler="ChangePassword">
-
                     <div class="row">
                         <div class="mb-3 col-md-6 form-password-toggle">
                             <label class="form-label">رمز عبور فعلی</label>
@@ -51,7 +54,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="row">
                         <div class="mb-3 col-md-6 form-password-toggle">
                             <label class="form-label">رمز عبور جدید</label>
@@ -65,7 +67,6 @@
                                 </span>
                             </div>
                         </div>
-
                         <div class="mb-3 col-md-6 form-password-toggle">
                             <label class="form-label">تأیید رمز عبور جدید</label>
                             <div class="input-group input-group-merge">
@@ -78,7 +79,6 @@
                                 </span>
                             </div>
                         </div>
-
                         <div class="col-12 mb-4">
                             <h6>الزامات رمز عبور:</h6>
                             <ul class="ps-3 mb-0">
@@ -87,7 +87,6 @@
                                 <li>حداقل یک عدد یا نماد خاص</li>
                             </ul>
                         </div>
-
                         <div class="col-12">
                             <button type="submit" class="btn btn-primary me-2">
                                 بروزرسانی رمز
@@ -97,7 +96,6 @@
                             </button>
                         </div>
                     </div>
-
                 </form>
             </div>
         </div>

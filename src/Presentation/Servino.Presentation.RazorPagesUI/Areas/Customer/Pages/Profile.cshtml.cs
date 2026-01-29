@@ -21,14 +21,15 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Customer.Pages
         public UpdateCustomerProfileDto Input { get; set; } = new();
 
         public CustomerProfileDto DisplayData { get; set; } = new();
+
         public string CityName { get; set; } = "تعیین نشده";
 
-        public SelectList Provinces { get; set; }
+        public SelectList Provinces { get; set; } 
 
         public int? CurrentProvinceId { get; set; }
 
-        [TempData] public string? SuccessMessage { get; set; }
-        [TempData] public string? ErrorMessage { get; set; }
+        public string? MessageText { get; private set; }
+        public string? MessageType { get; private set; } 
 
         private int GetCurrentUserId()
         {
@@ -36,8 +37,14 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Customer.Pages
             return int.TryParse(userIdStr, out int userId) ? userId : 0;
         }
 
-        public async Task<IActionResult> OnGetAsync(CancellationToken ct)
+        public async Task<IActionResult> OnGetAsync(string? msg, string? text, CancellationToken ct)
         {
+            if (!string.IsNullOrEmpty(msg) && !string.IsNullOrEmpty(text))
+            {
+                MessageType = msg;
+                MessageText = text;
+            }
+
             var userId = GetCurrentUserId();
             if (userId == 0) return RedirectToPage("/Auth/Login/Index");
 
@@ -52,8 +59,15 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Customer.Pages
 
             if (!ModelState.IsValid)
             {
+                var errors = ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage));
+                var errorText = string.Join(" ", errors);
+
                 await LoadData(userId, ct);
-                return Page();
+                return RedirectToPage(new
+                {
+                    msg = "danger",
+                    text = string.IsNullOrEmpty(errorText) ? "اطلاعات وارد شده معتبر نیست." : errorText
+                });
             }
 
             if (upload != null && upload.Length > 0)
@@ -74,19 +88,24 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Customer.Pages
             }
 
             Input.UserId = userId;
-
             var result = await customerAppService.UpdateProfile(Input, ct);
 
             if (result.IsSuccess)
             {
-                SuccessMessage = "پروفایل شما با موفقیت بروزرسانی شد.";
-                return RedirectToPage();
+                return RedirectToPage(new
+                {
+                    msg = "success",
+                    text = "پروفایل شما با موفقیت بروزرسانی شد."
+                });
             }
             else
             {
-                ErrorMessage = result.Message;
                 await LoadData(userId, ct);
-                return Page();
+                return RedirectToPage(new
+                {
+                    msg = "danger",
+                    text = result.Message ?? "خطایی در بروزرسانی پروفایل رخ داد."
+                });
             }
         }
 
@@ -99,11 +118,9 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Customer.Pages
         private async Task LoadData(int userId, CancellationToken ct)
         {
             var result = await customerAppService.GetByUserIdAsync(userId, ct);
-
             if (result.IsSuccess && result.Data != null)
             {
                 DisplayData = result.Data;
-
                 Input = new UpdateCustomerProfileDto
                 {
                     UserId = userId,
