@@ -54,4 +54,11 @@ public class CustomerRepository(AppDbContext context) : ICustomerRepository
         return affectedRows > 0;
     }
 
+    public async Task<bool> HardDeleteByUserIdAsync(int userId, CancellationToken ct)
+    {
+        var effectiveRows = await context.Customers.Where(e => e.UserId == userId)
+            .ExecuteDeleteAsync(ct);
+
+        return effectiveRows > 0;
+    }
 }

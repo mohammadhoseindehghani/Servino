@@ -32,6 +32,11 @@ public class UserService(IUserRepository userRepo) : IUserService
         return await userRepo.DeleteAsync(id, ct);
     }
 
+    public async Task<bool> HardDeleteAsync(int id, CancellationToken ct)
+    {
+        return await userRepo.HardDeleteAsync(id, ct);
+    }
+
     public async Task<UserDetailDto?> GetByIdAsync(int id, CancellationToken ct)
     {
         return await userRepo.GetByIdAsync(id, ct);
@@ -77,6 +82,11 @@ public class UserService(IUserRepository userRepo) : IUserService
     public async Task<bool> IsEmailExistAsync(string email, CancellationToken ct)
     {
         return await userRepo.IsEmailExistAsync(email, ct);
+    }
+
+    public async Task<bool> IsPhoneExistAsync(string mobile, CancellationToken ct)
+    {
+        return await userRepo.IsMobileExistAsync(mobile, ct);
     }
 
     public async Task<int> GetCountAsync(CancellationToken ct)

@@ -70,6 +70,14 @@ public class ExpertRepository(AppDbContext context) : IExpertRepository
         return expertRows > 0 && userRows > 0;
     }
 
+    public async Task<bool> HardDeleteByUserIdAsync(int userId, CancellationToken ct)
+    {
+        var effectiveRows = await context.Experts.Where(e => e.UserId == userId)
+            .ExecuteDeleteAsync(ct);
+
+        return effectiveRows > 0;
+    }
+
 
     //public async Task<bool> UpdateProfile(UpdateExpertProfileDto command, CancellationToken ct)
     //{

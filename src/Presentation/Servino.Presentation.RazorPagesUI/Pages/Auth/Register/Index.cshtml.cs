@@ -65,7 +65,6 @@ namespace Servino.Presentation.RazorPagesUI.Pages.Auth.Register
 
             if (result.IsSuccess)
             {
-   
                 return RedirectToPage("/Auth/Login/Index");
             }
             else

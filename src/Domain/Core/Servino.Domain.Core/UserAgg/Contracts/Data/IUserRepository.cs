@@ -12,6 +12,7 @@ public interface IUserRepository
     Task<bool> CreateAsync(CreateUserDto command, CancellationToken ct);
     Task<bool> UpdateAsync(UpdateUserDto command, CancellationToken ct);
     Task<bool> DeleteAsync(int id, CancellationToken ct); 
+    Task<bool> HardDeleteAsync(int id, CancellationToken ct); 
     Task<UserDetailDto?> GetByIdAsync(int id, CancellationToken ct);
     Task<int> GetIdByIdentityIdAsync(string identityId, CancellationToken ct);
     Task<List<UserSummaryProjectionDto>> GetAllAsync(PaginationRequestDto search, CancellationToken ct);

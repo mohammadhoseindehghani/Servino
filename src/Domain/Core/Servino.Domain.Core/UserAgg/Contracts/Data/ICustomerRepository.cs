@@ -8,4 +8,5 @@ public interface ICustomerRepository
     Task<int> GetCustomerIdByUserIdAsync(int userId, CancellationToken ct);
     Task<CustomerProfileDto?> GetByUserIdAsync(int userId, CancellationToken ct);
     Task<bool> UpdateProfile(UpdateCustomerProfileDto command, CancellationToken ct);
+    Task<bool> HardDeleteByUserIdAsync(int userId, CancellationToken ct);
 }

@@ -25,4 +25,9 @@ public class ExpertService(IExpertRepository expertRepo) : IExpertService
     {
         return await expertRepo.GetIdByUserIdAsync(userId, ct);
     }
+
+    public async Task<bool> HardDeleteByUserIdAsync(int userId, CancellationToken ct)
+    {
+        return await expertRepo.HardDeleteByUserIdAsync(userId, ct);
+    }
 }

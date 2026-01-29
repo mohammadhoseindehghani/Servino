@@ -79,6 +79,14 @@ public class UserRepository(AppDbContext context) : IUserRepository
         return affectedRows > 0;
     }
 
+    public async Task<bool> HardDeleteAsync(int id, CancellationToken ct)
+    {
+        var affectedRows = await context.Users
+            .Where(u => u.Id == id && !u.IsDeleted)
+            .ExecuteDeleteAsync(ct);
+        return affectedRows > 0;
+    }
+
     public async Task<UserDetailDto?> GetByIdAsync(int id, CancellationToken ct)
     {
         return await context.Users

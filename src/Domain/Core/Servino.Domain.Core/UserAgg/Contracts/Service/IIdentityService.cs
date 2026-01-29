@@ -11,7 +11,6 @@ public interface IIdentityService
     Task<LoginResultDto> VerifyOtpAndLoginAsync(LoginWithOtpDto otpDto, CancellationToken ct);
     Task<LoginResultDto> LoginWithGoogleAsync(LoginWithGoogleDto googleDto, CancellationToken ct);
     Task DeleteUserAsync(string id, CancellationToken ct);
-
     Task<Result<bool>> ChangeEmailAsync(string identityId, string newEmail, CancellationToken ct);
     Task<string?> GetEmailByIdentityIdAsync(string identityId, CancellationToken ct);
     Task<Result<bool>> AdminChangePasswordAsync(string identityId, string newPassword, CancellationToken ct);

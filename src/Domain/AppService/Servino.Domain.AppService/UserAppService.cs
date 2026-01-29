@@ -16,9 +16,7 @@ public class UserAppService(
     ILogger<UserAppService> logger) : IUserAppService
 {
 
-    public async Task<Result<bool>> CreateUserByAdminAsync(
-        CreateUserByAdminDto command,
-        CancellationToken ct)
+    public async Task<Result<bool>> CreateUserByAdminAsync(CreateUserByAdminDto command, CancellationToken ct)
     {
         if (await userService.IsEmailExistAsync(command.Email, ct))
             return Result<bool>.Failure("این ایمیل قبلاً ثبت شده است.");
@@ -26,55 +24,52 @@ public class UserAppService(
         if (await userService.IsMobileExistAsync(command.Mobile, ct))
             return Result<bool>.Failure("این شماره موبایل قبلاً ثبت شده است.");
 
-        var registerDto = new RegisterDto
-        {
-            Email = command.Email,
-            Password = command.Password,
-            PhoneNumber = command.Mobile
-        };
-
-        var identityResult =
-            await identityService.RegisterWithEmailAsync(registerDto, command.Role, ct);
-
-        if (!identityResult.Succeeded)
-            return Result<bool>.Failure(identityResult.Message ?? "خطا در سیستم هویت‌سنجی");
+        string? identityId = null;
+        int userId = 0;
 
         try
         {
+            var registerDto = new RegisterDto
+            {
+                Email = command.Email,
+                Password = command.Password,
+                PhoneNumber = command.Mobile
+            };
+
+            var identityResult =
+                await identityService.RegisterWithEmailAsync(registerDto, command.Role, ct);
+
+            if (!identityResult.Succeeded)
+                return Result<bool>.Failure(identityResult.Message ?? "خطا در سیستم هویت‌سنجی");
+
+            identityId = identityResult.Id!;
+
             var createUserDto = new CreateUserDto
             {
                 FirstName = command.FirstName,
                 LastName = command.LastName,
                 Email = command.Email,
                 Mobile = command.Mobile,
-                IdentityId = identityResult.Id!,
+                IdentityId = identityId,
                 CityId = 1
             };
 
             var userCreated = await userService.CreateAsync(createUserDto, ct);
-
             if (!userCreated)
+                throw new Exception("خطا در ذخیره اطلاعات کاربر");
+
+            userId = await userService.GetIdByIdentityIdAsync(identityId, ct);
+
+            bool roleCreated = command.Role switch
             {
-                await identityService.DeleteUserAsync(identityResult.Id!, ct);
-                return Result<bool>.Failure("خطا در ذخیره اطلاعات کاربر.");
-            }
+                "Expert" => await expertService.CreateAsync(userId, ct),
+                "Customer" => await customerService.CreateAsync(userId, ct),
+                "Admin" => true,
+                _ => throw new Exception("نقش کاربر نامعتبر است")
+            };
 
-            var userId =
-                await userService.GetIdByIdentityIdAsync(identityResult.Id!, ct);
-
-            switch (command.Role)
-            {
-                case "Expert":
-                    await expertService.CreateAsync(userId, ct);
-                    break;
-
-                case "Customer":
-                    await customerService.CreateAsync(userId, ct);
-                    break;
-
-                case "Admin":
-                    break;
-            }
+            if (!roleCreated)
+                throw new Exception("خطا در ایجاد اطلاعات نقش کاربر");
 
             return Result<bool>.Success(true, "کاربر با موفقیت ایجاد شد.");
         }
@@ -84,7 +79,19 @@ public class UserAppService(
                 "Error while creating user by admin. Email: {Email}",
                 command.Email);
 
-            await identityService.DeleteUserAsync(identityResult.Id!, ct);
+            if (userId > 0)
+            {
+                if (command.Role == "Customer")
+                    await customerService.HardDeleteByUserIdAsync(userId, ct);
+
+                if (command.Role == "Expert")
+                    await expertService.HardDeleteByUserIdAsync(userId, ct);
+
+                await userService.HardDeleteAsync(userId, ct);
+            }
+
+            if (!string.IsNullOrWhiteSpace(identityId))
+                await identityService.DeleteUserAsync(identityId, ct);
 
             return Result<bool>.Failure("خطای سیستمی در ایجاد کاربر. لطفاً مجدداً تلاش کنید.");
         }
@@ -94,44 +101,72 @@ public class UserAppService(
     public async Task<Result<bool>> RegisterUserAsync(RegisterDto command, CancellationToken ct)
     {
         if (await userService.IsEmailExistAsync(command.Email, ct))
-        {
             return Result<bool>.Failure("این ایمیل قبلاً در سیستم ثبت شده است.");
-        }
 
-        var identityResult = await identityService.RegisterWithEmailAsync(command, ct);
+        if (await userService.IsPhoneExistAsync(command.PhoneNumber, ct))
+            return Result<bool>.Failure("این شماره قبلاً در سیستم ثبت شده است.");
 
-        if (!identityResult.Succeeded)
-        {
-            return Result<bool>.Failure(identityResult.Message ?? "خطا در ثبت نام امنیتی");
-        }
+        if (command.Password.Length < 6)
+            return Result<bool>.Failure("پسورد باید حداقل 6 کاراکتر داشته باشد");
 
-        var createUserDto = new CreateUserDto
-        {
-            FirstName = "کاربر", 
-            LastName = "جدید",
-            Email = command.Email,
-            Mobile = command.PhoneNumber,
-            IdentityId = identityResult.Id!, 
-        };
+        string? identityId = null;
+        int userId = 0;
 
         try
         {
-            var dbResult = await userService.CreateAsync(createUserDto, ct);
+            var identityResult = await identityService.RegisterWithEmailAsync(command, ct);
+            if (!identityResult.Succeeded)
+                return Result<bool>.Failure(identityResult.Message ?? "خطا در ثبت نام امنیتی");
 
-            if (!dbResult)
+            identityId = identityResult.Id!;
+
+            var createUserDto = new CreateUserDto
             {
-                await identityService.DeleteUserAsync(identityResult.Id, ct);
-                return Result<bool>.Failure("خطا در ذخیره اطلاعات کاربری.");
-            }
+                FirstName = "کاربر",
+                LastName = "جدید",
+                Email = command.Email,
+                Mobile = command.PhoneNumber,
+                IdentityId = identityId
+            };
+
+            var userCreated = await userService.CreateAsync(createUserDto, ct);
+            if (!userCreated)
+                throw new Exception("خطا در ذخیره اطلاعات کاربر");
+
+            userId = await userService.GetIdByIdentityIdAsync(identityId, ct);
+
+            bool roleCreated = command.Role switch
+            {
+                "Customer" => await customerService.CreateAsync(userId, ct),
+                "Expert" => await expertService.CreateAsync(userId, ct),
+                _ => throw new Exception("نقش کاربر نامعتبر است")
+            };
+
+            if (!roleCreated)
+                throw new Exception("خطا در ایجاد اطلاعات نقش کاربر");
 
             return Result<bool>.Success(true, "ثبت نام با موفقیت انجام شد.");
         }
         catch (Exception ex)
         {
-            await identityService.DeleteUserAsync(identityResult.Id, ct);
-            return Result<bool>.Failure($"خطای سیستمی: {ex.Message}");
+            if (userId > 0)
+            {
+                if (command.Role == "Customer")
+                    await customerService.HardDeleteByUserIdAsync(userId, ct);
+
+                if (command.Role == "Expert")
+                    await expertService.HardDeleteByUserIdAsync(userId, ct);
+
+                await userService.HardDeleteAsync(userId, ct);
+            }
+
+            if (!string.IsNullOrWhiteSpace(identityId))
+                await identityService.DeleteUserAsync(identityId, ct);
+
+            return Result<bool>.Failure("خطای غیر منتظره");
         }
     }
+
 
     public async Task<Result<LoginResultDto>> LoginWithPasswordAsync(LoginWithPassDto command, CancellationToken ct)
     {

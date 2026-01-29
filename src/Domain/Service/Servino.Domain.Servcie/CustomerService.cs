@@ -25,4 +25,9 @@ public class CustomerService(ICustomerRepository customerRepo) : ICustomerServic
     {
         return await customerRepo.UpdateProfile(command, ct);
     }
+
+    public async Task<bool> HardDeleteByUserIdAsync(int userId, CancellationToken ct)
+    {
+        return await customerRepo.HardDeleteByUserIdAsync(userId, ct);
+    }
 }

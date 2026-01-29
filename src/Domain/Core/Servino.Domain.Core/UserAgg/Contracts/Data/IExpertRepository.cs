@@ -8,4 +8,5 @@ public interface IExpertRepository
     Task<int> GetIdByUserIdAsync(int userId, CancellationToken ct);
     Task<ExpertProfileDto?> GetByUserIdAsync(int userId, CancellationToken ct);
     Task<bool> UpdateProfile(UpdateExpertProfileDto command, CancellationToken ct);
+    Task<bool> HardDeleteByUserIdAsync(int userId, CancellationToken ct);
 }
