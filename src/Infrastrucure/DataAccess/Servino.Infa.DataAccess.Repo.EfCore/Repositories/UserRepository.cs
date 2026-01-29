@@ -148,6 +148,8 @@ public class UserRepository(AppDbContext context) : IUserRepository
                 IsActive = u.IsActive,
                 CreatedAt = u.CreatedAt,
                 ProfileImagePath = u.ProfileImagePath,
+                CityId = u.CityId,
+                ProvinceId = u.City!.ProvinceId,
                 HasAdmin = u.Admin != null,
                 HasExpert = u.Expert != null,
                 HasCustomer = u.Customer != null

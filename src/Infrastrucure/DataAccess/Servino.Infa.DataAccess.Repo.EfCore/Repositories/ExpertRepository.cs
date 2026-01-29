@@ -38,6 +38,7 @@ public class ExpertRepository(AppDbContext context) : IExpertRepository
                     Bio = e.Bio,
                     Email = e.User.Email,
                     Phone = e.User.MobileNumber,
+                    ShebaNumber = e.ShebaNumber
                 }
             ).FirstOrDefaultAsync(ct);
     }

@@ -103,7 +103,7 @@ public class UserAppService(
         if (await userService.IsEmailExistAsync(command.Email, ct))
             return Result<bool>.Failure("این ایمیل قبلاً در سیستم ثبت شده است.");
 
-        if (await userService.IsPhoneExistAsync(command.PhoneNumber, ct))
+        if (await userService.IsMobileExistAsync(command.PhoneNumber, ct))
             return Result<bool>.Failure("این شماره قبلاً در سیستم ثبت شده است.");
 
         if (command.Password.Length < 6)
@@ -203,21 +203,31 @@ public class UserAppService(
         try
         {
             var existingUser = await userService.GetByIdAsync(command.Id, ct);
+            if (existingUser == null)
+                return Result<bool>.Failure("کاربر یافت نشد.");
+
+            if (!string.IsNullOrWhiteSpace(command.Mobile) &&
+                command.Mobile != existingUser.Mobile)
+            {
+                bool mobileExists =
+                    await userService.IsMobileExistAsync(command.Mobile, ct);
+
+                if (mobileExists)
+                    return Result<bool>.Failure("این شماره موبایل قبلاً توسط کاربر دیگری ثبت شده است.");
+            }
+
             var userUpdateDto = new UpdateUserDto
             {
                 Id = command.Id,
                 FirstName = command.FirstName,
                 LastName = command.LastName,
                 Mobile = command.Mobile,
-                CityId = (command.CityId > 0) ? command.CityId : existingUser?.CityId
-                // ProfileImagePath 
+                CityId = (command.CityId > 0) ? command.CityId : existingUser.CityId
             };
 
             var basicUpdateResult = await userService.UpdateAsync(userUpdateDto, ct);
             if (!basicUpdateResult)
-            {
-                return Result<bool>.Failure("کاربر یافت نشد یا ویرایش اطلاعات پایه انجام نشد.");
-            }
+                return Result<bool>.Failure("ویرایش اطلاعات پایه انجام نشد.");
 
             if (command.Role == "Expert" && command.ExpertInfo != null)
             {
@@ -239,15 +249,17 @@ public class UserAppService(
 
             if (!string.IsNullOrWhiteSpace(command.NewPassword))
             {
-                var user = await userService.GetByIdAsync(command.Id, ct);
-                if (user != null)
-                {
-                    var passResult = await identityService.AdminChangePasswordAsync(user.IdentityId, command.NewPassword, ct);
-                    if (!passResult.IsSuccess)
-                    {
+                var passResult =
+                    await identityService.AdminChangePasswordAsync(
+                        existingUser.IdentityId,
+                        command.NewPassword,
+                        ct);
 
-                        return Result<bool>.Success(true, "اطلاعات ویرایش شد اما تغییر رمز عبور با خطا مواجه شد: " + passResult.Message);
-                    }
+                if (!passResult.IsSuccess)
+                {
+                    return Result<bool>.Success(
+                        true,
+                        "اطلاعات ویرایش شد اما تغییر رمز عبور با خطا مواجه شد: " + passResult.Message);
                 }
             }
 
@@ -255,9 +267,12 @@ public class UserAppService(
         }
         catch (Exception ex)
         {
-            return Result<bool>.Failure($"خطای سیستمی: {ex.Message}");
+            logger.LogError(ex, "AdminUpdateUser failed. UserId: {UserId}", command.Id);
+
+            return Result<bool>.Failure("خطای سیستمی در ویرایش کاربر.");
         }
     }
+
 
     public async Task<Result<bool>> ChangePasswordAsync(ChangePasswordDto command, CancellationToken ct)
     {
@@ -273,6 +288,11 @@ public class UserAppService(
         );
 
         return result;
+    }
+
+    public async Task<bool> IsMobileExistAsync(string mobile, CancellationToken ct)
+    {
+        return await userService.IsMobileExistAsync(mobile, ct);
     }
 
     public async Task<Result<bool>> UpdateEmailAsync(int userId, string newEmail, CancellationToken ct)

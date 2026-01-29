@@ -12,4 +12,7 @@ public class UserSummaryDto
     public string CityName { get; set; }
     public string? ImageUrl { get; set; }
     public string Role { get; set; }
+
+    public int? ProvinceId { get; set; }
+    public int? CityId { get; set; }
 }

@@ -62,7 +62,9 @@ public class UserService(IUserRepository userRepo) : IUserService
             IsActive = p.IsActive,
             RegisterDate = p.CreatedAt,
             ImageUrl = p.ProfileImagePath,
-            Role = DetermineRole(p.HasAdmin, p.HasExpert, p.HasCustomer)
+            Role = DetermineRole(p.HasAdmin, p.HasExpert, p.HasCustomer),
+            CityId = p.CityId,
+            ProvinceId = p.ProvinceId
         }).ToList();
     }
 

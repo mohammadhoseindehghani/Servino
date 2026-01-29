@@ -17,6 +17,5 @@ public interface IUserService
     Task<List<UserSummaryDto>> GetAllAsync(PaginationRequestDto search, CancellationToken ct);
     Task<bool> ChangeBalanceAsync(int userId, decimal amount, CancellationToken ct);
     Task<bool> IsEmailExistAsync(string email, CancellationToken ct);
-    Task<bool> IsPhoneExistAsync(string mobile, CancellationToken ct);
     Task<int> GetCountAsync(CancellationToken ct);
 }

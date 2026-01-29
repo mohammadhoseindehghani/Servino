@@ -23,4 +23,6 @@ public interface IUserAppService
     Task<Result<bool>> DeleteUserAsync(int userId, CancellationToken ct);
     Task<Result<bool>> AdminUpdateUserAsync(AdminUpdateUserDto command, CancellationToken ct);
     Task<Result<bool>> ChangePasswordAsync(ChangePasswordDto command, CancellationToken ct);
+    Task<bool> IsMobileExistAsync(string mobile, CancellationToken ct);
+
 }

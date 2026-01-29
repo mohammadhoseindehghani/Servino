@@ -19,7 +19,6 @@ public class UserSummaryProjectionDto
     public bool HasExpert { get; set; }
     public bool HasCustomer { get; set; }
 
-
-
-
+    public int? ProvinceId { get; set; }
+    public int? CityId { get; set; }
 }

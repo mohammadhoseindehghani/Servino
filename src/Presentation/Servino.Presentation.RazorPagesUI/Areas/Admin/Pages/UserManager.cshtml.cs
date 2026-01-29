@@ -2,13 +2,16 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Servino.Domain.Core._common;
+using Servino.Domain.Core.LocationAgg.Contracts.AppService;
+using Servino.Domain.Core.LocationAgg.Dtos;
 using Servino.Domain.Core.UserAgg.Contracts.AppService;
 using Servino.Domain.Core.UserAgg.Dtos;
 
 namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 {
     [Authorize(Roles = "Admin")]
-    public class UserManagerModel(IUserAppService userAppService, IExpertAppService expertAppService)
+    public class UserManagerModel(IUserAppService userAppService, IExpertAppService expertAppService, IProvinceAppService provinceAppService,
+        ICityAppService cityAppService)
         : PageModel
     {
         public List<UserSummaryDto> Users { get; set; } = [];
@@ -32,6 +35,8 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 
         [BindProperty]
         public List<int> SelectedServiceIds { get; set; } = [];
+        public List<SelectListDto> Provinces { get; set; } = [];
+
 
         [BindProperty]
         public int TargetExpertId { get; set; }
@@ -53,6 +58,7 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
                 PageSize = PageSize,
                 SearchKey = SearchKey
             };
+            Provinces = await provinceAppService.GetAllForDropdownAsync(ct);
 
             var result = await userAppService.GetUsersListAsync(pagination, ct);
             if (result.IsSuccess)
@@ -97,6 +103,12 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
                 text = result.Message ?? (result.IsSuccess ? "تغییرات با موفقیت ذخیره شد." : "خطایی رخ داد.")
             });
         }
+        public async Task<JsonResult> OnGetCitiesByProvinceAsync(int provinceId, CancellationToken ct)
+        {
+            var cities = await cityAppService.GetCitiesByProvinceIdAsync(provinceId, ct);
+            return new JsonResult(cities);
+        }
+
 
         public async Task<IActionResult> OnPostDeleteAsync(int id, CancellationToken ct)
         {
@@ -162,6 +174,17 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
                 text = result.IsSuccess ? "خدمات متخصص با موفقیت بروزرسانی شد." : result.Message
             });
         }
+
+        public async Task<JsonResult> OnGetExpertProfileAsync(int userId, CancellationToken ct)
+        {
+            var result = await expertAppService.GetByUserId(userId, ct);
+
+            if (!result.IsSuccess || result.Data == null)
+                return new JsonResult(null);
+
+            return new JsonResult(result.Data);
+        }
+
 
         public class ChargeBalanceModel
         {
