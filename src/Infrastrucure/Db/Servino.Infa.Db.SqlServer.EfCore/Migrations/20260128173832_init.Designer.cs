@@ -12,8 +12,8 @@ using Servino.Infa.Db.SqlServer.EfCore.DbContexts;
 namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251231174627_fix-request")]
-    partial class fixrequest
+    [Migration("20260128173832_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -960,8 +960,8 @@ namespace Servino.Infa.Db.SqlServer.EfCore.Migrations
 
                     b.Property<string>("MobileNumber")
                         .IsRequired()
-                        .HasMaxLength(11)
-                        .HasColumnType("nvarchar(11)");
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<string>("ProfileImagePath")
                         .HasMaxLength(200)

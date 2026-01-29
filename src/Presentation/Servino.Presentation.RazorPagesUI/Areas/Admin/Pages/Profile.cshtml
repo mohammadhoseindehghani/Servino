@@ -1,4 +1,5 @@
 ﻿@page
+@using Servino.Framework.Extensions
 @model Servino.Presentation.RazorPagesUI.Areas.Admin.Pages.ProfileModel
 @{
     Layout = "Layouts/_ContentNavbarLayout";
@@ -75,7 +76,7 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">تاریخ ثبت نام:</label>
-                        <p class="fs-5">@Model.Profile.RegisterDate.ToShortDateString()</p>
+                        <p class="fs-5">@Model.Profile.RegisterDate.ToShamsi()</p>
                     </div>
                 </div>
             </div>

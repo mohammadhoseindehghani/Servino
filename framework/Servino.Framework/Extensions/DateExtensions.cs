@@ -51,4 +51,16 @@ public static class DateExtensions
 
         return null; // Return null for any conversion failure
     }
+
+
+
+    public static string ToShamsi(this DateTime dateTime, string format = "yyyy/MM/dd")
+    {
+        var pc = new PersianCalendar();
+
+        return format
+            .Replace("yyyy", pc.GetYear(dateTime).ToString("0000"))
+            .Replace("MM", pc.GetMonth(dateTime).ToString("00"))
+            .Replace("dd", pc.GetDayOfMonth(dateTime).ToString("00"));
+    }
 }

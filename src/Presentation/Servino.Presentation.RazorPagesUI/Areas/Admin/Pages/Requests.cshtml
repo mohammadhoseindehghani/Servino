@@ -1,5 +1,6 @@
 ﻿@page
 @using Servino.Domain.Core.RequestAgg.Enum
+@using Servino.Framework.Extensions
 @model Servino.Presentation.RazorPagesUI.Areas.Admin.Pages.RequestsModel
 @{
     Layout = "Layouts/_ContentNavbarLayout";
@@ -70,7 +71,7 @@
                             }
                             <span class="badge @statusClass">@item.Status</span>
                         </td>
-                        <td dir="ltr">@item.CreatedAt.ToString("yyyy/MM/dd")</td>
+                        <td dir="ltr">@item.CreatedAt.ToShamsi()</td>
                         <td>
                             <button type="button" class="btn btn-sm btn-outline-info"
                                     onclick="loadSuggestions(@item.Id, '@item.Title')">
