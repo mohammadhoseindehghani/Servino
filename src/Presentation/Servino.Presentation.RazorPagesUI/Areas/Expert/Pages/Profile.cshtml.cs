@@ -185,9 +185,11 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Expert.Pages
             public string? Address { get; set; }
 
             [MaxLength(16, ErrorMessage = "شماره کارت باید ۱۶ رقم باشد")]
+            [RegularExpression(@"^\d{16}$", ErrorMessage = "شماره کارت باید ۱۶ رقم باشد")]
             public string? BankCardNumber { get; set; }
 
             [MaxLength(26, ErrorMessage = "شماره شبا معتبر نیست")]
+            [RegularExpression(@"^\d{24}$", ErrorMessage = "شماره شبا باید ۲۴ رقم (بدون IR) باشد")]
             public string? ShebaNumber { get; set; }
 
             public IFormFile? NewImageFile { get; set; }

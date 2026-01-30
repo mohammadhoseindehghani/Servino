@@ -149,15 +149,24 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">شماره کارت</label>
-                            <input type="text" class="form-control dir-ltr" asp-for="Input.BankCardNumber" placeholder="xxxx-xxxx-xxxx-xxxx" maxlength="16" />
+                            <input type="text" class="form-control dir-ltr" asp-for="Input.BankCardNumber" 
+                                   placeholder="xxxx-xxxx-xxxx-xxxx" 
+                                   maxlength="16" 
+                                   pattern="[0-9]{16}" 
+                                   title="شماره کارت باید ۱۶ رقم باشد" />
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">شماره شبا</label>
                             <div class="input-group">
                                 <span class="input-group-text">IR</span>
-                                <input type="text" class="form-control dir-ltr" asp-for="Input.ShebaNumber" placeholder="۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰" maxlength="24" />
+                                <input type="text" class="form-control dir-ltr" asp-for="Input.ShebaNumber" 
+                                       placeholder="۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰" 
+                                       maxlength="24" 
+                                       pattern="[0-9]{24}" 
+                                       title="شماره شبا باید ۲۴ رقم (بدون IR) باشد" />
                             </div>
                         </div>
+
                         <div class="col-md-12">
                             <label class="form-label">درباره من (بیوگرافی)</label>
                             <textarea class="form-control" rows="4" asp-for="Input.Bio" placeholder="توضیحی کوتاه درباره تخصص و تجربیات خود بنویسید..."></textarea>

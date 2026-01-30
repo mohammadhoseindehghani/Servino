@@ -203,20 +203,17 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
                 if (!allowedExtensions.Contains(ext))
                     return new JsonResult(new { success = false, message = "فرمت فایل مجاز نیست." });
 
-                // 1️⃣ حذف تصویر قبلی (اگر وجود دارد)
                 var oldImageResult = await userAppService.GetUserProfileImageAsync(userId, ct);
                 if (!string.IsNullOrWhiteSpace(oldImageResult))
                 {
                     await fileService.DeleteFile(oldImageResult, ct);
                 }
 
-                // 2️⃣ آپلود تصویر جدید
                 var imagePath = await fileService.Upload(file, "Profiles", ct);
 
                 if (string.IsNullOrWhiteSpace(imagePath))
                     return new JsonResult(new { success = false, message = "آپلود فایل ناموفق بود." });
 
-                // 3️⃣ ذخیره مسیر در دیتابیس
                 var updateResult = await userAppService.UpdateProfileImageAsync(userId, imagePath, ct);
 
                 if (!updateResult.IsSuccess)

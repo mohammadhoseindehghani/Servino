@@ -30,7 +30,6 @@
                 icon: '@(Model.MessageType == "success" ? "success" : "error")',
                 confirmButtonText: 'باشه'
             }).then(() => {
-                // پاک کردن Query String بدون رفرش
                 const url = new URL(window.location);
                 url.searchParams.delete('msg');
                 url.searchParams.delete('text');
