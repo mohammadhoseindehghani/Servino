@@ -1,11 +1,12 @@
-﻿using Servino.Domain.Core._common;
+﻿using Microsoft.Extensions.Logging;
+using Servino.Domain.Core._common;
 using Servino.Domain.Core.HomeServiceAgg.Contracts.AppService;
 using Servino.Domain.Core.HomeServiceAgg.Contracts.Service;
 using Servino.Domain.Core.HomeServiceAgg.Dtos;
 
 namespace Servino.Domain.AppService;
 
-public class HomeServiceAppService(IHomeServiceService homeServiceService) : IHomeServiceAppService
+public class HomeServiceAppService(IHomeServiceService homeServiceService, ILogger<HomeServiceAppService> logger) : IHomeServiceAppService
 {
     public async Task<Result<bool>> CreateAsync(HomeServiceDto command, CancellationToken ct)
     {
@@ -27,7 +28,13 @@ public class HomeServiceAppService(IHomeServiceService homeServiceService) : IHo
         }
         catch (Exception ex)
         {
-            return Result<bool>.Failure($"خطای سیستمی: {ex.Message}");
+            logger.LogError(
+                ex,
+                "System error occurred while creating HomeService. CategoryId: {CategoryId}, Title: {Title}",
+                command?.CategoryId,
+                command?.Title);
+
+            return Result<bool>.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
         }
     }
 
@@ -48,7 +55,12 @@ public class HomeServiceAppService(IHomeServiceService homeServiceService) : IHo
         }
         catch (Exception ex)
         {
-            return Result<bool>.Failure($"خطای سیستمی: {ex.Message}");
+            logger.LogError(
+                ex,
+                "System error occurred while updating HomeService. ServiceId: {ServiceId}",
+                command?.Id);
+
+            return Result<bool>.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
         }
     }
 
@@ -64,7 +76,12 @@ public class HomeServiceAppService(IHomeServiceService homeServiceService) : IHo
         }
         catch (Exception ex)
         {
-            return Result<bool>.Failure($"خطای سیستمی: {ex.Message}");
+            logger.LogError(
+                ex,
+                "System error occurred while deleting HomeService. ServiceId: {ServiceId}",
+                id);
+
+            return Result<bool>.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
         }
     }
 
@@ -79,7 +96,12 @@ public class HomeServiceAppService(IHomeServiceService homeServiceService) : IHo
         }
         catch (Exception ex)
         {
-            return Result<HomeServiceDto>.Failure($"خطای سیستمی: {ex.Message}");
+            logger.LogError(
+                ex,
+                "System error occurred while retrieving HomeService by id. ServiceId: {ServiceId}",
+                id);
+
+            return Result<HomeServiceDto>.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
         }
     }
 
@@ -93,7 +115,13 @@ public class HomeServiceAppService(IHomeServiceService homeServiceService) : IHo
         }
         catch (Exception ex)
         {
-            return Result<List<HomeServiceSummaryDto>>.Failure($"خطای سیستمی: {ex.Message}");
+            logger.LogError(
+                ex,
+                "System error occurred while retrieving HomeService list. Page: {Page}, PageSize: {PageSize}",
+                search.PageNumber,
+                search.PageSize);
+
+            return Result<List<HomeServiceSummaryDto>>.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
         }
     }
 }

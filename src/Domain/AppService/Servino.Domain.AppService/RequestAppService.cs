@@ -1,4 +1,5 @@
-﻿using Servino.Domain.Core._common;
+﻿using Microsoft.Extensions.Logging;
+using Servino.Domain.Core._common;
 using Servino.Domain.Core.ExpertHomeServiceAgg.Contracts.Service;
 using Servino.Domain.Core.RequestAgg.Contracts.AppService;
 using Servino.Domain.Core.RequestAgg.Contracts.Service;
@@ -11,7 +12,8 @@ namespace Servino.Domain.AppService;
 public class RequestAppService(
         IRequestService requestService,
         IExpertService expertService, 
-        IExpertHomeServiceService expertHomeServiceService) : IRequestAppService
+        IExpertHomeServiceService expertHomeServiceService,
+        ILogger<RequestAppService> logger) : IRequestAppService
 {
     public async Task<Result<int>> CreateAsync(CreateRequestDto command, CancellationToken ct)
     {
@@ -26,13 +28,27 @@ public class RequestAppService(
             if (command.CityId <= 0)
                 return Result<int>.Failure("انتخاب شهر الزامی است.");
 
+            if (string.IsNullOrWhiteSpace(command.Address))
+                return Result<int>.Failure("ادرس نمیتواند خالی باشد.");
+
+            if (command.CustomerId <= 0)
+                return Result<int>.Failure("برای این درخواست مشتری معتبر نیست.");
+
+            if (command.HomeServiceId <= 0)
+                return Result<int>.Failure("انتخاب خدمات الزامی است.");
+
+
             var newId = await requestService.CreateAsync(command, ct);
 
             return Result<int>.Success(newId, "درخواست با موفقیت ثبت شد.");
         }
         catch (Exception ex)
         {
-            return Result<int>.Failure($"خطای سیستمی در ثبت درخواست: {ex.Message}");
+            logger.LogError(ex,
+                "System error in RequestAppService.CreateAsync | CustomerId: {CustomerId} | HomeServiceId: {HomeServiceId}",
+                command.CustomerId, command.HomeServiceId);
+
+            return Result<int>.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
         }
     }
 
@@ -56,8 +72,13 @@ public class RequestAppService(
         }
         catch (Exception ex)
         {
-            return Result<bool>.Failure($"خطای سیستمی: {ex.Message}");
+            logger.LogError(ex,
+                "System error in RequestAppService.UpdateAsync | RequestId: {RequestId}",
+                command.Id);
+
+            return Result<bool>.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
         }
+
     }
 
     public async Task<Result<RequestFullDto>> GetByIdAsync(int id, CancellationToken ct)
@@ -70,8 +91,13 @@ public class RequestAppService(
         }
         catch (Exception ex)
         {
-            return Result<RequestFullDto>.Failure($"خطا: {ex.Message}");
+            logger.LogError(ex,
+                "System error in RequestAppService.GetByIdAsync | RequestId: {RequestId}",
+                id);
+
+            return Result<RequestFullDto>.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
         }
+
     }
 
     public async Task<Result<RequestDetailDto>> GetDetailsByIdAsync(int id, CancellationToken ct)
@@ -84,8 +110,13 @@ public class RequestAppService(
         }
         catch (Exception ex)
         {
-            return Result<RequestDetailDto>.Failure($"خطا: {ex.Message}");
+            logger.LogError(ex,
+                "System error in RequestAppService.GetDetailsByIdAsync | RequestId: {RequestId}",
+                id);
+
+            return Result<RequestDetailDto>.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
         }
+
     }
 
 
@@ -154,7 +185,12 @@ public class RequestAppService(
         }
         catch (Exception ex)
         {
-            return Result<bool>.Failure($"خطا: {ex.Message}");
+            logger.LogError(ex,
+                "System error in RequestAppService.CancelRequestAsync | RequestId: {RequestId} | CustomerId: {CustomerId}",
+                requestId, customerId);
+
+            return Result<bool>.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
         }
+
     }
 }

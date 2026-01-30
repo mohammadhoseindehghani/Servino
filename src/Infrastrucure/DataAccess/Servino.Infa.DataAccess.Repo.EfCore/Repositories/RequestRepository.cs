@@ -177,4 +177,15 @@ public class RequestRepository(AppDbContext context) : IRequestRepository
         return await context.Requests
             .AnyAsync(r => r.Id == requestId && r.CustomerId == customerId, ct);
     }
+
+    public async Task<bool> IsAllowToCommentAsync(int requestId, CancellationToken ct)
+    {
+        var status = await context.Requests
+            .Where(r => r.Id == requestId)
+            .Select(r => r.Status)
+            .FirstOrDefaultAsync(ct);
+
+        return status is RequestStatus.Done or RequestStatus.Paid;
+    }
+
 }

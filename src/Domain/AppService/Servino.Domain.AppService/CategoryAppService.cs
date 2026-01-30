@@ -1,22 +1,23 @@
-﻿using Servino.Domain.Core._common;
+﻿using Microsoft.Extensions.Logging;
+using Servino.Domain.Core._common;
 using Servino.Domain.Core.CategoryAgg.Contracts.AppService;
 using Servino.Domain.Core.CategoryAgg.Contracts.Service;
 using Servino.Domain.Core.CategoryAgg.Dtos;
 
 namespace Servino.Domain.AppService;
 
-public class CategoryAppService(ICategoryService categoryService) : ICategoryAppService
+public class CategoryAppService(ICategoryService categoryService, ILogger<CategoryAppService> logger) : ICategoryAppService
 {
     public async Task<Result<bool>> CreateAsync(CategoryDto command, CancellationToken ct)
     {
-        //validation
+        if (string.IsNullOrWhiteSpace(command.Title))
+            return Result<bool>.Failure("عنوان الزامی است.");
+        
+        if (command.Title.Length <3)
+            return Result<bool>.Failure("عنوان نمیتواند کمتر از 3 کاراکتر باشد.");
+        
         try
         {
-            if (string.IsNullOrWhiteSpace(command.Title))
-            {
-                return Result<bool>.Failure("عنوان دسته‌بندی نمی‌تواند خالی باشد.");
-            }
-
             var isCreated = await categoryService.CreateAsync(command, ct);
 
             return !isCreated ? Result<bool>.Failure("خطایی در ایجاد دسته‌بندی رخ داد. ممکن است عنوان تکراری باشد.") 
@@ -24,7 +25,10 @@ public class CategoryAppService(ICategoryService categoryService) : ICategoryApp
         }
         catch (Exception ex)
         {
-            return Result<bool>.Failure($"خطای سیستمی: {ex.Message}");
+            logger.LogError(ex,
+                "System error in CategoryAppService.CreateAsync | Title: {Title} | ParentId: {ParentId}",
+                command.Title, command.ParentId);
+            return Result<bool>.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
         }
     }
 
@@ -39,7 +43,10 @@ public class CategoryAppService(ICategoryService categoryService) : ICategoryApp
         }
         catch (Exception ex)
         {
-            return Result<bool>.Failure($"خطای سیستمی: {ex.Message}");
+            logger.LogError(ex,
+                "System error in CategoryAppService.UpdateAsync | CategoryId: {CategoryId} | Title: {Title}",
+                command.Id, command.Title);
+            return Result<bool>.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
         }
     }
 
@@ -54,7 +61,10 @@ public class CategoryAppService(ICategoryService categoryService) : ICategoryApp
         }
         catch (Exception ex)
         {
-            return Result<bool>.Failure($"خطای سیستمی: {ex.Message}");
+            logger.LogError(ex,
+                "System error in CategoryAppService.DeleteAsync | CategoryId: {CategoryId}",
+                id);
+            return Result<bool>.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
         }
     }
 
@@ -69,7 +79,10 @@ public class CategoryAppService(ICategoryService categoryService) : ICategoryApp
         }
         catch (Exception ex)
         {
-            return Result<CategoryDto>.Failure($"خطای سیستمی: {ex.Message}");
+            logger.LogError(ex,
+                "System error in CategoryAppService.GetByIdAsync | CategoryId: {CategoryId}",
+                id);
+            return Result<CategoryDto>.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
         }
     }
 

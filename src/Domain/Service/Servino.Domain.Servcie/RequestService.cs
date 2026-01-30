@@ -47,4 +47,9 @@ public class RequestService(IRequestRepository requestRepo) : IRequestService
     {
         return await requestRepo.IsOwnerAsync(requestId, customerId, ct);
     }
+
+    public async Task<bool> IsAllowToCommentAsync(int requestId, CancellationToken ct)
+    {
+        return await requestRepo.IsAllowToCommentAsync(requestId, ct);
+    }
 }

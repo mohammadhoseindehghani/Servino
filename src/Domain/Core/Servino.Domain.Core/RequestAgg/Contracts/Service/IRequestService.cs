@@ -1,6 +1,5 @@
 ﻿using Servino.Domain.Core._common;
 using Servino.Domain.Core.RequestAgg.Dtos;
-using Servino.Domain.Core.RequestAgg.Entity;
 
 namespace Servino.Domain.Core.RequestAgg.Contracts.Service;
 
@@ -14,4 +13,5 @@ public interface IRequestService
     Task<List<RequestSummaryDto>> GetByCustomerIdAsync(int customerId, CancellationToken ct);
     Task<List<RequestSummaryDto>> GetAvailableForExpertAsync(List<int> expertServiceIds, int cityId, CancellationToken ct);
     Task<bool> IsOwnerAsync(int requestId, int customerId, CancellationToken ct);
+    Task<bool> IsAllowToCommentAsync(int requestId, CancellationToken ct);
 }

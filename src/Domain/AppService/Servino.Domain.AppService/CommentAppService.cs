@@ -2,14 +2,20 @@
 using Servino.Domain.Core.CommentAgg.Contracts.AppService;
 using Servino.Domain.Core.CommentAgg.Contracts.Service;
 using Servino.Domain.Core.CommentAgg.Dtos;
+using Servino.Domain.Core.RequestAgg.Contracts.Service;
 
 namespace Servino.Domain.AppService;
 
-public class CommentAppService(ICommentService commentService) : ICommentAppService
+public class CommentAppService(ICommentService commentService,IRequestService requestService) : ICommentAppService
 {
     public async Task<Result<bool>> AddAsync(CreateCommentDto command, CancellationToken ct)
     {
-        //validation
+        
+        if (string.IsNullOrWhiteSpace(command.Text) || string.IsNullOrWhiteSpace(command.Title)
+            || command.CustomerId == 0 || command.ExpertId == 0 || command.RequestId == 0)
+        {
+            return Result<bool>.Failure("پر کردن تمام مقادیر الزامی است.");
+        }
 
         var isCreated = await commentService.AddAsync(command, ct);
 
