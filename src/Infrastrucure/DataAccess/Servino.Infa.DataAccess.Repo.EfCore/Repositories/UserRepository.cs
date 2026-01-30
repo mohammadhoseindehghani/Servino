@@ -178,4 +178,23 @@ public class UserRepository(AppDbContext context) : IUserRepository
     {
         return await context.Users.CountAsync(ct);
     }
+
+    public async Task<string> GetUserProfileImageAsync(int userId, CancellationToken ct)
+    {
+        var profileImageUrl = await context.Users
+            .Where(u => u.Id == userId)
+            .Select(u => u.ProfileImagePath)
+            .FirstOrDefaultAsync(ct);
+
+        return profileImageUrl ?? string.Empty;
+    }
+
+    public async Task<bool> UpdateProfileImageAsync(int userId, string path, CancellationToken ct)
+    {
+        var effectedRows = await context.Users.Where(u => u.Id == userId)
+            .ExecuteUpdateAsync(setter => setter
+                .SetProperty(u => u.ProfileImagePath, path), ct);
+
+        return effectedRows > 0;
+    }
 }

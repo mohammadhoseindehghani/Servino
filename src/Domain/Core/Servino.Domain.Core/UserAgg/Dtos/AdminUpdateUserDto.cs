@@ -8,7 +8,8 @@ public class AdminUpdateUserDto
     public string Mobile { get; set; }
     public int CityId { get; set; }
     public int ProvinceId { get; set; }
-    public string Role { get; set; } 
+    public string Role { get; set; }
+    public string? ProfileImagePath { get; set; }
 
     public string? NewPassword { get; set; }
 

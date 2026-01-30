@@ -1,5 +1,6 @@
 ﻿@page
 @using Servino.Domain.Core.RequestAgg.Enum
+@using Servino.Framework.Extensions
 @model Servino.Presentation.RazorPagesUI.Areas.Customer.Pages.MyRequestsModel
 @{
     Layout = "Layouts/_ContentNavbarLayout"; 
@@ -31,7 +32,7 @@
                         <tr>
                             <td><strong>@item.Title</strong></td>
                             <td>@item.ServiceName</td>
-                            <td>@item.DateRequired</td> 
+                            <td>@item.DateRequired.ToShamsi()</td> 
                             <td>
                                 @switch (item.Status)
                                 {

@@ -104,7 +104,6 @@
                                         data-fullname="@user.FullName">
                                     <i class="ti ti-wallet"></i>
                                 </button>
-
                                 <button type="button" class="btn btn-icon btn-sm btn-label-primary edit-btn"
                                         data-bs-toggle="modal"
                                         data-bs-target="#editUserModal"
@@ -112,8 +111,9 @@
                                         data-fullname="@user.FullName"
                                         data-mobile="@user.Mobile"
                                         data-role="@user.Role"
-                                        data-provinceid="@(user.ProvinceId.HasValue ? user.ProvinceId.Value : "")"
-                                        data-cityid="@(user.CityId.HasValue ? user.CityId.Value : "")">
+                                        data-provinceid="@(user.ProvinceId.HasValue? user.ProvinceId.Value : "")"
+                                        data-cityid="@(user.CityId.HasValue? user.CityId.Value : "")"
+                                        data-profileimage="@(user.ImageUrl ?? "")">
                                     <i class="ti ti-edit"></i>
                                 </button>
 
@@ -129,7 +129,7 @@
 
                                 }
 
-                                <form method="post" asp-page-handler="Delete" asp-route-id="@user.Id" class="d-inline" 
+                                <form method="post" asp-page-handler="Delete" asp-route-id="@user.Id" class="d-inline"
                                       onsubmit="return confirm('آیا مطمئن هستید؟');">
                                     <button type="submit" class="btn btn-icon btn-sm btn-label-danger">
                                         <i class="ti ti-trash"></i>
@@ -176,37 +176,69 @@
 <div class="modal fade" id="editUserModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-
             <div class="modal-header">
                 <h5 class="modal-title">ویرایش کاربر</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
-            <form method="post" asp-page-handler="Edit">
+            <form method="post" asp-page-handler="Edit" id="editUserForm" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
                 <div class="modal-body">
-
                     <input type="hidden" asp-for="EditModel.Id" id="editUserId" />
                     <input type="hidden" asp-for="EditModel.Role" id="editUserRole" />
+                    <input type="hidden" asp-for="EditModel.ProfileImagePath" id="profileImagePath" />
 
                     <div class="row g-3">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">تصویر پروفایل</label>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="position-relative">
+                                    <img id="currentProfileImage"
+                                         src="/img/avatars/1.png"
+                                         alt="تصویر پروفایل"
+                                         class="rounded-circle border"
+                                         style="width: 100px; height: 100px; object-fit: cover;">
+                                    <button type="button" id="removeImageBtn" class="btn btn-sm btn-danger position-absolute top-0 end-0 rounded-circle"
+                                            style="width: 24px; height: 24px; padding: 0; display: none;">
+                                        <i class="ti ti-x" style="font-size: 12px;"></i>
+                                    </button>
+                                </div>
+
+                                <!-- آپلود فایل جدید -->
+                                <div class="flex-grow-1">
+                                    <div class="input-group">
+                                        <input type="file" class="form-control" id="profileImageUpload" accept="image/*">
+                                        <button class="btn btn-outline-secondary" type="button" id="uploadImageBtn">
+                                            <i class="ti ti-upload"></i>
+                                        </button>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">
+                                        فرمت‌های مجاز: JPG, PNG, GIF. حداکثر حجم: 2MB
+                                    </small>
+                                    <div id="imageUploadProgress" class="progress mt-2" style="height: 6px; display: none;">
+                                        <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="col-md-6">
-                            <label>نام</label>
+                            <label class="form-label">نام</label>
                             <input class="form-control" asp-for="EditModel.FirstName" id="editFirstName" />
                         </div>
 
                         <div class="col-md-6">
-                            <label>نام خانوادگی</label>
+                            <label class="form-label">نام خانوادگی</label>
                             <input class="form-control" asp-for="EditModel.LastName" id="editLastName" />
                         </div>
 
                         <div class="col-md-6">
-                            <label>موبایل</label>
+                            <label class="form-label">موبایل</label>
                             <input class="form-control" asp-for="EditModel.Mobile" id="editMobile" />
                         </div>
 
                         <div class="col-md-6">
-                            <label>استان</label>
+                            <label class="form-label">استان</label>
                             <select class="form-select" asp-for="EditModel.ProvinceId" id="editProvince">
                                 <option value="">انتخاب استان</option>
                                 @foreach (var p in Model.Provinces)
@@ -217,7 +249,7 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label>شهر</label>
+                            <label class="form-label">شهر</label>
                             <select class="form-select" asp-for="EditModel.CityId" id="editCity" disabled>
                                 <option value="">انتخاب شهر</option>
                             </select>
@@ -248,17 +280,16 @@
                         <label class="text-warning">رمز جدید (اختیاری)</label>
                         <input asp-for="EditModel.NewPassword" class="form-control" />
                     </div>
-
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-primary">ذخیره</button>
+                    <button type="submit" class="btn btn-primary">ذخیره</button>
                 </div>
             </form>
-
         </div>
     </div>
 </div>
+
 
 
 <div class="modal fade" id="servicesModal" tabindex="-1">
@@ -312,6 +343,80 @@
 
 @section PageScripts {
     <script>
+        function loadProfileImage(imageUrl) {
+            const imgElement = $('#currentProfileImage');
+            const hiddenInput = $('#profileImagePath');
+            const removeBtn = $('#removeImageBtn');
+
+            if (imageUrl && imageUrl.trim() !== '') {
+                let fullImageUrl = imageUrl;
+                if (!imageUrl.startsWith('http') && !imageUrl.startsWith('/')) {
+                    fullImageUrl = '/uploads/' + imageUrl;
+                } else if (imageUrl.startsWith('~')) {
+                    fullImageUrl = imageUrl.replace('~', '');
+                }
+                imgElement.attr('src', fullImageUrl);
+                hiddenInput.val(imageUrl);
+                removeBtn.show();
+            } else {
+                imgElement.attr('src', '/assets/img/avatars/default-avatar.png');
+                hiddenInput.val('');
+                removeBtn.hide();
+            }
+        }
+
+               function uploadProfileImage(file, userId) {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('userId', userId);
+
+                const token = $('#editUserForm input[name="__RequestVerificationToken"]').val();
+                if (token) {
+                    formData.append('__RequestVerificationToken', token);
+                }
+
+                const progressBar = $('#imageUploadProgress .progress-bar');
+                const progressContainer = $('#imageUploadProgress');
+                progressContainer.show();
+                progressBar.css('width', '0%');
+
+                $.ajax({
+                    url: '?handler=UploadProfileImage',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    xhr: function () {
+                        const xhr = new window.XMLHttpRequest();
+                        xhr.upload.addEventListener('progress', function (evt) {
+                            if (evt.lengthComputable) {
+                                const percent = (evt.loaded / evt.total) * 100;
+                                progressBar.css('width', percent + '%');
+                            }
+                        }, false);
+                        return xhr;
+                    },
+                    success: function (response) {
+                        progressContainer.hide();
+                        if (response.success) {
+                            loadProfileImage(response.imagePath);
+                            resolve(response);
+                        } else {
+                            alert('خطا در آپلود: ' + (response.message || 'نامشخص'));
+                            reject(response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        progressContainer.hide();
+                        console.error('Upload error:', status, error, xhr.responseText);
+                        alert('خطا در ارتباط با سرور. لطفاً کنسول مرورگر رو چک کنید (F12).');
+                        reject(error);
+                    }
+                });
+            });
+        }
+
         function loadCities(provinceId, selectedCityId = null) {
             const citySelect = $('#editCity');
             citySelect.prop('disabled', true).html('<option>در حال بارگذاری...</option>');
@@ -324,45 +429,33 @@
             $.get('?handler=CitiesByProvince', { provinceId })
                 .done(res => {
                     citySelect.empty().append('<option value="">انتخاب شهر</option>');
-                    res.forEach(c => {
-                        citySelect.append(`<option value="${c.id}">${c.title}</option>`);
-                    });
-                    if (selectedCityId) {
-                        citySelect.val(selectedCityId);
-                    }
+                    res.forEach(c => citySelect.append(`<option value="${c.id}">${c.title}</option>`));
+                    if (selectedCityId) citySelect.val(selectedCityId);
                     citySelect.prop('disabled', false);
                 })
                 .fail(() => {
-                    citySelect.html('<option value="">خطا در بارگذاری شهرها</option>').prop('disabled', true);
+                    citySelect.html('<option value="">خطا در بارگذاری</option>').prop('disabled', true);
                 });
         }
 
-        $('#editProvince').on('change', function () {
-            const provinceId = $(this).val();
-            loadCities(provinceId);
-        });
-
-        $('#chargeModal').on('show.bs.modal', function (e) {
-            const button = e.relatedTarget;
-            const userId = button.dataset.userid;
-            const fullName = button.dataset.fullname;
-
-            $('#inputChargeUserId').val(userId);
-            $('#lblChargeUserName').text(fullName);
-        });
+        function clearExpertFields() {
+            $('[name^="EditModel.ExpertInfo"]').val('');
+        }
 
         $(document).on('click', '.edit-btn', function () {
-            const id = $(this).data('id');
-            const role = $(this).data('role');
-            const fullName = $(this).data('fullname');
-            const mobile = $(this).data('mobile');
-
-            let provinceId = $(this).data('provinceid') || null;
-            let cityId = $(this).data('cityid') || null;
+            const btn = $(this);
+            const id = btn.data('id');
+            const role = btn.data('role');
+            const fullName = btn.data('fullname') || '';
+            const mobile = btn.data('mobile') || '';
+            let provinceId = btn.data('provinceid') || null;
+            let cityId = btn.data('cityid') || null;
+                    const profileImage = $(this).data('profileimage') || '';
+        loadProfileImage(profileImage);
 
             const names = fullName.trim().split(/\s+/);
-            const firstName = names[0] || '';
-            const lastName = names.slice(1).join(' ') || '';
+            const lastName = names.pop() || '';               
+            const firstName = names.join(' ') || '';           
 
             $('#editUserId').val(id);
             $('#editUserRole').val(role);
@@ -370,75 +463,130 @@
             $('#editLastName').val(lastName);
             $('#editMobile').val(mobile);
 
-            clearExpert();
+            clearExpertFields();
             $('#expertFields').hide();
             $('#editProvince').val('');
             $('#editCity').html('<option value="">انتخاب شهر</option>').prop('disabled', true);
 
-            $('#editProvince').val(provinceId || '');
-            loadCities(provinceId, cityId);
+            if (provinceId) {
+                $('#editProvince').val(provinceId);
+                loadCities(provinceId, cityId);
+            }
 
             if (role === 'Expert') {
                 $('#expertFields').show();
                 $.get('?handler=ExpertProfile', { userId: id })
-                    .done(d => {
-                        if (!d) return;
+                    .done(data => {
+                        if (!data) return;
 
-                        $('[name="EditModel.ExpertInfo.ShebaNumber"]').val(d.shebaNumber || '');
-                        $('[name="EditModel.ExpertInfo.BankCardNumber"]').val(d.bankCardNumber || '');
-                        $('[name="EditModel.ExpertInfo.Address"]').val(d.address || '');
-                        $('[name="EditModel.ExpertInfo.Bio"]').val(d.bio || '');
+                        $('[name="EditModel.ExpertInfo.ShebaNumber"]').val(data.shebaNumber || '');
+                        $('[name="EditModel.ExpertInfo.BankCardNumber"]').val(data.bankCardNumber || '');
+                        $('[name="EditModel.ExpertInfo.Address"]').val(data.address || '');
+                        $('[name="EditModel.ExpertInfo.Bio"]').val(data.bio || '');
 
-                        if (d.provinceId && d.cityId) {
-                            $('#editProvince').val(d.provinceId);
-                            loadCities(d.provinceId, d.cityId);
+                        if (data.provinceId && data.cityId) {
+                            provinceId = data.provinceId;
+                            cityId = data.cityId;
+                            $('#editProvince').val(provinceId);
+                            loadCities(provinceId, cityId);
+                        }
+                        if (data.profileImagePath) {
+                            loadProfileImage(data.profileImagePath);
                         }
                     });
             }
         });
 
-        function clearExpert() {
-            $('[name^="EditModel.ExpertInfo"]').val('');
-        }
+        $('#uploadImageBtn').on('click', () => $('#profileImageUpload').click());
 
-                $('#servicesModal').on('show.bs.modal', function (e) {
-            const button = e.relatedTarget;
-            const expertId = button.dataset.userid;
-            const fullName = button.dataset.fullname;
+        $('#profileImageUpload').on('change', function () {
+            const file = this.files[0];
+            const userId = $('#editUserId').val();
+            if (!file || !userId) return alert('کاربر انتخاب نشده');
+
+            if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
+                alert('فرمت مجاز نیست');
+                return $(this).val('');
+            }
+            if (file.size > 2 * 1024 * 1024) {
+                alert('حجم بیش از ۲ مگابایت');
+                return $(this).val('');
+            }
+
+            uploadProfileImage(file, userId).then(() => $(this).val(''));
+        });
+
+        $('#removeImageBtn').on('click', function () {
+            if (!confirm('حذف تصویر؟')) return;
+
+            const userId = $('#editUserId').val();
+            if (!userId) return;
+
+            const token = $('#editUserForm input[name="__RequestVerificationToken"]').val();
+
+            $.ajax({
+                url: '?handler=RemoveProfileImage',
+                type: 'POST',
+                data: {
+                    userId: userId,
+                    __RequestVerificationToken: token  
+                },
+                success: function (res) {
+                    if (res.success) {
+                        loadProfileImage('');
+                        alert('تصویر حذف شد');
+                    } else {
+                        alert(res.message || 'خطا در حذف');
+                    }
+                },
+                error: function () {
+                    alert('خطا در ارتباط با سرور');
+                }
+            });
+        });
+
+        $('#editProvince').on('change', function () {
+            loadCities($(this).val());
+        });
+
+        $('#chargeModal').on('show.bs.modal', function (e) {
+            const btn = e.relatedTarget;
+            $('#inputChargeUserId').val(btn.dataset.userid);
+            $('#lblChargeUserName').text(btn.dataset.fullname);
+        });
+
+        $('#servicesModal').on('show.bs.modal', function (e) {
+            const btn = e.relatedTarget;
+            const expertId = btn.dataset.userid;
+            const fullName = btn.dataset.fullname;
 
             $('#inputServiceExpertId').val(expertId);
             $('#lblServiceExpertName').text(fullName);
+
             const container = $('#servicesListContainer');
             container.html('<div class="text-center"><div class="spinner-border text-primary"></div></div>');
 
-        $.get('?handler=ExpertServices', { userId: expertId })
-            .done(data => {
-                console.log('Data received:', data);
-                console.log('First item:', data[0]);
-
-                container.empty();
-                if (data && data.length > 0) {
-                    data.forEach(service => {
-                        const checked = service.isSelected ? 'checked' : '';
-                        const html = `
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="SelectedServiceIds" value="${service.homeServiceId}" id="svc_${service.homeServiceId}" ${checked}>
-                                <label class="form-check-label" for="svc_${service.homeServiceId}">${service.homeServiceTitle}</label>
-                            </div>`;
-                        container.append(html);
-                    });
-                } else {
-                    container.append('<p class="text-muted">هیچ خدمتی یافت نشد.</p>');
-                }
-            })
-
-                .fail((jqXHR, textStatus, errorThrown) => {
-                    console.error('Error:', textStatus, errorThrown);
-                    console.error('Response:', jqXHR.responseText);
-                    container.html('<p class="text-danger">خطا در بارگذاری خدمات</p>');
-                });
+            $.get('?handler=ExpertServices', { userId: expertId })
+                .done(data => {
+                    container.empty();
+                    if (data && data.length > 0) {
+                        data.forEach(service => {
+                            const checked = service.isSelected ? 'checked' : '';
+                            const html = `
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="SelectedServiceIds"
+                                           value="${service.homeServiceId}" id="svc_${service.homeServiceId}" ${checked}>
+                                    <label class="form-check-label" for="svc_${service.homeServiceId}">
+                                        ${service.homeServiceTitle}
+                                    </label>
+                                </div>`;
+                            container.append(html);
+                        });
+                    } else {
+                        container.append('<p class="text-muted">هیچ خدمتی یافت نشد.</p>');
+                    }
+                })
+                .fail(() => container.html('<p class="text-danger">خطا در بارگذاری خدمات</p>'));
         });
-
-
     </script>
 }

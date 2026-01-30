@@ -95,4 +95,14 @@ public class UserService(IUserRepository userRepo) : IUserService
     {
         return await userRepo.GetCountAsync(ct);
     }
+
+    public async Task<string> GetUserProfileImageAsync(int userId, CancellationToken ct)
+    {
+        return await userRepo.GetUserProfileImageAsync(userId, ct);
+    }
+
+    public async Task<bool> UpdateProfileImageAsync(int userId, string path, CancellationToken ct)
+    {
+        return await userRepo.UpdateProfileImageAsync(userId, path, ct);
+    }
 }

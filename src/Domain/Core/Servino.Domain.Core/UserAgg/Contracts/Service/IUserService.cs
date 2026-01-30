@@ -1,6 +1,5 @@
 ﻿using Servino.Domain.Core._common;
 using Servino.Domain.Core.UserAgg.Dtos;
-using Servino.Domain.Core.UserAgg.Dtos.Identity;
 
 namespace Servino.Domain.Core.UserAgg.Contracts.Service;
 
@@ -18,4 +17,6 @@ public interface IUserService
     Task<bool> ChangeBalanceAsync(int userId, decimal amount, CancellationToken ct);
     Task<bool> IsEmailExistAsync(string email, CancellationToken ct);
     Task<int> GetCountAsync(CancellationToken ct);
+    Task<string> GetUserProfileImageAsync(int userId, CancellationToken ct);
+    Task<bool> UpdateProfileImageAsync(int userId, string path, CancellationToken ct);
 }

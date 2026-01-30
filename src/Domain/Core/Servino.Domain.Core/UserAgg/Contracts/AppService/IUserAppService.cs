@@ -25,4 +25,7 @@ public interface IUserAppService
     Task<Result<bool>> ChangePasswordAsync(ChangePasswordDto command, CancellationToken ct);
     Task<bool> IsMobileExistAsync(string mobile, CancellationToken ct);
 
+    Task<string> GetUserProfileImageAsync(int userId, CancellationToken ct);
+    Task<Result<bool>> UpdateProfileImageAsync(int userId, string path, CancellationToken ct);
+
 }

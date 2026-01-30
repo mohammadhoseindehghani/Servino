@@ -21,6 +21,7 @@ public class AdminRepository(AppDbContext context) : IAdminRepository
                     Email = c.User.Email,
                     Phone = c.User.MobileNumber,
                     RegisterDate = c.CreatedAt,
+                    ProfileImagePath = c.User.ProfileImagePath
                 }
             ).FirstOrDefaultAsync(ct);
     }

@@ -35,6 +35,7 @@ public class CustomerRepository(AppDbContext context) : ICustomerRepository
                     Balance = c.User.Balance,
                     Email = c.User.Email,
                     Phone = c.User.MobileNumber,
+                    ProfileImagePath = c.User.ProfileImagePath
                 }
             ).FirstOrDefaultAsync(ct);
     }

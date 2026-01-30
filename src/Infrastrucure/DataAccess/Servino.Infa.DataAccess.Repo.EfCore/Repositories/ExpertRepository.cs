@@ -34,6 +34,7 @@ public class ExpertRepository(AppDbContext context) : IExpertRepository
                     CityId = e.User.CityId,
                     FirstName = e.User.FirstName,
                     LastName = e.User.LastName,
+                    ProfileImagePath = e.User.ProfileImagePath,
                     BankCardNumber = e.BankCardNumber,
                     Bio = e.Bio,
                     Email = e.User.Email,

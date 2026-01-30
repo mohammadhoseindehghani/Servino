@@ -6,12 +6,13 @@ using Servino.Domain.Core.LocationAgg.Contracts.AppService;
 using Servino.Domain.Core.LocationAgg.Dtos;
 using Servino.Domain.Core.UserAgg.Contracts.AppService;
 using Servino.Domain.Core.UserAgg.Dtos;
+using Servino.Presentation.RazorPagesUI.Services.File;
 
 namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 {
     [Authorize(Roles = "Admin")]
     public class UserManagerModel(IUserAppService userAppService, IExpertAppService expertAppService, IProvinceAppService provinceAppService,
-        ICityAppService cityAppService)
+        ICityAppService cityAppService, IFileService fileService, ILogger<UserManagerModel> logger)
         : PageModel
     {
         public List<UserSummaryDto> Users { get; set; } = [];
@@ -42,7 +43,7 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
         public int TargetExpertId { get; set; }
 
         public string? MessageText { get; private set; }
-        public string? MessageType { get; private set; } 
+        public string? MessageType { get; private set; }
 
         public async Task OnGet(string? msg, string? text, CancellationToken ct)
         {
@@ -183,6 +184,98 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
                 return new JsonResult(null);
 
             return new JsonResult(result.Data);
+        }
+
+
+        public async Task<JsonResult> OnPostUploadProfileImageAsync(IFormFile file, int userId, CancellationToken ct)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                    return new JsonResult(new { success = false, message = "فایلی انتخاب نشده است." });
+
+                if (file.Length > 2 * 1024 * 1024)
+                    return new JsonResult(new { success = false, message = "حجم فایل نباید بیشتر از ۲ مگابایت باشد." });
+
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
+                var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+                if (!allowedExtensions.Contains(ext))
+                    return new JsonResult(new { success = false, message = "فرمت فایل مجاز نیست." });
+
+                // 1️⃣ حذف تصویر قبلی (اگر وجود دارد)
+                var oldImageResult = await userAppService.GetUserProfileImageAsync(userId, ct);
+                if (!string.IsNullOrWhiteSpace(oldImageResult))
+                {
+                    await fileService.DeleteFile(oldImageResult, ct);
+                }
+
+                // 2️⃣ آپلود تصویر جدید
+                var imagePath = await fileService.Upload(file, "Profiles", ct);
+
+                if (string.IsNullOrWhiteSpace(imagePath))
+                    return new JsonResult(new { success = false, message = "آپلود فایل ناموفق بود." });
+
+                // 3️⃣ ذخیره مسیر در دیتابیس
+                var updateResult = await userAppService.UpdateProfileImageAsync(userId, imagePath, ct);
+
+                if (!updateResult.IsSuccess)
+                    return new JsonResult(new { success = false, message = updateResult.Message });
+
+                return new JsonResult(new
+                {
+                    success = true,
+                    imagePath
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(
+                    ex,
+                    "System error in UserManager.UploadProfileImage | UserId: {UserId}",
+                    userId);
+
+                return new JsonResult(new
+                {
+                    success = false,
+                    message = "خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید."
+                });
+            }
+        }
+
+        public async Task<JsonResult> OnPostRemoveProfileImageAsync(
+            int userId,
+            CancellationToken ct)
+        {
+            try
+            {
+                var imageResult = await userAppService.GetUserProfileImageAsync(userId, ct);
+
+                if (!string.IsNullOrWhiteSpace(imageResult))
+                {
+                    await fileService.DeleteFile(imageResult, ct);
+                }
+
+                var updateResult = await userAppService.UpdateProfileImageAsync(userId, string.Empty, ct);
+
+                if (!updateResult.IsSuccess)
+                    return new JsonResult(new { success = false, message = updateResult.Message });
+
+                return new JsonResult(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(
+                    ex,
+                    "System error in UserManager.RemoveProfileImage | UserId: {UserId}",
+                    userId);
+
+                return new JsonResult(new
+                {
+                    success = false,
+                    message = "خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید."
+                });
+            }
         }
 
 

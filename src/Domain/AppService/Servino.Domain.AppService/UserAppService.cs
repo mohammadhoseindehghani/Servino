@@ -295,6 +295,18 @@ public class UserAppService(
         return await userService.IsMobileExistAsync(mobile, ct);
     }
 
+    public async Task<string> GetUserProfileImageAsync(int userId, CancellationToken ct)
+    {
+        return await userService.GetUserProfileImageAsync(userId, ct);
+    }
+
+    public async Task<Result<bool>> UpdateProfileImageAsync(int userId, string path, CancellationToken ct)
+    {
+        var result = await userService.UpdateProfileImageAsync(userId, path, ct);
+        return !result ? Result<bool>.Failure("عملیات به روز رسانی عکس پروفایل با شکست مواجه شد.")
+            : Result<bool>.Success(result);
+    }
+
     public async Task<Result<bool>> UpdateEmailAsync(int userId, string newEmail, CancellationToken ct)
     {
         var user = await userService.GetByIdAsync(userId, ct);
