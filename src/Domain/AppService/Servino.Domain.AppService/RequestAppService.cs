@@ -5,6 +5,9 @@ using Servino.Domain.Core.RequestAgg.Contracts.AppService;
 using Servino.Domain.Core.RequestAgg.Contracts.Service;
 using Servino.Domain.Core.RequestAgg.Dtos;
 using Servino.Domain.Core.RequestAgg.Enum;
+using Servino.Domain.Core.SuggestionAgg.Contracts.Service;
+using Servino.Domain.Core.SuggestionAgg.Dtos;
+using Servino.Domain.Core.SuggestionAgg.Enum;
 using Servino.Domain.Core.UserAgg.Contracts.Service;
 
 namespace Servino.Domain.AppService;
@@ -13,6 +16,8 @@ public class RequestAppService(
         IRequestService requestService,
         IExpertService expertService, 
         IExpertHomeServiceService expertHomeServiceService,
+        ISuggestionService suggestionService, 
+        IUserService userService, 
         ILogger<RequestAppService> logger) : IRequestAppService
 {
     public async Task<Result<int>> CreateAsync(CreateRequestDto command, CancellationToken ct)
@@ -192,5 +197,125 @@ public class RequestAppService(
             return Result<bool>.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
         }
 
+    }
+
+    public async Task<Result<bool>> MarkAsDoneAndPayAsync(int requestId, int customerId, CancellationToken ct)
+    {
+        try
+        {
+            var request = await requestService.GetByIdAsync(requestId, ct);
+            if (request == null) return Result<bool>.Failure("درخواست یافت نشد.");
+
+            if (request.CustomerId != customerId) return Result<bool>.Failure("دسترسی غیرمجاز.");
+
+            if (request.Status != RequestStatus.Started)
+                return Result<bool>.Failure("وضعیت سفارش برای پرداخت معتبر نیست.");
+
+            if (request.WinnerSuggestionId == null)
+                return Result<bool>.Failure("پیشنهاد تایید شده‌ای وجود ندارد.");
+
+            var suggestion = await suggestionService.GetByIdAsync(request.WinnerSuggestionId.Value, ct);
+            if (suggestion == null) return Result<bool>.Failure("اطلاعات پیشنهاد یافت نشد.");
+
+            decimal totalAmount = suggestion.SuggestedPrice;
+
+            var customerUser = await userService.GetByIdAsync(customerId, ct); 
+            if (customerUser.BalanceAmount < totalAmount)
+            {
+                return Result<bool>.Failure($"موجودی ناکافی است. مبلغ: {totalAmount:N0}، موجودی شما: {customerUser.BalanceAmount:N0}");
+            }
+
+            decimal adminShare = totalAmount * 0.10m; 
+            decimal expertShare = totalAmount * 0.90m; 
+            int adminUserId = 1; 
+
+
+            await userService.ChangeBalanceAsync(customerId, -totalAmount, ct);
+            await userService.ChangeBalanceAsync(suggestion.ExpertUserId, expertShare, ct);
+            await userService.ChangeBalanceAsync(adminUserId, adminShare, ct);
+
+            var updateDto = new UpdateRequestDto
+            {
+                Id = request.Id,
+                Title = request.Title,
+                Description = request.Description,
+                Address = request.Address,
+                CityId = request.CityId,
+                DateRequired = request.DateRequired,
+                WinnerSuggestionId = request.WinnerSuggestionId,
+                Status = RequestStatus.Paid, 
+                DateDone = DateTime.Now
+            };
+
+            await requestService.UpdateAsync(updateDto, ct);
+
+            return Result<bool>.Success(true, "پرداخت با موفقیت انجام شد و سفارش بسته شد.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error in MarkAsDoneAndPayAsync");
+            return Result<bool>.Failure($"خطای سیستمی: {ex.Message}");
+        }
+    }
+    public async Task<Result<bool>> SelectExpertAsync(int requestId, int suggestionId, int customerId, CancellationToken ct)
+    {
+        try
+        {
+            var request = await requestService.GetByIdAsync(requestId, ct);
+            if (request == null) return Result<bool>.Failure("درخواست یافت نشد.");
+
+            if (request.CustomerId != customerId) return Result<bool>.Failure("شما اجازه دسترسی به این درخواست را ندارید.");
+
+            if (request.Status != RequestStatus.WaitingForExperts && request.Status != RequestStatus.WaitingForSelection)
+                return Result<bool>.Failure("وضعیت درخواست برای انتخاب متخصص معتبر نیست.");
+
+            var suggestion = await suggestionService.GetByIdAsync(suggestionId, ct);
+            if (suggestion == null) return Result<bool>.Failure("پیشنهاد یافت نشد.");
+
+            if (suggestion.RequestId != requestId) return Result<bool>.Failure("این پیشنهاد مربوط به این درخواست نیست.");
+
+            var userDetail = await userService.GetByIdAsync(request.CustomerId, ct);
+
+            if (userDetail == null) return Result<bool>.Failure("اطلاعات کاربر یافت نشد.");
+
+            if (userDetail.BalanceAmount < suggestion.SuggestedPrice)
+            {
+                return Result<bool>.Failure($"موجودی ناکافی است. هزینه: {suggestion.SuggestedPrice:N0}، موجودی شما: {userDetail.BalanceAmount:N0}");
+            }
+
+            var updateSuggestionDto = new UpdateSuggestionDto
+            {
+                Id = suggestion.Id,
+                Status = SuggestionStatus.Accepted, 
+
+                SuggestedPrice = suggestion.SuggestedPrice,
+                SuggestedDate = suggestion.SuggestedDate,
+                EstimatedDurationHours = suggestion.EstimatedDurationHours,
+                Note = suggestion.Note
+            };
+
+            await suggestionService.UpdateAsync(updateSuggestionDto, ct);
+
+            var updateRequestDto = new UpdateRequestDto
+            {
+                Id = request.Id,
+                Title = request.Title,
+                Description = request.Description,
+                Address = request.Address,
+                CityId = request.CityId,
+                DateRequired = request.DateRequired,
+                Status = RequestStatus.Started, 
+                WinnerSuggestionId = suggestionId
+            };
+
+            await requestService.UpdateAsync(updateRequestDto, ct);
+
+            return Result<bool>.Success(true, "متخصص با موفقیت انتخاب شد.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error in SelectExpertAsync | RequestId: {RequestId}", requestId);
+            return Result<bool>.Failure("خطای سیستمی.");
+        }
     }
 }

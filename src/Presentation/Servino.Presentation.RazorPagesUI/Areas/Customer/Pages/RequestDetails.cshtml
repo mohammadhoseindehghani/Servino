@@ -1,0 +1,126 @@
+﻿@page "{id:int}"
+@using Servino.Domain.Core.RequestAgg.Enum
+@using Servino.Framework.Extensions
+@model Servino.Presentation.RazorPagesUI.Areas.Customer.Pages.RequestDetailsModel
+@{
+    Layout = "Layouts/_ContentNavbarLayout";
+    ViewData["Title"] = "جزئیات سفارش";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">@Model.RequestDetail.Title</h5>
+        <span class="badge bg-label-primary">@Model.RequestDetail.RequestStatus</span>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="fw-bold">توضیحات:</label>
+                <p>@Model.RequestDetail.Description</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="fw-bold">آدرس:</label>
+                <p>@Model.RequestDetail.CityName - @Model.RequestDetail.Address</p>
+            </div>
+            <div class="col-md-6">
+                <label class="fw-bold">تاریخ مورد نیاز:</label>
+                <p>@Model.RequestDetail.DateRequired.ToShamsi()</p>
+            </div>
+        </div>
+
+        @if (Model.RequestDetail.RequestStatus == RequestStatus.Started)
+        {
+            <hr />
+            <div class="alert alert-info">
+                <i class="ti ti-info-circle me-1"></i>
+                آیا کار توسط متخصص انجام شده است؟ با زدن دکمه زیر، هزینه پرداخت شده و سفارش بسته می‌شود.
+            </div>
+            <form method="post" asp-page-handler="FinishWork">
+                <input type="hidden" name="requestId" value="@Model.RequestDetail.Id" />
+                <button type="submit" class="btn btn-success w-100" onclick="return confirm('آیا از اتمام کار و پرداخت هزینه اطمینان دارید؟')">
+                    <i class="ti ti-check me-1"></i> تایید انجام کار و پرداخت
+                </button>
+            </form>
+        }
+    </div>
+</div>
+
+<div class="card">
+    <h5 class="card-header">پیشنهادات متخصصین</h5>
+    <div class="table-responsive text-nowrap">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>نام متخصص</th>
+                    <th>قیمت پیشنهادی</th>
+                    <th>تاریخ پیشنهادی</th>
+                    <th>مدت زمان</th>
+                    <th>توضیحات</th>
+                    <th>عملیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Suggestions.Any())
+                {
+                    @foreach (var item in Model.Suggestions)
+                    {
+                        var isSelected = item.Status == Servino.Domain.Core.SuggestionAgg.Enum.SuggestionStatus.Accepted;
+                        <tr class="@(isSelected ? "table-success" : "")">
+                            <td>
+                                <strong>@item.ExpertFullName</strong>
+                                @if (isSelected)
+                                {
+                                    <span class="badge bg-success ms-2">انتخاب شده</span>
+                                }
+                            </td>
+                            <td class="text-primary fw-bold">@item.SuggestedPrice.ToString("N0") تومان</td>
+                            <td>@item.SuggestedDate.ToShamsi()</td>
+                            <td>@item.EstimatedDurationHours ساعت</td>
+                            <td>
+                                <span class="d-inline-block text-truncate" style="max-width: 150px;" title="@item.Note">
+                                    @(item.Note ?? "-")
+                                </span>
+                            </td>
+                            <td>
+                                @if (Model.RequestDetail.RequestStatus == RequestStatus.WaitingForExperts ||
+                                                        Model.RequestDetail.RequestStatus == RequestStatus.WaitingForSelection)
+                                {
+                                    <form method="post" asp-page-handler="SelectExpert">
+                                        <input type="hidden" name="requestId" value="@Model.RequestDetail.Id" />
+                                        <input type="hidden" name="suggestionId" value="@item.Id" />
+                                        <button type="submit" class="btn btn-sm btn-primary" onclick="return confirm('آیا از انتخاب این متخصص اطمینان دارید؟ مبلغ موجودی شما چک خواهد شد.')">
+                                            انتخاب و تایید
+                                        </button>
+                                    </form>
+                                }
+                                else if (isSelected)
+                                {
+                                    <span class="text-success"><i class="ti ti-check"></i> تایید شده</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">هنوز پیشنهادی ثبت نشده است.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

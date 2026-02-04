@@ -92,6 +92,7 @@ public class RequestRepository(AppDbContext context) : IRequestRepository
                 DateRequired = r.DateRequired,
                 RequestStatus = r.Status, 
                 CustomerName = r.Customer.User.FirstName + " " + r.Customer.User.LastName,
+                CustomerId = r.CustomerId,
                 ImagePaths = r.Images.Select(i => i.ImagePath).ToList()
             })
             .FirstOrDefaultAsync(ct);

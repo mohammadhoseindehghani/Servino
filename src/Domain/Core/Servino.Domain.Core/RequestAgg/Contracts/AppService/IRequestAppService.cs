@@ -13,4 +13,6 @@ public interface IRequestAppService
     Task<List<RequestSummaryDto>> GetByCustomerIdAsync(int customerId, CancellationToken ct);
     Task<List<RequestSummaryDto>> GetAvailableForExpertAsync(int expertId, CancellationToken ct);
     Task<Result<bool>> CancelRequestAsync(int requestId, int customerId, CancellationToken ct);
+    Task<Result<bool>> MarkAsDoneAndPayAsync(int requestId, int customerId, CancellationToken ct);
+    Task<Result<bool>> SelectExpertAsync(int requestId, int suggestionId, int customerId, CancellationToken ct);
 }

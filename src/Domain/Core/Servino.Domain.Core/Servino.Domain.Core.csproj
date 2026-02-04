@@ -18,7 +18,6 @@
     <Folder Include="LocationAgg\Entity\" />
     <Folder Include="LocationAgg\Enum\" />
     <Folder Include="SuggestionAgg\Contracts\Data\" />
-    <Folder Include="SuggestionAgg\Dtos\" />
     <Folder Include="UserAgg\Enum\" />
   </ItemGroup>
 

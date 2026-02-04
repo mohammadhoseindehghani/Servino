@@ -13,4 +13,5 @@ public class RequestDetailDto
     public RequestStatus RequestStatus { get; set; }
     public List<string> ImagePaths { get; set; }
     public string CustomerName { get; set; }
+    public int CustomerId { get; set; }
 }

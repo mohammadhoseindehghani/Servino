@@ -3,24 +3,32 @@ using Servino.Domain.Core.CommentAgg.Contracts.AppService;
 using Servino.Domain.Core.CommentAgg.Contracts.Service;
 using Servino.Domain.Core.CommentAgg.Dtos;
 using Servino.Domain.Core.RequestAgg.Contracts.Service;
+using Servino.Domain.Core.RequestAgg.Enum;
+using Servino.Domain.Core.SuggestionAgg.Contracts.Service;
 
 namespace Servino.Domain.AppService;
 
-public class CommentAppService(ICommentService commentService,IRequestService requestService) : ICommentAppService
+public class CommentAppService(ICommentService commentService,IRequestService requestService, ISuggestionService suggestionService) : ICommentAppService
 {
     public async Task<Result<bool>> AddAsync(CreateCommentDto command, CancellationToken ct)
     {
-        
-        if (string.IsNullOrWhiteSpace(command.Text) || string.IsNullOrWhiteSpace(command.Title)
-            || command.CustomerId == 0 || command.ExpertId == 0 || command.RequestId == 0)
-        {
-            return Result<bool>.Failure("پر کردن تمام مقادیر الزامی است.");
-        }
+        var request = await requestService.GetByIdAsync(command.RequestId, ct);
+        if (request == null) return Result<bool>.Failure("درخواست یافت نشد.");
 
-        var isCreated = await commentService.AddAsync(command, ct);
+        if (request.Status != RequestStatus.Paid)
+            return Result<bool>.Failure("ثبت نظر فقط پس از پرداخت و اتمام نهایی کار امکان‌پذیر است.");
 
-        return !isCreated ? Result<bool>.Failure("خطایی در ثبت دیدگاه رخ داده است.", "Create_Error") 
-            : Result<bool>.Success(true, "دیدگاه شما با موفقیت ثبت شد و پس از تایید نمایش داده می‌شود.");
+        if (request.CustomerId != command.CustomerId)
+            return Result<bool>.Failure("شما مالک این درخواست نیستید.");
+
+        var suggestion = await suggestionService.GetByIdAsync(request.WinnerSuggestionId.Value, ct);
+        if (suggestion.ExpertId != command.ExpertId)
+            return Result<bool>.Failure("شما فقط می‌توانید برای متخصص انجام‌دهنده کار نظر دهید.");
+
+        var result = await commentService.AddAsync(command, ct);
+        return result
+            ? Result<bool>.Success(true, "نظر شما ثبت شد و پس از تایید نمایش داده می‌شود.")
+            : Result<bool>.Failure("خطا در ثبت نظر.");
     }
 
     public async Task<Result<List<CommentDto>>> GetAllAsync(PaginationRequestDto pagination, CancellationToken ct)

@@ -10,4 +10,14 @@ public class SuggestionService(ISuggestionRepository suggestionRepo) : ISuggesti
     {
         return await suggestionRepo.GetByRequestIdAsync(requestId, ct);
     }
+
+    public async Task<SuggestionDto?> GetByIdAsync(int id, CancellationToken ct)
+    {
+        return await suggestionRepo.GetByIdAsync(id, ct);
+    }
+
+    public async Task<bool> UpdateAsync(UpdateSuggestionDto command, CancellationToken ct)
+    {
+        return await suggestionRepo.UpdateAsync(command, ct);
+    }
 }

@@ -30,4 +30,41 @@ public class SuggestionRepository(AppDbContext context) : ISuggestionRepository
             })
             .ToListAsync(ct);
     }
+
+    public async Task<SuggestionDto?> GetByIdAsync(int id, CancellationToken ct)
+    {
+        return await context.Suggestions
+            .AsNoTracking()
+            .Where(s => s.Id == id)
+            .Select(s => new SuggestionDto
+            {
+                Id = s.Id,
+                RequestId = s.RequestId,
+                ExpertId = s.ExpertId,
+                ExpertUserId = s.Expert.UserId,
+                SuggestedPrice = s.SuggestedPrice,
+                SuggestedDate = s.SuggestedDate,
+                EstimatedDurationHours = s.EstimatedDurationHours,
+                Note = s.Note,
+                Status = s.Status,
+                CreatedAt = s.CreatedAt
+            })
+            .FirstOrDefaultAsync(ct);
+    }
+
+    public async Task<bool> UpdateAsync(UpdateSuggestionDto command, CancellationToken ct)
+    {
+        var suggestion = await context.Suggestions.FirstOrDefaultAsync(s => s.Id == command.Id, ct);
+
+        if (suggestion == null) return false;
+
+        suggestion.Status = command.Status;
+        suggestion.SuggestedPrice = command.SuggestedPrice;
+        suggestion.SuggestedDate = command.SuggestedDate;
+        suggestion.EstimatedDurationHours = command.EstimatedDurationHours;
+        suggestion.Note = command.Note;
+        suggestion.UpdatedAt = DateTime.Now;
+
+        return await context.SaveChangesAsync(ct) > 0;
+    }
 }
