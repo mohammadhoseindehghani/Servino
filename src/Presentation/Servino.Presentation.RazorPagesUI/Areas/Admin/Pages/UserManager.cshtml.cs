@@ -6,7 +6,7 @@ using Servino.Domain.Core.LocationAgg.Contracts.AppService;
 using Servino.Domain.Core.LocationAgg.Dtos;
 using Servino.Domain.Core.UserAgg.Contracts.AppService;
 using Servino.Domain.Core.UserAgg.Dtos;
-using Servino.Presentation.RazorPagesUI.Services.File;
+using IFileService = Servino.Presentation.RazorPagesUI.Services.File.IFileService;
 
 namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 {

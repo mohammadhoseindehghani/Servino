@@ -7,7 +7,7 @@ using Servino.Domain.Core.CategoryAgg.Contracts.AppService;
 using Servino.Domain.Core.CategoryAgg.Dtos;
 using Servino.Domain.Core.HomeServiceAgg.Contracts.AppService;
 using Servino.Domain.Core.HomeServiceAgg.Dtos;
-using Servino.Presentation.RazorPagesUI.Services.File;
+using IFileService = Servino.Presentation.RazorPagesUI.Services.File.IFileService;
 
 namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 {

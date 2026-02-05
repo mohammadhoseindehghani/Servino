@@ -25,5 +25,6 @@
   </Folder>
   <Folder Name="/src/Presentation/">
     <Project Path="src/Presentation/Servino.Presentation.RazorPagesUI/Servino.Presentation.RazorPagesUI.csproj" Id="add3cde9-a56c-4eaa-9ff8-2292d3e84317" />
+    <Project Path="src/Presentation/Servino.Presentation.WebApi/Servino.Presentation.WebApi.csproj" Id="2ab3e7c5-dd74-481c-9bf7-4f323fdb3c7c" />
   </Folder>
 </Solution>

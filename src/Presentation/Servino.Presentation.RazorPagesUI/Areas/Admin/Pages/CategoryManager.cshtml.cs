@@ -2,12 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Servino.Domain.AppService;
 using Servino.Domain.Core._common;
 using Servino.Domain.Core.CategoryAgg.Contracts.AppService;
 using Servino.Domain.Core.CategoryAgg.Dtos;
-using Servino.Presentation.RazorPagesUI.Services.File;
 using System.ComponentModel.DataAnnotations;
+using IFileService = Servino.Presentation.RazorPagesUI.Services.File.IFileService;
 
 namespace Servino.Presentation.RazorPagesUI.Areas.Admin.Pages
 {

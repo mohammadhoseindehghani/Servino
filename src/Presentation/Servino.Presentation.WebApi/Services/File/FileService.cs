@@ -1,5 +1,5 @@
 ﻿
-namespace Servino.Presentation.RazorPagesUI.Services.File;
+namespace Servino.Presentation.WebApi.Services.File;
 
 public class FileService(IWebHostEnvironment env) : IFileService
 {

@@ -9,9 +9,9 @@ using Servino.Domain.Core.RequestAgg.Contracts.AppService;
 using Servino.Domain.Core.RequestAgg.Dtos;
 using Servino.Domain.Core.UserAgg.Contracts.AppService;
 using Servino.Presentation.RazorPagesUI.Extensions;
-using Servino.Presentation.RazorPagesUI.Services.File;
 using System.ComponentModel.DataAnnotations;
 using Servino.Framework.Extensions;
+using IFileService = Servino.Presentation.RazorPagesUI.Services.File.IFileService;
 
 namespace Servino.Presentation.RazorPagesUI.Pages.Services
 {
