@@ -27,6 +27,7 @@ using Servino.Domain.Core.UserAgg.Contracts.AppService;
 using Servino.Domain.Core.UserAgg.Contracts.Data;
 using Servino.Domain.Core.UserAgg.Contracts.Service;
 using Servino.Domain.Service;
+using Servino.Framework.Caching;
 using Servino.Infa.DataAccess.Repo.EfCore.Repositories;
 using Servino.Infa.Db.SqlServer.EfCore.DataSeed;
 using Servino.Infa.Db.SqlServer.EfCore.DbContexts;
@@ -113,10 +114,19 @@ builder.Services.AddScoped<IAdminAppService, AdminAppService>();
 
 
 builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<ICacheService, RedisCacheService>();
+
 builder.Services.AddMemoryCache();
 
 builder.Services.AddScoped<ISmsService>(provider =>
-    new SmsIrService("Hsglr29hTKTzz9k4F9mDFVdFQMkllYkxv3VV5wDBilPyljbp")); 
+    new SmsIrService("Hsglr29hTKTzz9k4F9mDFVdFQMkllYkxv3VV5wDBilPyljbp"));
+
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration["Redis:Configuration"];
+    options.InstanceName = builder.Configuration["Redis:InstanceName"];
+});
+
 
 var app = builder.Build();
 app.UseMiddleware<RequestLoggingMiddleware>();

@@ -4,6 +4,7 @@ using Servino.Domain.Core.UserAgg.Contracts.Service;
 using Servino.Domain.Core.UserAgg.Dtos;
 using Servino.Domain.Core.UserAgg.Dtos.Identity;
 using Microsoft.Extensions.Logging;
+using Servino.Framework.Caching;
 
 
 namespace Servino.Domain.AppService;
@@ -13,6 +14,7 @@ public class UserAppService(
     IUserService userService,
     IExpertService expertService,
     ICustomerService customerService,
+    ICacheService cache,
     ILogger<UserAppService> logger) : IUserAppService
 {
 
@@ -36,9 +38,7 @@ public class UserAppService(
                 PhoneNumber = command.Mobile
             };
 
-            var identityResult =
-                await identityService.RegisterWithEmailAsync(registerDto, command.Role, ct);
-
+            var identityResult = await identityService.RegisterWithEmailAsync(registerDto, command.Role, ct);
             if (!identityResult.Succeeded)
                 return Result<bool>.Failure(identityResult.Message ?? "خطا در سیستم هویت‌سنجی");
 
@@ -71,13 +71,14 @@ public class UserAppService(
             if (!roleCreated)
                 throw new Exception("خطا در ایجاد اطلاعات نقش کاربر");
 
+
+            await cache.RemoveAsync(CacheKeys.UsersList("", 1, 10), ct);
+
             return Result<bool>.Success(true, "کاربر با موفقیت ایجاد شد.");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex,
-                "Error while creating user by admin. Email: {Email}",
-                command.Email);
+            logger.LogError(ex, "Error while creating user by admin. Email: {Email}", command.Email);
 
             if (userId > 0)
             {
@@ -96,6 +97,7 @@ public class UserAppService(
             return Result<bool>.Failure("خطای سیستمی در ایجاد کاربر. لطفاً مجدداً تلاش کنید.");
         }
     }
+
 
 
     public async Task<Result<bool>> RegisterUserAsync(RegisterDto command, CancellationToken ct)
@@ -194,6 +196,12 @@ public class UserAppService(
     public async Task<Result<bool>> UpdateUserProfileAsync(UpdateUserDto command, CancellationToken ct)
     {
         var success = await userService.UpdateProfileAsync(command, ct);
+
+        if (success)
+        {
+            await cache.RemoveAsync(CacheKeys.UserProfile(command.Id), ct);
+        }
+
         return !success ? Result<bool>.Failure("خطا در بروزرسانی اطلاعات پروفایل.") 
             : Result<bool>.Success(true, "پروفایل با موفقیت بروزرسانی شد.");
     }
@@ -341,10 +349,16 @@ public class UserAppService(
 
     public async Task<Result<UserDetailDto>> GetUserProfileAsync(int userId, CancellationToken ct)
     {
-        var user = await userService.GetByIdAsync(userId, ct);
-        return user == null ? Result<UserDetailDto>.Failure("کاربر یافت نشد.", "404") 
-            : Result<UserDetailDto>.Success(user);
+        var key = CacheKeys.UserProfile(userId);
+
+        var profile = await cache.GetOrSetAsync(key,
+            async () => await userService.GetByIdAsync(userId, ct), CacheTtl.UserProfile, ct);
+
+        return profile == null
+            ? Result<UserDetailDto>.Failure("کاربر یافت نشد.", "404")
+            : Result<UserDetailDto>.Success(profile);
     }
+
 
     public async Task<Result<bool>> EditUserProfileAsync(UpdateUserDto command, CancellationToken ct)
     {
@@ -362,9 +376,12 @@ public class UserAppService(
 
     public async Task<Result<List<UserSummaryDto>>> GetUsersListAsync(PaginationRequestDto search, CancellationToken ct)
     {
-        var users = await userService.GetAllAsync(search, ct);
-        return Result<List<UserSummaryDto>>.Success(users);
+        var key = CacheKeys.UsersList(search.SearchKey ?? "", search.PageNumber, search.PageSize);
+
+        return await cache.GetOrSetAsync(key,
+            async () => await userService.GetAllAsync(search, ct), CacheTtl.UsersList, ct);
     }
+
 
     public async Task<Result<bool>> DeleteUserAsync(int userId, CancellationToken ct)
     {
@@ -381,6 +398,11 @@ public class UserAppService(
 
             var dbResult = await userService.DeleteAsync(userId, ct);
 
+            if (dbResult)
+            {
+                await cache.RemoveAsync(CacheKeys.UsersList("", 1, 10), ct);
+            }
+
             return !dbResult ? Result<bool>.Failure("کاربر در دیتابیس اصلی یافت نشد اما اکانت سیستمی غیرفعال شد.") 
                 : Result<bool>.Success(true, "کاربر با موفقیت حذف و اطلاعات تماس او آزاد شد.");
         }
@@ -389,4 +411,19 @@ public class UserAppService(
             return Result<bool>.Failure($"خطای سیستمی: {ex.Message}");
         }
     }
+
+
+    private static class CacheKeys
+    {
+        public static string UserProfile(int userId) => $"user:profile:{userId}";
+        public static string UsersList(string searchKey, int pageNumber, int pageSize) =>
+            $"users:all:{searchKey}:{pageNumber}:{pageSize}";
+    }
+
+    private static class CacheTtl
+    {
+        public static readonly TimeSpan UserProfile = TimeSpan.FromMinutes(5);
+        public static readonly TimeSpan UsersList = TimeSpan.FromMinutes(10);
+    }
+
 }

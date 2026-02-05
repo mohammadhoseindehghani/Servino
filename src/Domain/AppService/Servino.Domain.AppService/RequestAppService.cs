@@ -9,15 +9,17 @@ using Servino.Domain.Core.SuggestionAgg.Contracts.Service;
 using Servino.Domain.Core.SuggestionAgg.Dtos;
 using Servino.Domain.Core.SuggestionAgg.Enum;
 using Servino.Domain.Core.UserAgg.Contracts.Service;
+using Servino.Framework.Caching;
 
 namespace Servino.Domain.AppService;
 
 public class RequestAppService(
         IRequestService requestService,
-        IExpertService expertService, 
+        IExpertService expertService,
         IExpertHomeServiceService expertHomeServiceService,
-        ISuggestionService suggestionService, 
-        IUserService userService, 
+        ISuggestionService suggestionService,
+        IUserService userService,
+        ICacheService cache,
         ILogger<RequestAppService> logger) : IRequestAppService
 {
     public async Task<Result<int>> CreateAsync(CreateRequestDto command, CancellationToken ct)
@@ -44,6 +46,11 @@ public class RequestAppService(
 
 
             var newId = await requestService.CreateAsync(command, ct);
+
+            await cache.BumpStampAsync(CacheKeys.StampAllRequests, CacheTtl.Stamps, ct);
+            await cache.BumpStampAsync(CacheKeys.StampAvailableRequests, CacheTtl.Stamps, ct);
+            await cache.BumpStampAsync(CacheKeys.StampCustomerRequests(command.CustomerId), CacheTtl.Stamps, ct);
+
 
             return Result<int>.Success(newId, "درخواست با موفقیت ثبت شد.");
         }
@@ -72,7 +79,17 @@ public class RequestAppService(
 
             var isUpdated = await requestService.UpdateAsync(command, ct);
 
-            return !isUpdated ? Result<bool>.Failure("عملیات ویرایش انجام نشد.") 
+            if (isUpdated)
+            {
+                await cache.RemoveAsync(CacheKeys.RequestDetails(command.Id), ct);
+                await cache.RemoveAsync(CacheKeys.RequestFull(command.Id), ct);
+                await cache.BumpStampAsync(CacheKeys.StampAllRequests, CacheTtl.Stamps, ct);
+                await cache.BumpStampAsync(CacheKeys.StampAvailableRequests, CacheTtl.Stamps, ct);
+                await cache.BumpStampAsync(CacheKeys.StampCustomerRequests(existingRequest.CustomerId), CacheTtl.Stamps, ct);
+            }
+
+
+            return !isUpdated ? Result<bool>.Failure("عملیات ویرایش انجام نشد.")
                 : Result<bool>.Success(true, "درخواست با موفقیت ویرایش شد.");
         }
         catch (Exception ex)
@@ -90,69 +107,96 @@ public class RequestAppService(
     {
         try
         {
-            var request = await requestService.GetByIdAsync(id, ct);
-            return request == null ? Result<RequestFullDto>.Failure("درخواست یافت نشد.", "404") 
+            var key = CacheKeys.RequestFull(id);
+
+            var request = await cache.GetOrSetAsync(
+                key,
+                async () => await requestService.GetByIdAsync(id, ct),
+                CacheTtl.Full,
+                ct);
+
+            return request == null
+                ? Result<RequestFullDto>.Failure("درخواست یافت نشد.", "404")
                 : Result<RequestFullDto>.Success(request);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex,
-                "System error in RequestAppService.GetByIdAsync | RequestId: {RequestId}",
-                id);
-
+            logger.LogError(ex, "System error in RequestAppService.GetByIdAsync | RequestId: {RequestId}", id);
             return Result<RequestFullDto>.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
         }
-
     }
+
 
     public async Task<Result<RequestDetailDto>> GetDetailsByIdAsync(int id, CancellationToken ct)
     {
         try
         {
-            var details = await requestService.GetDetailsByIdAsync(id, ct);
-            return details == null ? Result<RequestDetailDto>.Failure("جزئیات درخواست یافت نشد.", "404") 
+            var key = $"request:details:{id}";
+
+            var details = await cache.GetOrSetAsync(key,
+                async () => await requestService.GetDetailsByIdAsync(id, ct), ttl: TimeSpan.FromMinutes(5), ct);
+
+            return details == null
+                ? Result<RequestDetailDto>.Failure("جزئیات درخواست یافت نشد.", "404")
                 : Result<RequestDetailDto>.Success(details);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex,
-                "System error in RequestAppService.GetDetailsByIdAsync | RequestId: {RequestId}",
-                id);
-
+            logger.LogError(ex, "System error in RequestAppService.GetDetailsByIdAsync | RequestId: {RequestId}", id);
             return Result<RequestDetailDto>.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
         }
-
     }
+
 
 
     public async Task<List<RequestSummaryDto>> GetAllAsync(PaginationRequestDto search, int? categoryId, int? cityId, CancellationToken ct)
     {
-        return await requestService.GetAllAsync(search, categoryId, cityId, ct);
+        var stamp = await cache.GetOrCreateStampAsync(CacheKeys.StampAllRequests, CacheTtl.Stamps, ct);
+
+        var key =
+            $"requests:all:{stamp}" +
+            $":cat:{categoryId ?? 0}" +
+            $":city:{cityId ?? 0}" +
+            $":p:{search.PageNumber}" +
+            $":s:{search.PageSize}" +
+            $":q:{search.SearchKey ?? ""}";
+
+        return await cache.GetOrSetAsync(
+            key,
+            async () => await requestService.GetAllAsync(search, categoryId, cityId, ct),
+            CacheTtl.Lists, ct);
     }
 
     public async Task<List<RequestSummaryDto>> GetByCustomerIdAsync(int customerId, CancellationToken ct)
     {
-        return await requestService.GetByCustomerIdAsync(customerId, ct);
+        var stampKey = CacheKeys.StampCustomerRequests(customerId);
+        var stamp = await cache.GetOrCreateStampAsync(stampKey, CacheTtl.Stamps, ct);
+
+        var key = $"requests:customer:{customerId}:{stamp}";
+
+        return await cache.GetOrSetAsync(
+            key,
+            async () => await requestService.GetByCustomerIdAsync(customerId, ct), CacheTtl.Lists, ct);
     }
+
 
     public async Task<List<RequestSummaryDto>> GetAvailableForExpertAsync(int expertId, CancellationToken ct)
     {
+        var stamp = await cache.GetOrCreateStampAsync(CacheKeys.StampAvailableRequests, CacheTtl.Stamps, ct);
+        var key = $"requests:available:{expertId}:{stamp}";
 
-
-        var expertProfile = await expertService.GetByUserId(expertId, ct); 
-        if (expertProfile == null || expertProfile.CityId == null)
+        return await cache.GetOrSetAsync(key, async () =>
         {
-            return [];
-        }
+            var expertProfile = await expertService.GetByUserId(expertId, ct);
+            if (expertProfile == null || expertProfile.CityId == null) return [];
 
-        var skillIds = await expertHomeServiceService.GetSelectedServiceIdsAsync(expertProfile.ExpertId, ct);
-        if (skillIds == null! || !skillIds.Any())
-        {
-            return [];
-        }
+            var skillIds = await expertHomeServiceService.GetSelectedServiceIdsAsync(expertProfile.ExpertId, ct);
+            if (skillIds == null || !skillIds.Any()) return [];
 
-        return await requestService.GetAvailableForExpertAsync(skillIds, expertProfile.CityId.Value, ct);
+            return await requestService.GetAvailableForExpertAsync(skillIds, expertProfile.CityId.Value, ct);
+        }, CacheTtl.Lists, ct);
     }
+
 
     public async Task<Result<bool>> CancelRequestAsync(int requestId, int customerId, CancellationToken ct)
     {
@@ -183,6 +227,15 @@ public class RequestAppService(
             };
 
             var result = await requestService.UpdateAsync(updateDto, ct);
+
+            if (result)
+            {
+                await cache.RemoveAsync(CacheKeys.RequestDetails(requestId), ct);
+                await cache.RemoveAsync(CacheKeys.RequestFull(requestId), ct);
+                await cache.BumpStampAsync(CacheKeys.StampAllRequests, CacheTtl.Stamps, ct);
+                await cache.BumpStampAsync(CacheKeys.StampAvailableRequests, CacheTtl.Stamps, ct);
+                await cache.BumpStampAsync(CacheKeys.StampCustomerRequests(request.CustomerId), CacheTtl.Stamps, ct);
+            }
 
             return result
                 ? Result<bool>.Success(true, "درخواست شما لغو شد.")
@@ -230,11 +283,15 @@ public class RequestAppService(
 
             decimal adminShare = totalAmount * 0.10m;
             decimal expertShare = totalAmount * 0.90m;
-            int adminUserId = 1; 
+            int adminUserId = 1;
 
             await userService.ChangeBalanceAsync(request.CustomerUserId, -totalAmount, ct);
             await userService.ChangeBalanceAsync(suggestion.ExpertUserId, expertShare, ct);
             await userService.ChangeBalanceAsync(adminUserId, adminShare, ct);
+
+            await cache.BumpStampAsync(CacheKeys.StampAllRequests, CacheTtl.Stamps, ct);
+            await cache.BumpStampAsync(CacheKeys.StampAvailableRequests, CacheTtl.Stamps, ct);
+            await cache.BumpStampAsync(CacheKeys.StampCustomerRequests(request.CustomerId), CacheTtl.Stamps, ct);
 
             var updateDto = new UpdateRequestDto
             {
@@ -246,11 +303,14 @@ public class RequestAppService(
                 DateRequired = request.DateRequired,
                 WinnerSuggestionId = request.WinnerSuggestionId,
 
-                Status = RequestStatus.Paid, 
+                Status = RequestStatus.Paid,
                 DateDone = DateTime.Now
             };
 
             await requestService.UpdateAsync(updateDto, ct);
+
+            await cache.RemoveAsync($"request:details:{requestId}", ct);
+            await cache.RemoveAsync($"request:full:{requestId}", ct);
 
             return Result<bool>.Success(true, "پرداخت با موفقیت انجام شد و سفارش بسته شد.");
         }
@@ -289,7 +349,7 @@ public class RequestAppService(
             var updateSuggestionDto = new UpdateSuggestionDto
             {
                 Id = suggestion.Id,
-                Status = SuggestionStatus.Accepted, 
+                Status = SuggestionStatus.Accepted,
 
                 SuggestedPrice = suggestion.SuggestedPrice,
                 SuggestedDate = suggestion.SuggestedDate,
@@ -307,11 +367,20 @@ public class RequestAppService(
                 Address = request.Address,
                 CityId = request.CityId,
                 DateRequired = request.DateRequired,
-                Status = RequestStatus.Started, 
+                Status = RequestStatus.Started,
                 WinnerSuggestionId = suggestionId
             };
 
             await requestService.UpdateAsync(updateRequestDto, ct);
+
+            await cache.RemoveAsync($"request:details:{requestId}", ct);
+            await cache.RemoveAsync($"request:full:{requestId}", ct);
+            await cache.RemoveAsync($"suggestions:request:{requestId}", ct);
+
+            await cache.BumpStampAsync(CacheKeys.StampAllRequests, CacheTtl.Stamps, ct);
+            await cache.BumpStampAsync(CacheKeys.StampAvailableRequests, CacheTtl.Stamps, ct);
+            await cache.BumpStampAsync(CacheKeys.StampCustomerRequests(request.CustomerId), CacheTtl.Stamps, ct);
+
 
             return Result<bool>.Success(true, "متخصص با موفقیت انتخاب شد.");
         }
@@ -321,4 +390,26 @@ public class RequestAppService(
             return Result<bool>.Failure("خطای سیستمی.");
         }
     }
+
+
+
+
+
+    private static class CacheKeys
+    {
+        public static string RequestDetails(int id) => $"request:details:{id}";
+        public static string RequestFull(int id) => $"request:full:{id}";
+        public static string StampAllRequests => "stamp:requests:all";
+        public static string StampAvailableRequests => "stamp:requests:available";
+        public static string StampCustomerRequests(int customerId) => $"stamp:requests:customer:{customerId}";
+    }
+
+    private static class CacheTtl
+    {
+        public static readonly TimeSpan Details = TimeSpan.FromMinutes(5);
+        public static readonly TimeSpan Full = TimeSpan.FromMinutes(5);
+        public static readonly TimeSpan Lists = TimeSpan.FromMinutes(2);
+        public static readonly TimeSpan Stamps = TimeSpan.FromHours(7);
+    }
+
 }
