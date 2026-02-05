@@ -37,4 +37,14 @@ public class CommentService(ICommentRepository commentRepo) : ICommentService
     {
         return await commentRepo.ChangeApprovalStatusAsync(id, isApproved, ct);
     }
+
+    public async Task<CommentDto?> GetByRequestIdAndCustomerIdAsync(int requestId, int customerId, CancellationToken ct)
+    {
+        return await commentRepo.GetByRequestIdAndCustomerIdAsync(requestId, customerId, ct);
+    }
+
+    public async Task<bool> ExistsByRequestIdAndCustomerIdAsync(int requestId, int customerId, CancellationToken ct)
+    {
+        return await commentRepo.ExistsByRequestIdAndCustomerIdAsync(requestId, customerId, ct);
+    }
 }

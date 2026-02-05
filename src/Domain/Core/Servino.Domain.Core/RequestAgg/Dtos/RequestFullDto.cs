@@ -13,6 +13,7 @@ public class RequestFullDto
     public DateTime? DateDone { get; set; }
     public RequestStatus Status { get; set; }
     public int CustomerId { get; set; }
+    public int CustomerUserId { get; set; }
     public int HomeServiceId { get; set; }
     public int? WinnerSuggestionId { get; set; }
     public List<string> ImagePaths { get; set; }

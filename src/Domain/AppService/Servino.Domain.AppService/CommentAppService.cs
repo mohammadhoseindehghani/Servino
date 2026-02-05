@@ -21,6 +21,10 @@ public class CommentAppService(ICommentService commentService,IRequestService re
         if (request.CustomerId != command.CustomerId)
             return Result<bool>.Failure("شما مالک این درخواست نیستید.");
 
+        var exists = await commentService.ExistsByRequestIdAndCustomerIdAsync(command.RequestId, command.CustomerId, ct);
+        if (exists)
+            return Result<bool>.Failure("شما قبلاً برای این سفارش نظر ثبت کرده‌اید.");
+
         var suggestion = await suggestionService.GetByIdAsync(request.WinnerSuggestionId.Value, ct);
         if (suggestion.ExpertId != command.ExpertId)
             return Result<bool>.Failure("شما فقط می‌توانید برای متخصص انجام‌دهنده کار نظر دهید.");
@@ -30,6 +34,7 @@ public class CommentAppService(ICommentService commentService,IRequestService re
             ? Result<bool>.Success(true, "نظر شما ثبت شد و پس از تایید نمایش داده می‌شود.")
             : Result<bool>.Failure("خطا در ثبت نظر.");
     }
+
 
     public async Task<Result<List<CommentDto>>> GetAllAsync(PaginationRequestDto pagination, CancellationToken ct)
     {
@@ -71,4 +76,12 @@ public class CommentAppService(ICommentService commentService,IRequestService re
         var statusMessage = isApproved ? "تایید" : "رد";
         return Result<bool>.Success(true, $"دیدگاه با موفقیت {statusMessage} شد.");
     }
+
+    public async Task<Result<CommentDto>> GetMyCommentForRequestAsync(int requestId, int customerId, CancellationToken ct)
+    {
+        var comment = await commentService.GetByRequestIdAndCustomerIdAsync(requestId, customerId, ct);
+        return comment == null ? Result<CommentDto>.Failure("دیدگاهی برای این درخواست یافت نشد.", "404") 
+            : Result<CommentDto>.Success(comment);
+    }
+
 }

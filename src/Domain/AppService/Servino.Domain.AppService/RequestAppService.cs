@@ -206,10 +206,13 @@ public class RequestAppService(
             var request = await requestService.GetByIdAsync(requestId, ct);
             if (request == null) return Result<bool>.Failure("درخواست یافت نشد.");
 
-            if (request.CustomerId != customerId) return Result<bool>.Failure("دسترسی غیرمجاز.");
+            if (request.CustomerUserId != customerId) return Result<bool>.Failure("دسترسی غیرمجاز.");
+
+            if (request.Status == RequestStatus.Paid || request.Status == RequestStatus.Done)
+                return Result<bool>.Failure("این سفارش قبلاً پرداخت شده است.");
 
             if (request.Status != RequestStatus.Started)
-                return Result<bool>.Failure("وضعیت سفارش برای پرداخت معتبر نیست.");
+                return Result<bool>.Failure("وضعیت سفارش برای پرداخت معتبر نیست. (باید در حالت شروع شده باشد)");
 
             if (request.WinnerSuggestionId == null)
                 return Result<bool>.Failure("پیشنهاد تایید شده‌ای وجود ندارد.");
@@ -219,18 +222,17 @@ public class RequestAppService(
 
             decimal totalAmount = suggestion.SuggestedPrice;
 
-            var customerUser = await userService.GetByIdAsync(customerId, ct); 
+            var customerUser = await userService.GetByIdAsync(request.CustomerUserId, ct);
             if (customerUser.BalanceAmount < totalAmount)
             {
                 return Result<bool>.Failure($"موجودی ناکافی است. مبلغ: {totalAmount:N0}، موجودی شما: {customerUser.BalanceAmount:N0}");
             }
 
-            decimal adminShare = totalAmount * 0.10m; 
-            decimal expertShare = totalAmount * 0.90m; 
+            decimal adminShare = totalAmount * 0.10m;
+            decimal expertShare = totalAmount * 0.90m;
             int adminUserId = 1; 
 
-
-            await userService.ChangeBalanceAsync(customerId, -totalAmount, ct);
+            await userService.ChangeBalanceAsync(request.CustomerUserId, -totalAmount, ct);
             await userService.ChangeBalanceAsync(suggestion.ExpertUserId, expertShare, ct);
             await userService.ChangeBalanceAsync(adminUserId, adminShare, ct);
 
@@ -243,6 +245,7 @@ public class RequestAppService(
                 CityId = request.CityId,
                 DateRequired = request.DateRequired,
                 WinnerSuggestionId = request.WinnerSuggestionId,
+
                 Status = RequestStatus.Paid, 
                 DateDone = DateTime.Now
             };
@@ -253,7 +256,7 @@ public class RequestAppService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error in MarkAsDoneAndPayAsync");
+            logger.LogError(ex, "Error in MarkAsDoneAndPayAsync | RequestId: {RequestId}", requestId);
             return Result<bool>.Failure($"خطای سیستمی: {ex.Message}");
         }
     }
@@ -264,7 +267,7 @@ public class RequestAppService(
             var request = await requestService.GetByIdAsync(requestId, ct);
             if (request == null) return Result<bool>.Failure("درخواست یافت نشد.");
 
-            if (request.CustomerId != customerId) return Result<bool>.Failure("شما اجازه دسترسی به این درخواست را ندارید.");
+            if (request.CustomerUserId != customerId) return Result<bool>.Failure("شما اجازه دسترسی به این درخواست را ندارید.");
 
             if (request.Status != RequestStatus.WaitingForExperts && request.Status != RequestStatus.WaitingForSelection)
                 return Result<bool>.Failure("وضعیت درخواست برای انتخاب متخصص معتبر نیست.");
@@ -274,7 +277,7 @@ public class RequestAppService(
 
             if (suggestion.RequestId != requestId) return Result<bool>.Failure("این پیشنهاد مربوط به این درخواست نیست.");
 
-            var userDetail = await userService.GetByIdAsync(request.CustomerId, ct);
+            var userDetail = await userService.GetByIdAsync(request.CustomerUserId, ct);
 
             if (userDetail == null) return Result<bool>.Failure("اطلاعات کاربر یافت نشد.");
 

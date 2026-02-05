@@ -11,4 +11,8 @@ public interface ICommentAppService
     Task<Result<CommentDto>> GetByIdAsync(int id, CancellationToken ct);
     Task<Result<bool>> DeleteAsync(int id, CancellationToken ct);
     Task<Result<bool>> ChangeApprovalStatusAsync(int id, bool isApproved, CancellationToken ct);
+
+
+    Task<Result<CommentDto>> GetMyCommentForRequestAsync(int requestId, int customerId, CancellationToken ct);
+
 }

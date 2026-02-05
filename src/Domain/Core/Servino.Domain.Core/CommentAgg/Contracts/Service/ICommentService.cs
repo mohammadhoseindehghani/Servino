@@ -11,4 +11,7 @@ public interface ICommentService
     Task<CommentDto?> GetByIdAsync(int id, CancellationToken ct);
     Task<bool> DeleteAsync(int id, CancellationToken ct);
     Task<bool> ChangeApprovalStatusAsync(int id, bool isApproved, CancellationToken ct);
+
+    Task<CommentDto?> GetByRequestIdAndCustomerIdAsync(int requestId, int customerId, CancellationToken ct);
+    Task<bool> ExistsByRequestIdAndCustomerIdAsync(int requestId, int customerId, CancellationToken ct);
 }

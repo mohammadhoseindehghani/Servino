@@ -11,8 +11,6 @@ public class CommentRepository(AppDbContext context) : ICommentRepository
 {
     public async Task<bool> AddAsync(CreateCommentDto command, CancellationToken ct)
     {
-        try
-        {
             var comment = new Comment
             {
                 Title = command.Title,
@@ -25,14 +23,8 @@ public class CommentRepository(AppDbContext context) : ICommentRepository
                 CreatedAt = DateTime.Now
             };
 
-            await context.Comments.AddAsync(comment, ct);
-            await context.SaveChangesAsync(ct);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+            context.Comments.Add(comment);
+            return await context.SaveChangesAsync(ct) > 0;
     }
 
     public async Task<List<CommentDto>> GetAllAsync(PaginationRequestDto pagination, CancellationToken ct)
@@ -135,4 +127,34 @@ public class CommentRepository(AppDbContext context) : ICommentRepository
 
         return affectedRows > 0;
     }
+
+    public async Task<CommentDto?> GetByRequestIdAndCustomerIdAsync(int requestId, int customerId, CancellationToken ct)
+    {
+        return await context.Comments
+            .AsNoTracking()
+            .Where(c => c.RequestId == requestId && c.CustomerId == customerId)
+            .Include(c => c.Customer)
+            .Include(c => c.Expert)
+            .OrderByDescending(c => c.CreatedAt)
+            .Select(c => new CommentDto
+            {
+                Id = c.Id,
+                Title = c.Title,
+                Text = c.Text,
+                Rating = c.Rating,
+                IsApproved = c.IsApproved,
+                CreatedAt = c.CreatedAt,
+                CustomerName = c.Customer == null ? null : c.Customer.User.FirstName + " " + c.Customer.User.LastName,
+                ExpertName = c.Expert == null ? null : c.Expert.User.FirstName + " " + c.Expert.User.LastName
+            })
+            .FirstOrDefaultAsync(ct);
+    }
+
+    public async Task<bool> ExistsByRequestIdAndCustomerIdAsync(int requestId, int customerId, CancellationToken ct)
+    {
+        return await context.Comments
+            .AsNoTracking()
+            .AnyAsync(c => c.RequestId == requestId && c.CustomerId == customerId, ct);
+    }
+
 }

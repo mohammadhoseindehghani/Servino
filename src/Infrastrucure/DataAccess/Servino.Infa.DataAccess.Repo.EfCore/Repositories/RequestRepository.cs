@@ -70,6 +70,7 @@ public class RequestRepository(AppDbContext context) : IRequestRepository
                 DateDone = r.DateDone,
                 Status = r.Status,
                 CustomerId = r.CustomerId,
+                CustomerUserId = r.Customer.UserId,
                 HomeServiceId = r.HomeServiceId,
                 WinnerSuggestionId = r.WinnerSuggestionId,
                 ImagePaths = r.Images.Select(img => img.ImagePath).ToList()
