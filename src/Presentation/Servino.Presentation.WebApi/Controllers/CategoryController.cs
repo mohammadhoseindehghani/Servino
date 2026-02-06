@@ -29,5 +29,30 @@ namespace Servino.Presentation.WebApi.Controllers
                 return Ok(result); 
             return NotFound("دسته‌بندی‌ها یافت نشد."); 
         }
+
+        [HttpGet("children/{parentId:int?}")]
+        public async Task<IActionResult> GetCategoriesByParentIdAsync(int? parentId, CancellationToken ct = default)
+        {
+            var result = await categoryAppService.GetCategoriesByParentIdAsync(parentId, ct);
+
+            if (result.Count > 0)
+                return Ok(result);
+
+            return NotFound("دسته‌بندی فرزند یافت نشد.");
+        }
+
+        [HttpGet("{categoryId:int}/services")]
+        public async Task<IActionResult> GetServicesByCategoryIdAsync(int categoryId, CancellationToken ct = default)
+        {
+            var result = await categoryAppService.GetServicesByCategoryIdAsync(categoryId, ct);
+
+            if (result.Count > 0)
+                return Ok(result);
+
+            return NotFound("خدماتی برای این دسته‌بندی یافت نشد.");
+        }
     }
 }
+
+
+
