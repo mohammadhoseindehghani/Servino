@@ -78,9 +78,10 @@ namespace Servino.Presentation.RazorPagesUI.Areas.Customer.Pages
         public async Task<IActionResult> OnPostFinishWorkAsync(int requestId, CancellationToken ct)
         {
             var customerId = User.GetCustomerId();
+            var customerUserId = User.GetUserId();
             if (customerId == 0) return Unauthorized();
 
-            var result = await requestAppService.MarkAsDoneAndPayAsync(requestId, customerId, ct);
+            var result = await requestAppService.MarkAsDoneAndPayAsync(requestId, customerUserId, ct);
 
             return RedirectToPage(new { id = requestId, msg = result.IsSuccess ? "success" : "danger", text = result.Message });
         }
