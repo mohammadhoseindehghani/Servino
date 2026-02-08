@@ -144,12 +144,18 @@
                                 var isWinner = item.Status == Servino.Domain.Core.SuggestionAgg.Enum.SuggestionStatus.Accepted;
                                 <tr class="@(isWinner ? "table-success" : "")">
                                     <td>
-                                        <strong>@item.ExpertFullName</strong>
+                                        <a href="/ExpertProfile/@item.ExpertId" class="fw-semibold text-primary">
+                                            @item.ExpertFullName
+                                        </a>
+
                                         @if (isWinner)
                                         {
                                             <span class="badge bg-success ms-1">انتخاب شده</span>
                                         }
                                     </td>
+
+
+
                                     <td class="text-primary fw-bold">@item.SuggestedPrice.ToString("N0") تومان</td>
                                     <td>@item.SuggestedDate.ToShamsi()</td>
                                     <td>@item.EstimatedDurationHours ساعت</td>

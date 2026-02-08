@@ -36,6 +36,13 @@ public class ExpertAppService(
         }
     }
 
+    public async Task<Result<ExpertProfileDto>> GetByExpertId(int expertId, CancellationToken ct)
+    {
+        var result = await expertService.GetByExpertIdAsync(expertId, ct);
+        return result is null ? Result<ExpertProfileDto>.Failure("مشخصات متخصص یافت نشد") 
+            : Result<ExpertProfileDto>.Success(result);
+    }
+
     public async Task<Result<bool>> UpdateProfile(UpdateExpertProfileDto command, CancellationToken ct)
     {
         var result = await expertService.UpdateProfile(command, ct);

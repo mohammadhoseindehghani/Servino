@@ -44,6 +44,27 @@ public class ExpertRepository(AppDbContext context) : IExpertRepository
             ).FirstOrDefaultAsync(ct);
     }
 
+    public async Task<ExpertProfileDto?> GetByExpertIdAsync(int expertId, CancellationToken ct)
+    {
+        return await context.Experts.Where(x => x.Id == expertId)
+            .Select(e => new ExpertProfileDto()
+                {
+                    UserId = e.UserId,
+                    ExpertId = e.Id,
+                    Address = e.Address,
+                    CityId = e.User.CityId,
+                    FirstName = e.User.FirstName,
+                    LastName = e.User.LastName,
+                    ProfileImagePath = e.User.ProfileImagePath,
+                    BankCardNumber = e.BankCardNumber,
+                    Bio = e.Bio,
+                    Email = e.User.Email,
+                    Phone = e.User.MobileNumber,
+                    ShebaNumber = e.ShebaNumber
+                }
+            ).FirstOrDefaultAsync(ct);
+    }
+
 
     //add rollback or Stored Procedure 
     public async Task<bool> UpdateProfile(UpdateExpertProfileDto dto, CancellationToken ct)
