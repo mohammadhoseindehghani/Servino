@@ -6,6 +6,11 @@ namespace Servino.Domain.Service;
 
 public class SuggestionService(ISuggestionRepository suggestionRepo) : ISuggestionService
 {
+    public async Task<bool> CreateAsync(CreateSuggestionDto command, CancellationToken ct)
+    {
+        return await suggestionRepo.CreateAsync(command, ct);
+    }
+
     public async Task<List<SuggestionSummaryDto>> GetByRequestIdAsync(int requestId, CancellationToken ct)
     {
         return await suggestionRepo.GetByRequestIdAsync(requestId, ct);

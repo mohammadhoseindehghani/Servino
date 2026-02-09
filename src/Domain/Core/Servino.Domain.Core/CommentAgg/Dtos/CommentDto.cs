@@ -12,5 +12,4 @@ public class CommentDto
     public DateTime CreatedAt { get; set; } 
     public string CustomerName { get; set; }
     public string ExpertName { get; set; }
-    prop
 }

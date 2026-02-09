@@ -43,6 +43,12 @@
                 <div data-i18n="پروفایل">پروفایل</div>
             </a>
         </li>
+        <li class='menu-item@(currentPage == "/AvailableRequests" ? " active" : "")'>
+            <a asp-area="Expert" asp-page="/AvailableRequests" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-database"></i>
+                <div data-i18n="درخواست ها">درخواست ها </div>
+            </a>
+        </li>
         <li class='menu-item@(currentPage == "/UserCRUD" ? " active" : "")'>
             <a asp-area="Expert" asp-page="/UserCRUD" class="menu-link">
                 <i class="menu-icon tf-icons ti ti-database"></i>

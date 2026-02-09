@@ -1,12 +1,30 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Servino.Domain.Core.SuggestionAgg.Contracts.Data;
 using Servino.Domain.Core.SuggestionAgg.Dtos;
+using Servino.Domain.Core.SuggestionAgg.Entity;
+using Servino.Domain.Core.SuggestionAgg.Enum;
 using Servino.Infa.Db.SqlServer.EfCore.DbContexts;
 
 namespace Servino.Infa.DataAccess.Repo.EfCore.Repositories;
 
 public class SuggestionRepository(AppDbContext context) : ISuggestionRepository
 {
+    public async Task<bool> CreateAsync(CreateSuggestionDto command, CancellationToken ct)
+    {
+        var suggestion = new Suggestion()
+        {
+            SuggestedPrice = command.SuggestedPrice,
+            SuggestedDate = command.SuggestedDate,
+            EstimatedDurationHours = command.EstimatedDurationHours,
+            RequestId = command.RequestId,
+            ExpertId = command.ExpertId,
+            Note = command.Note,
+            Status = SuggestionStatus.Pending
+        };
+        context.Add(suggestion);
+        return await context.SaveChangesAsync(ct) > 0;
+    }
+
     public async Task<List<SuggestionSummaryDto>> GetByRequestIdAsync(int requestId, CancellationToken ct)
     {
         return await context.Suggestions
