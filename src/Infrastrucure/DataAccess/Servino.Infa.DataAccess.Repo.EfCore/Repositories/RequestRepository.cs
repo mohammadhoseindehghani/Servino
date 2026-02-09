@@ -174,6 +174,36 @@ public class RequestRepository(AppDbContext context) : IRequestRepository
             .ToListAsync(ct);
     }
 
+    public async Task<List<RequestSummaryDto>> GetAvailableForExpertAsync(int expertId, List<int> expertServiceIds, int cityId, CancellationToken ct)
+    {
+        return await context.Requests
+            .AsNoTracking()
+            .Where(r =>
+                r.Status == RequestStatus.WaitingForExperts &&
+                r.CityId == cityId &&
+                expertServiceIds.Contains(r.HomeServiceId)
+            )
+            .OrderByDescending(r => r.CreatedAt)
+            .Select(r => new RequestSummaryDto
+            {
+                Id = r.Id,
+                Title = r.Title,
+                ServiceName = r.HomeService.Title,
+                CityName = r.City.Title,
+                Status = r.Status,
+                DateRequired = r.DateRequired,
+                CreatedAt = r.CreatedAt,
+                SuggestionCount = r.Suggestions.Count,
+                HasExpertSuggestion = r.Suggestions.Any(s => s.ExpertId == expertId),
+                ExpertSuggestionId = r.Suggestions
+                    .Where(s => s.ExpertId == expertId)
+                    .Select(s => (int?)s.Id)
+                    .FirstOrDefault()
+            })
+            .ToListAsync(ct);
+    }
+
+
     public async Task<bool> IsOwnerAsync(int requestId, int customerId, CancellationToken ct)
     {
         return await context.Requests

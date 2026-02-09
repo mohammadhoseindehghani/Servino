@@ -193,8 +193,13 @@ public class RequestAppService(
             var skillIds = await expertHomeServiceService.GetSelectedServiceIdsAsync(expertProfile.ExpertId, ct);
             if (skillIds == null || !skillIds.Any()) return [];
 
-            return await requestService.GetAvailableForExpertAsync(skillIds, expertProfile.CityId.Value, ct);
+            return await requestService.GetAvailableForExpertAsync(expertProfile.ExpertId, skillIds, expertProfile.CityId.Value, ct);
         }, CacheTtl.Lists, ct);
+    }
+
+    public async Task<List<RequestSummaryDto>> GetAvailableForExpertAsync(int expertId, List<int> expertServiceIds, int cityId, CancellationToken ct)
+    {
+        return await requestService.GetAvailableForExpertAsync(expertId, expertServiceIds, cityId, ct);
     }
 
 

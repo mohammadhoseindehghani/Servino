@@ -1,0 +1,37 @@
+﻿@page
+@model Servino.Presentation.RazorPagesUI.Areas.Expert.Pages.RequestDetailsModel
+@{
+    Layout = "Layouts/_ContentNavbarLayout";
+    ViewData["Title"] = "جرئیات درخواست";
+}
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/select2/select2.dist.css" />
+    <link rel="stylesheet" href="~/vendor/libs/sweetalert2/sweetalert2.dist.css" />
+}
+@section VendorScripts {
+    <script src="~/vendor/libs/select2/select2.dist.js"></script>
+    <script src="~/vendor/libs/select2/i18n/fa.dist.js"></script>
+    <script src="~/vendor/libs/sweetalert2/sweetalert2.dist.js"></script>
+}
+
+
+<h4 class="mb-4">جزئیات درخواست</h4>
+
+<div class="card">
+    <div class="card-body">
+        <h5>@Model.Request.Title</h5>
+        <p class="text-muted">@Model.Request.Description</p>
+
+        <ul class="list-unstyled mt-3">
+            <li><strong>سرویس:</strong> @Model.Request.Title</li>
+            <li><strong>شهر:</strong> @Model.Request.CityName</li>
+            <li><strong>تاریخ مورد نیاز:</strong> @Model.Request.DateRequired</li>
+        </ul>
+
+        <a asp-page="./CreateSuggestion"
+           asp-route-requestId="@Model.Request.Id"
+           class="btn btn-primary mt-3">
+            ارسال پیشنهاد
+        </a>
+    </div>
+</div>

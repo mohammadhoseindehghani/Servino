@@ -50,6 +50,13 @@ public class SuggestionAppService(ISuggestionService suggestionService, ICacheSe
         }
     }
 
+    public async Task<Result<SuggestionDto>> GetByIdAsync(int id, CancellationToken ct)
+    {
+        var result = await suggestionService.GetByIdAsync(id, ct);
+        return result is null ? Result<SuggestionDto>.Failure("پیشنهاد یافت نشد.") 
+            : Result<SuggestionDto>.Success(result);
+    }
+
     private static class CacheKeys
     {
         public static string SuggestionsByRequestId(int requestId) => $"suggestions:request:{requestId}";

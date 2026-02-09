@@ -2,7 +2,6 @@
 using Servino.Domain.Core.RequestAgg.Contracts.Data;
 using Servino.Domain.Core.RequestAgg.Contracts.Service;
 using Servino.Domain.Core.RequestAgg.Dtos;
-using Servino.Domain.Core.RequestAgg.Entity;
 
 namespace Servino.Domain.Service;
 
@@ -41,6 +40,11 @@ public class RequestService(IRequestRepository requestRepo) : IRequestService
     public async Task<List<RequestSummaryDto>> GetAvailableForExpertAsync(List<int> expertServiceIds, int cityId, CancellationToken ct)
     {
         return await requestRepo.GetAvailableForExpertAsync(expertServiceIds, cityId, ct);
+    }
+
+    public async Task<List<RequestSummaryDto>> GetAvailableForExpertAsync(int expertId, List<int> expertServiceIds, int cityId, CancellationToken ct)
+    {
+        return await requestRepo.GetAvailableForExpertAsync(expertId, expertServiceIds, cityId, ct);
     }
 
     public async Task<bool> IsOwnerAsync(int requestId, int customerId, CancellationToken ct)

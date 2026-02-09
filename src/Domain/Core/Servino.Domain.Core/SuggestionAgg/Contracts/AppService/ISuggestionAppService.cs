@@ -7,4 +7,6 @@ public interface ISuggestionAppService
 {
     Task<Result<bool>> CreateAsync(CreateSuggestionDto command, CancellationToken ct);
     Task<List<SuggestionSummaryDto>> GetByRequestIdAsync(int requestId, CancellationToken ct);
+
+    Task<Result<SuggestionDto>> GetByIdAsync(int id, CancellationToken ct);
 }
