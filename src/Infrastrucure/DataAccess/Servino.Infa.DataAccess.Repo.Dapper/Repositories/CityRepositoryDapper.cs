@@ -6,22 +6,8 @@ using Dapper;
 
 namespace Servino.Infa.DataAccess.Repo.Dapper.Repositories;
 
-public class CityRepositoryDapper(IDbConnection connection) : ICityRepository
+public class CityRepositoryDapper(IDbConnection connection) : ICityDapperRepository
 {
-    public Task<bool> CreateAsync(string title, int provinceId, CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> UpdateAsync(int id, string title, int provinceId, CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> DeleteAsync(int id, CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
 
     public async Task<CityDto?> GetByIdAsync(int id, CancellationToken ct)
     {
@@ -41,11 +27,6 @@ public class CityRepositoryDapper(IDbConnection connection) : ICityRepository
         var cities = await connection.QueryAsync<CityDto>(sql, new { SearchKey = "%" + search.SearchKey + "%" });
 
         return cities.AsList();
-    }
-
-    public Task<int> GetCountAsync(CancellationToken ct)
-    {
-        throw new NotImplementedException();
     }
 
     public async Task<List<SelectListDto>> GetCitiesByProvinceIdAsync(int provinceId, CancellationToken ct)

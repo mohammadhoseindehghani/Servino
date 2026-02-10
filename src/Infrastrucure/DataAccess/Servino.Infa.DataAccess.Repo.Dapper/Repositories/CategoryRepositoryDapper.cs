@@ -6,22 +6,8 @@ using Dapper;
 
 namespace Servino.Infa.DataAccess.Repo.Dapper.Repositories;
 
-public class CategoryRepositoryDapper(IDbConnection connection) : ICategoryRepository
+public class CategoryRepositoryDapper(IDbConnection connection) : ICategoryDapperRepository
 {
-    public Task<bool> CreateAsync(CategoryDto command, CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> UpdateAsync(CategoryDto command, CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> DeleteAsync(int id, CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
 
     public async Task<CategoryDto?> GetByIdAsync(int id, CancellationToken ct)
     {
@@ -43,11 +29,6 @@ public class CategoryRepositoryDapper(IDbConnection connection) : ICategoryRepos
         return categories.AsList();
     }
 
-    public Task<int> GetCountAsync(CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<List<CategoryClientDto>> GetCategoriesByParentIdAsync(int? parentId, CancellationToken ct)
     {
         string sql = "SELECT Id, Title, ImagePath FROM Categories WHERE ParentId = @ParentId AND IsDeleted = 0 AND IsActive = 1";
@@ -62,13 +43,4 @@ public class CategoryRepositoryDapper(IDbConnection connection) : ICategoryRepos
         return services.AsList();
     }
 
-    public Task<List<BreadcrumbDto>> GetBreadcrumbAsync(int categoryId, CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> IsCategoryExistAndActiveAsync(int id, CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
 }

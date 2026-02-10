@@ -80,10 +80,10 @@ builder.Services.AddRazorPages();
 
 
 //Dapper
-builder.Services.AddScoped<ICategoryRepository, CategoryRepositoryDapper>();
-builder.Services.AddScoped<IHomeServiceRepository, HomeServiceRepositoryDapper>();
-builder.Services.AddScoped<ICityRepository, CityRepositoryDapper>();
-builder.Services.AddScoped<IProvinceRepository, ProvinceRepositoryDapper>();
+builder.Services.AddScoped<ICategoryDapperRepository, CategoryRepositoryDapper>();
+builder.Services.AddScoped<IHomeServiceDapperRepository, HomeServiceRepositoryDapper>();
+builder.Services.AddScoped<ICityDapperRepository, CityRepositoryDapper>();
+builder.Services.AddScoped<IProvinceDapperRepository, ProvinceRepositoryDapper>();
 
 //Ef Core
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();

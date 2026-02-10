@@ -5,7 +5,7 @@ using Servino.Domain.Core.LocationAgg.Dtos;
 
 namespace Servino.Domain.Service;
 
-public class ProvinceService(IProvinceRepository provinceRepo, IProvinceRepository dapperProvinceRepo) : IProvinceService
+public class ProvinceService(IProvinceRepository provinceRepo, IProvinceDapperRepository dapperProvinceRepo) : IProvinceService
 {
     public async Task<bool> CreateAsync(string title, CancellationToken ct)
     {

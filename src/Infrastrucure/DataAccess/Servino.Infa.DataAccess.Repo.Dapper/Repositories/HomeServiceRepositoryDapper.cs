@@ -6,7 +6,7 @@ using Dapper;
 
 namespace Servino.Infa.DataAccess.Repo.Dapper.Repositories;
 
-public class HomeServiceRepositoryDapper(IDbConnection connection) : IHomeServiceRepository
+public class HomeServiceRepositoryDapper(IDbConnection connection) : IHomeServiceDapperRepository
 {
     public async Task<List<HomeServiceSummaryDto>> GetAllActiveServicesAsync(CancellationToken ct)
     {
@@ -17,21 +17,6 @@ public class HomeServiceRepositoryDapper(IDbConnection connection) : IHomeServic
 
         var services = await connection.QueryAsync<HomeServiceSummaryDto>(sql);
         return services.AsList();
-    }
-
-    public Task<bool> CreateAsync(HomeServiceDto command, CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> UpdateAsync(HomeServiceDto command, CancellationToken ct)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> DeleteAsync(int id, CancellationToken ct)
-    {
-        throw new NotImplementedException();
     }
 
     public async Task<HomeServiceDto?> GetByIdAsync(int id, CancellationToken ct)

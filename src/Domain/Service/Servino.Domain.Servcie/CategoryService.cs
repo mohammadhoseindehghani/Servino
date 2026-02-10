@@ -5,7 +5,7 @@ using Servino.Domain.Core.CategoryAgg.Dtos;
 
 namespace Servino.Domain.Service;
 
-public class CategoryService(ICategoryRepository categoryRepo, ICategoryRepository dapperCategoryRepo) : ICategoryService
+public class CategoryService(ICategoryRepository categoryRepo, ICategoryDapperRepository dapperCategoryRepo) : ICategoryService
 {
     public async Task<bool> CreateAsync(CategoryDto command, CancellationToken ct)
     {

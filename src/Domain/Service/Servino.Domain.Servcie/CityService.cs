@@ -5,7 +5,7 @@ using Servino.Domain.Core.LocationAgg.Dtos;
 
 namespace Servino.Domain.Service;
 
-public class CityService(ICityRepository cityRepo, ICityRepository dapperCityRepo) : ICityService
+public class CityService(ICityRepository cityRepo, ICityDapperRepository dapperCityRepo) : ICityService
 {
     public async Task<bool> CreateAsync(string title, int provinceId, CancellationToken ct)
     {
