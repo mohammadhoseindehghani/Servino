@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Data;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Servino.Domain.AppService;
@@ -28,6 +30,7 @@ using Servino.Domain.Core.UserAgg.Contracts.Data;
 using Servino.Domain.Core.UserAgg.Contracts.Service;
 using Servino.Domain.Service;
 using Servino.Framework.Caching;
+using Servino.Infa.DataAccess.Repo.Dapper.Repositories;
 using Servino.Infa.DataAccess.Repo.EfCore.Repositories;
 using Servino.Infa.Db.SqlServer.EfCore.DataSeed;
 using Servino.Infa.Db.SqlServer.EfCore.DbContexts;
@@ -40,6 +43,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection")));
+
+builder.Services.AddScoped<IDbConnection>(sp =>
+    new SqlConnection(builder.Configuration.GetConnectionString("SqlConnection")));
+
 
 builder.Host.UseSerilog((context, configuration) =>
 {
@@ -71,6 +78,14 @@ builder.Services.AddScoped<DbInitializer>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddRazorPages();
 
+
+//Dapper
+builder.Services.AddScoped<ICategoryRepository, CategoryRepositoryDapper>();
+builder.Services.AddScoped<IHomeServiceRepository, HomeServiceRepositoryDapper>();
+builder.Services.AddScoped<ICityRepository, CityRepositoryDapper>();
+builder.Services.AddScoped<IProvinceRepository, ProvinceRepositoryDapper>();
+
+//Ef Core
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();

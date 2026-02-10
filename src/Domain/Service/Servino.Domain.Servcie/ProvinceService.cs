@@ -5,7 +5,7 @@ using Servino.Domain.Core.LocationAgg.Dtos;
 
 namespace Servino.Domain.Service;
 
-public class ProvinceService(IProvinceRepository provinceRepo) : IProvinceService
+public class ProvinceService(IProvinceRepository provinceRepo, IProvinceRepository dapperProvinceRepo) : IProvinceService
 {
     public async Task<bool> CreateAsync(string title, CancellationToken ct)
     {
@@ -29,7 +29,7 @@ public class ProvinceService(IProvinceRepository provinceRepo) : IProvinceServic
 
     public async Task<List<ProvinceDto>> GetAllAsync(PaginationRequestDto search, CancellationToken ct)
     {
-        return await provinceRepo.GetAllAsync(search, ct);
+        return await dapperProvinceRepo.GetAllAsync(search, ct);
     }
 
     public async Task<int> GetCountAsync(CancellationToken ct)
@@ -39,6 +39,6 @@ public class ProvinceService(IProvinceRepository provinceRepo) : IProvinceServic
 
     public async Task<List<SelectListDto>> GetAllForDropdownAsync(CancellationToken ct)
     {
-        return await provinceRepo.GetAllForDropdownAsync(ct);
+        return await dapperProvinceRepo.GetAllForDropdownAsync(ct);
     }
 }

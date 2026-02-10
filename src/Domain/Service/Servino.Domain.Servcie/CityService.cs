@@ -5,7 +5,7 @@ using Servino.Domain.Core.LocationAgg.Dtos;
 
 namespace Servino.Domain.Service;
 
-public class CityService(ICityRepository cityRepo) : ICityService
+public class CityService(ICityRepository cityRepo, ICityRepository dapperCityRepo) : ICityService
 {
     public async Task<bool> CreateAsync(string title, int provinceId, CancellationToken ct)
     {
@@ -29,7 +29,7 @@ public class CityService(ICityRepository cityRepo) : ICityService
 
     public async Task<List<CityDto>> GetAllAsync(PaginationRequestDto search, CancellationToken ct)
     {
-        return await cityRepo.GetAllAsync(search, ct);
+        return await dapperCityRepo.GetAllAsync(search, ct);
     }
 
     public async Task<int> GetCountAsync(CancellationToken ct)
@@ -39,6 +39,6 @@ public class CityService(ICityRepository cityRepo) : ICityService
 
     public async Task<List<SelectListDto>> GetCitiesByProvinceIdAsync(int provinceId, CancellationToken ct)
     {
-        return await cityRepo.GetCitiesByProvinceIdAsync(provinceId, ct);
+        return await dapperCityRepo.GetCitiesByProvinceIdAsync(provinceId, ct);
     }
 }

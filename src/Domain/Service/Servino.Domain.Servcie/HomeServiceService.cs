@@ -5,7 +5,7 @@ using Servino.Domain.Core.HomeServiceAgg.Dtos;
 
 namespace Servino.Domain.Service;
 
-public class HomeServiceService(IHomeServiceRepository homeServiceRepo) : IHomeServiceService
+public class HomeServiceService(IHomeServiceRepository homeServiceRepo, IHomeServiceRepository dapperHomeServiceRepo) : IHomeServiceService
 {
     public async Task<List<HomeServiceSummaryDto>> GetAllActiveServicesAsync(CancellationToken ct)
     {
@@ -34,6 +34,6 @@ public class HomeServiceService(IHomeServiceRepository homeServiceRepo) : IHomeS
 
     public async Task<List<HomeServiceSummaryDto>> GetAllAsync(PaginationRequestDto search, CancellationToken ct)
     {
-        return await homeServiceRepo.GetAllAsync(search, ct);
+        return await dapperHomeServiceRepo.GetAllAsync(search, ct);
     }
 }

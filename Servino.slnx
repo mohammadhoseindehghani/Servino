@@ -15,9 +15,11 @@
   </Folder>
   <Folder Name="/src/Infrastructure/" />
   <Folder Name="/src/Infrastructure/DataAccess/">
+    <Project Path="src/Infrastrucure/DataAccess/Servino.Infa.DataAccess.Repo.Dapper/Servino.Infa.DataAccess.Repo.Dapper.csproj" Id="8a9807c5-1034-4cb2-bd19-716bed0b2782" />
     <Project Path="src/Infrastrucure/DataAccess/Servino.Infa.DataAccess.Repo.EfCore/Servino.Infa.DataAccess.Repo.EfCore.csproj" Id="5e3e11a6-f55b-4694-b1b5-326db7650229" />
   </Folder>
   <Folder Name="/src/Infrastructure/Db/">
+    <Project Path="src/Infrastrucure/Db/Servino.Infa.Db.SqlServer.Dapper/Servino.Infa.Db.SqlServer.Dapper.csproj" Id="7d085ae8-3cad-4743-b091-028d4ce5f5e4" />
     <Project Path="src/Infrastrucure/Db/Servino.Infa.Db.SqlServer.EfCore/Servino.Infa.Db.SqlServer.EfCore.csproj" Id="0f781f93-f4ee-4c59-a8c2-74e7341903ab" />
   </Folder>
   <Folder Name="/src/Infrastructure/Providers/">

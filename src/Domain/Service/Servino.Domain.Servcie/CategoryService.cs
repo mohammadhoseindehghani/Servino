@@ -5,7 +5,7 @@ using Servino.Domain.Core.CategoryAgg.Dtos;
 
 namespace Servino.Domain.Service;
 
-public class CategoryService(ICategoryRepository categoryRepo) : ICategoryService
+public class CategoryService(ICategoryRepository categoryRepo, ICategoryRepository dapperCategoryRepo) : ICategoryService
 {
     public async Task<bool> CreateAsync(CategoryDto command, CancellationToken ct)
     {
@@ -29,7 +29,7 @@ public class CategoryService(ICategoryRepository categoryRepo) : ICategoryServic
 
     public async Task<List<CategorySummaryDto>> GetAllAsync(PaginationRequestDto search, CancellationToken ct)
     {
-        return await categoryRepo.GetAllAsync(search, ct);
+        return await dapperCategoryRepo.GetAllAsync(search, ct);
     }
 
     public async Task<int> GetCountAsync(CancellationToken ct)
