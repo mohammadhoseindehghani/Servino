@@ -5,29 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Serilog;
 using Servino.Domain.AppService;
-using Servino.Domain.AppService.UserAgg;
-using Servino.Domain.Core.CategoryAgg.Contracts.AppService;
-using Servino.Domain.Core.CategoryAgg.Contracts.Data;
-using Servino.Domain.Core.CategoryAgg.Contracts.Service;
-using Servino.Domain.Core.CommentAgg.Contracts.AppService;
-using Servino.Domain.Core.CommentAgg.Contracts.Data;
-using Servino.Domain.Core.CommentAgg.Contracts.Service;
-using Servino.Domain.Core.ExpertHomeServiceAgg.Contracts.Data;
-using Servino.Domain.Core.ExpertHomeServiceAgg.Contracts.Service;
-using Servino.Domain.Core.HomeServiceAgg.Contracts.AppService;
-using Servino.Domain.Core.HomeServiceAgg.Contracts.Data;
-using Servino.Domain.Core.HomeServiceAgg.Contracts.Service;
-using Servino.Domain.Core.LocationAgg.Contracts.AppService;
-using Servino.Domain.Core.LocationAgg.Contracts.Data;
-using Servino.Domain.Core.LocationAgg.Contracts.Service;
-using Servino.Domain.Core.RequestAgg.Contracts.AppService;
-using Servino.Domain.Core.RequestAgg.Contracts.Data;
-using Servino.Domain.Core.RequestAgg.Contracts.Service;
-using Servino.Domain.Core.SuggestionAgg.Contracts.AppService;
-using Servino.Domain.Core.SuggestionAgg.Contracts.Data;
-using Servino.Domain.Core.SuggestionAgg.Contracts.Service;
-using Servino.Domain.Core.UserAgg.Contracts.AppService;
-using Servino.Domain.Core.UserAgg.Contracts.Data;
 using Servino.Domain.Core.UserAgg.Contracts.Service;
 using Servino.Domain.Service;
 using Servino.Framework.Caching;
@@ -47,24 +24,34 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 
-
 builder.Services.Configure<SiteSettings>(builder.Configuration.GetSection("SiteSettings"));
 builder.Services.AddSingleton(resolver =>
     resolver.GetRequiredService<IOptions<SiteSettings>>().Value);
 
 
+builder.Services.AddDbContext<AppDbContext>((sp, options) =>
+{
+    var siteSettings = sp.GetRequiredService<SiteSettings>();
+    options.UseSqlServer(siteSettings.ConnectionStrings.SqlConnection);
+});
 
-
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection")));
 
 builder.Services.AddScoped<IDbConnection>(sp =>
-    new SqlConnection(builder.Configuration.GetConnectionString("SqlConnection")));
+{
+    var siteSettings = sp.GetRequiredService<SiteSettings>();  
+    return new SqlConnection(siteSettings.ConnectionStrings.SqlConnection); 
+});
+
 
 builder.Services.AddHangfire(config =>
-    config.UseSqlServerStorage(
-        builder.Configuration.GetConnectionString("SqlConnection")));
+{
+    var siteSettings = builder.Services.BuildServiceProvider().GetRequiredService<SiteSettings>();
+
+    config.UseSqlServerStorage(siteSettings.ConnectionStrings.SqlConnection); 
+});
+
+
+builder.Services.AddHangfireServer();
 
 builder.Services.AddHangfireServer();
 
@@ -107,53 +94,17 @@ builder.Services.AddScoped<RequestReminderJob>();
 
 
 
-//Dapper
-builder.Services.AddScoped<ICategoryDapperRepository, CategoryRepositoryDapper>();
-builder.Services.AddScoped<IHomeServiceDapperRepository, HomeServiceRepositoryDapper>();
-builder.Services.AddScoped<ICityDapperRepository, CityRepositoryDapper>();
-builder.Services.AddScoped<IProvinceDapperRepository, ProvinceRepositoryDapper>();
+builder.Services.AddDapperRepositoryServices(builder.Configuration);
 
-//Ef Core
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<ICommentRepository, CommentRepository>();
-builder.Services.AddScoped<IHomeServiceRepository, HomeServiceRepository>();
-builder.Services.AddScoped<IExpertRepository, ExpertRepository>();
-builder.Services.AddScoped<IExpertHomeServiceRepository, ExpertHomeServiceRepository>();
-builder.Services.AddScoped<IProvinceRepository, ProvinceRepository>();
-builder.Services.AddScoped<ICityRepository, CityRepository>();
-builder.Services.AddScoped<IRequestRepository, RequestRepository>();
-builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
-builder.Services.AddScoped<ISuggestionRepository, SuggestionRepository>();
-builder.Services.AddScoped<IAdminRepository, AdminRepository>();
-
+builder.Services.AddEfRepositoryService(builder.Configuration);
 
 builder.Services.AddScoped<IIdentityService, IdentityService>();
-builder.Services.AddScoped<ICommentService, CommentService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<IHomeServiceService, HomeServiceService>();
-builder.Services.AddScoped<IExpertHomeServiceService, ExpertHomeServiceService>();
-builder.Services.AddScoped<IExpertService, ExpertService>();
-builder.Services.AddScoped<IProvinceService, ProvinceService>();
-builder.Services.AddScoped<ICityService, CityService>();
-builder.Services.AddScoped<IRequestService, RequestService>();
-builder.Services.AddScoped<ICustomerService, CustomerService>();
-builder.Services.AddScoped<ISuggestionService, SuggestionService>();
-builder.Services.AddScoped<IAdminService, AdminService>();
+
+builder.Services.AddServiceServices(builder.Configuration);
+
+builder.Services.AddApplicationServices(builder.Configuration);
 
 
-builder.Services.AddScoped<IUserAppService, UserAppService>();
-builder.Services.AddScoped<ICommentAppService, CommentAppService>();
-builder.Services.AddScoped<ICategoryAppService, CategoryAppService>();
-builder.Services.AddScoped<IHomeServiceAppService, HomeServiceAppService>();
-builder.Services.AddScoped<IExpertAppService, ExpertAppService>();
-builder.Services.AddScoped<IProvinceAppService, ProvinceAppService>();
-builder.Services.AddScoped<ICityAppService, CityAppService>();
-builder.Services.AddScoped<IRequestAppService, RequestAppService>();
-builder.Services.AddScoped<ICustomerAppService, CustomerAppService>();
-builder.Services.AddScoped<ISuggestionAppService, SuggestionAppService>();
-builder.Services.AddScoped<IAdminAppService, AdminAppService>();
 
 
 builder.Services.AddScoped<IFileService, FileService>();
@@ -175,10 +126,19 @@ builder.Services.AddStackExchangeRedisCache(options =>
 var app = builder.Build();
 app.UseMiddleware<RequestLoggingMiddleware>();
 
-RecurringJob.AddOrUpdate<RequestReminderJob>(
-    "check-requests-without-suggestion",
-    job => job.CheckRequestsWithoutSuggestion(JobCancellationToken.Null),
-    Cron.Weekly);
+
+
+app.UseHangfireDashboard("/hangfire");
+
+using (var scope = app.Services.CreateScope())
+{
+    var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+
+    recurringJobManager.AddOrUpdate<RequestReminderJob>(
+        "check-requests-without-suggestion",
+        job => job.CheckRequestsWithoutSuggestion(JobCancellationToken.Null),
+        Cron.Weekly); // Adjust frequency as needed
+}
 
 
 
