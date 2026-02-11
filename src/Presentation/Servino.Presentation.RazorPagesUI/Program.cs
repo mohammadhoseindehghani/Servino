@@ -1,4 +1,4 @@
-﻿using System.Data;
+﻿using Hangfire;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +38,8 @@ using Servino.Infa.Db.SqlServer.EfCore.Identity.Service;
 using Servino.Infra.Providers.SmsProvider.SmsIrService;
 using Servino.Presentation.RazorPagesUI.CustomMiddleware;
 using Servino.Presentation.RazorPagesUI.Services.File;
+using System.Data;
+using Servino.Infrastructure.BackgroundJobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +48,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IDbConnection>(sp =>
     new SqlConnection(builder.Configuration.GetConnectionString("SqlConnection")));
+
+builder.Services.AddHangfire(config =>
+    config.UseSqlServerStorage(
+        builder.Configuration.GetConnectionString("SqlConnection")));
+
+builder.Services.AddHangfireServer();
+
 
 
 builder.Host.UseSerilog((context, configuration) =>
@@ -77,6 +86,12 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddScoped<DbInitializer>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddRazorPages();
+
+
+
+
+builder.Services.AddScoped<RequestReminderJob>();
+
 
 
 //Dapper
@@ -145,6 +160,14 @@ builder.Services.AddStackExchangeRedisCache(options =>
 
 var app = builder.Build();
 app.UseMiddleware<RequestLoggingMiddleware>();
+
+RecurringJob.AddOrUpdate<RequestReminderJob>(
+    "check-requests-without-suggestion",
+    job => job.CheckRequestsWithoutSuggestion(JobCancellationToken.Null),
+    Cron.Weekly);
+
+
+
 
 using (var scope = app.Services.CreateScope())
 {

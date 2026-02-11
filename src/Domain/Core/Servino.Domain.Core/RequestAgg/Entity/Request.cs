@@ -18,6 +18,7 @@ public class Request : BaseEntity
     public DateTime DateRequired { get; set; } 
     public DateTime? DateDone { get; set; } 
     public RequestStatus Status { get; set; }
+    public DateTime? NoSuggestionReminderAt { get; set; }
 
     public int CustomerId { get; set; }
     public int HomeServiceId { get; set; }

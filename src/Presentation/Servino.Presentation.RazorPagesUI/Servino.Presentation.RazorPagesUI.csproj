@@ -7,6 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Hangfire" Version="1.8.23" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.23" />
+    <PackageReference Include="Hangfire.SqlServer" Version="1.8.23" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.1">
       <PrivateAssets>all</PrivateAssets>
@@ -25,6 +28,7 @@
     <ProjectReference Include="..\..\..\framework\Servino.Framework\Servino.Framework.csproj" />
     <ProjectReference Include="..\..\Domain\AppService\Servino.Domain.AppService\Servino.Domain.AppService.csproj" />
     <ProjectReference Include="..\..\Domain\Service\Servino.Domain.Servcie\Servino.Domain.Service.csproj" />
+    <ProjectReference Include="..\..\Infrastrucure\Background Jobs\Servino.Infrastructure.BackgroundJobs\Servino.Infrastructure.BackgroundJobs.csproj" />
     <ProjectReference Include="..\..\Infrastrucure\DataAccess\Servino.Infa.DataAccess.Repo.Dapper\Servino.Infa.DataAccess.Repo.Dapper.csproj" />
     <ProjectReference Include="..\..\Infrastrucure\DataAccess\Servino.Infa.DataAccess.Repo.EfCore\Servino.Infa.DataAccess.Repo.EfCore.csproj" />
     <ProjectReference Include="..\..\Infrastrucure\Db\Servino.Infa.Db.SqlServer.EfCore\Servino.Infa.Db.SqlServer.EfCore.csproj" />

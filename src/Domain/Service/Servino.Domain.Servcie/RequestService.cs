@@ -2,6 +2,7 @@
 using Servino.Domain.Core.RequestAgg.Contracts.Data;
 using Servino.Domain.Core.RequestAgg.Contracts.Service;
 using Servino.Domain.Core.RequestAgg.Dtos;
+using Servino.Domain.Core.RequestAgg.Entity;
 
 namespace Servino.Domain.Service;
 
@@ -55,5 +56,20 @@ public class RequestService(IRequestRepository requestRepo) : IRequestService
     public async Task<bool> IsAllowToCommentAsync(int requestId, CancellationToken ct)
     {
         return await requestRepo.IsAllowToCommentAsync(requestId, ct);
+    }
+
+    public async Task<List<Request>> GetRequestsWithoutSuggestionAsync(CancellationToken ct)
+    {
+        return await requestRepo.GetRequestsWithoutSuggestionAsync(ct);
+    }
+
+    public async Task<bool> MarkNoSuggestionReminderSentAsync(int requestId, DateTime atUtc, CancellationToken ct)
+    {
+        return await requestRepo.MarkNoSuggestionReminderSentAsync(requestId, atUtc, ct);
+    }
+
+    public async Task<string?> GetCustomerMobileByRequestId(int requestId, CancellationToken ct)
+    {
+        return await requestRepo.GetCustomerMobileByRequestId(requestId, ct);
     }
 }

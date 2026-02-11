@@ -220,4 +220,37 @@ public class RequestRepository(AppDbContext context) : IRequestRepository
         return status is RequestStatus.Done or RequestStatus.Paid;
     }
 
+    public async Task<List<Request>> GetRequestsWithoutSuggestionAsync(CancellationToken ct)
+    {
+        var threshold = DateTime.UtcNow.AddHours(-3);
+
+        return await context.Requests
+            .Where(r =>
+                r.Status == RequestStatus.WaitingForExperts &&
+                !r.Suggestions.Any() &&
+                r.CreatedAt < threshold &&
+                r.NoSuggestionReminderAt == null &&
+                !r.IsDeleted)
+            .ToListAsync(ct);
+    }
+
+
+    public async Task<bool> MarkNoSuggestionReminderSentAsync(int requestId, DateTime atUtc, CancellationToken ct)
+    {
+        var affected = await context.Requests
+            .Where(r => r.Id == requestId && !r.IsDeleted)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(x => x.NoSuggestionReminderAt, atUtc)
+                .SetProperty(x => x.UpdatedAt, DateTime.UtcNow), ct);
+
+        return affected > 0;
+    }
+
+    public async Task<string?> GetCustomerMobileByRequestId(int requestId, CancellationToken ct)
+    {
+        return await context.Requests
+            .Where(r => r.Id == requestId)
+            .Select(r => r.Customer.User.MobileNumber)
+            .FirstOrDefaultAsync(ct);
+    }
 }

@@ -17,4 +17,9 @@ public interface IRequestRepository
     Task<List<RequestSummaryDto>> GetAvailableForExpertAsync(int expertId, List<int> expertServiceIds, int cityId, CancellationToken ct);
     Task<bool> IsOwnerAsync(int requestId, int customerId, CancellationToken ct);
     Task<bool> IsAllowToCommentAsync(int requestId, CancellationToken ct);
+
+
+    Task<List<Request>> GetRequestsWithoutSuggestionAsync(CancellationToken ct);
+    Task<bool> MarkNoSuggestionReminderSentAsync(int requestId, DateTime atUtc, CancellationToken ct);
+    Task<string?> GetCustomerMobileByRequestId(int requestId, CancellationToken ct);
 }

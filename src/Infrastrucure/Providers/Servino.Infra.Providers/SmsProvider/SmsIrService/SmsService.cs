@@ -13,19 +13,16 @@ public class SmsIrService(string apiKey) : ISmsService
     {
         try
         {
-            // دریافت پاسخ - نوع response یک wrapper با پراپرتی Data هست
             var response = await smsIr.VerifySendAsync(
                 mobile: mobileNumber,
                 templateId: templateId,
                 parameters: parameters.ToArray()
             );
 
-            // اگر به اینجا رسید یعنی ارسال موفق بوده (کتابخانه در خطا exception می‌ندازه)
-            return response.Data; // مستقیم VerifySendResult رو برمی‌گردونیم
+            return response.Data; 
         }
         catch (Exception ex)
         {
-            // مدیریت خطاهای شناخته‌شده (دقیقاً مثل کد نمونه شما)
             string friendlyMessage = ex switch
             {
                 UnauthorizedException => "کلید API نامعتبر یا منقضی شده است.",
@@ -37,6 +34,35 @@ public class SmsIrService(string apiKey) : ISmsService
             };
 
             throw new Exception($"ارسال OTP شکست خورد: {friendlyMessage}", ex);
+        }
+    }
+
+    public async Task<VerifySendResult> SendByTemplateAsync(string mobileNumber, int templateId, List<VerifySendParameter> parameters, CancellationToken ct = default)
+    {
+        try
+        {
+            ct.ThrowIfCancellationRequested();
+            var response = await smsIr.VerifySendAsync(
+                mobile: mobileNumber,
+                templateId: templateId,
+                parameters: parameters.ToArray()
+            );
+
+            return response.Data;
+        }
+        catch (Exception ex)
+        {
+            string friendlyMessage = ex switch
+            {
+                UnauthorizedException => "کلید API نامعتبر یا منقضی شده است.",
+                LogicalException lex => $"پارامترهای ارسالی اشتباه است: {lex.Message}",
+                TooManyRequestException => "تعداد درخواست‌ها بیش از حد مجاز است. کمی صبر کنید.",
+                UnexpectedException => "خطای غیرمنتظره از سمت سرور Sms.ir.",
+                InvalidOperationException => "عملیات نامعتبر (مثل قالب تأیید نشده).",
+                _ => $"خطای ناشناخته: {ex.Message}"
+            };
+
+            throw new Exception($"ارسال پیام قالبی شکست خورد: {friendlyMessage}", ex);
         }
     }
 }

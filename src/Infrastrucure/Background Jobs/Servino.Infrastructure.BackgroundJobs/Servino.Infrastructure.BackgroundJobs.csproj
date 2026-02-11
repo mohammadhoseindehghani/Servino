@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\Domain\Core\Servino.Domain.Core\Servino.Domain.Core.csproj" />
-    <ProjectReference Include="..\..\Db\Servino.Infa.Db.SqlServer.EfCore\Servino.Infa.Db.SqlServer.EfCore.csproj" />
+    <ProjectReference Include="..\..\Providers\Servino.Infra.Providers\Servino.Infra.Providers.csproj" />
   </ItemGroup>
 
 </Project>

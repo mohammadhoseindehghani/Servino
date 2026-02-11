@@ -14,6 +14,9 @@
     <Project Path="src/Domain/Service/Servino.Domain.Servcie/Servino.Domain.Service.csproj" Id="190fb836-cfb4-4c9c-899a-509df4e04f63" />
   </Folder>
   <Folder Name="/src/Infrastructure/" />
+  <Folder Name="/src/Infrastructure/Background Jobs/">
+    <Project Path="src/Infrastrucure/Background Jobs/Servino.Infrastructure.BackgroundJobs/Servino.Infrastructure.BackgroundJobs.csproj" Id="945fcf33-4ce8-4b3d-bbb5-58cb1cde8cf5" />
+  </Folder>
   <Folder Name="/src/Infrastructure/DataAccess/">
     <Project Path="src/Infrastrucure/DataAccess/Servino.Infa.DataAccess.Repo.Dapper/Servino.Infa.DataAccess.Repo.Dapper.csproj" Id="8a9807c5-1034-4cb2-bd19-716bed0b2782" />
     <Project Path="src/Infrastrucure/DataAccess/Servino.Infa.DataAccess.Repo.EfCore/Servino.Infa.DataAccess.Repo.EfCore.csproj" Id="5e3e11a6-f55b-4694-b1b5-326db7650229" />
