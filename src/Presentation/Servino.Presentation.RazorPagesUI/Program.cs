@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Serilog;
 using Servino.Domain.AppService;
 using Servino.Domain.AppService.UserAgg;
@@ -36,12 +37,24 @@ using Servino.Infa.Db.SqlServer.EfCore.DataSeed;
 using Servino.Infa.Db.SqlServer.EfCore.DbContexts;
 using Servino.Infa.Db.SqlServer.EfCore.Identity.Service;
 using Servino.Infra.Providers.SmsProvider.SmsIrService;
+using Servino.Infrastructure.BackgroundJobs;
+using Servino.Presentation.RazorPagesUI.Configurations;
 using Servino.Presentation.RazorPagesUI.CustomMiddleware;
 using Servino.Presentation.RazorPagesUI.Services.File;
 using System.Data;
-using Servino.Infrastructure.BackgroundJobs;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+
+
+builder.Services.Configure<SiteSettings>(builder.Configuration.GetSection("SiteSettings"));
+builder.Services.AddSingleton(resolver =>
+    resolver.GetRequiredService<IOptions<SiteSettings>>().Value);
+
+
+
+
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlConnection")));
@@ -153,8 +166,9 @@ builder.Services.AddScoped<ISmsService>(provider =>
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = builder.Configuration["Redis:Configuration"];
-    options.InstanceName = builder.Configuration["Redis:InstanceName"];
+    var siteSettings = builder.Services.BuildServiceProvider().GetRequiredService<SiteSettings>();
+    options.Configuration = siteSettings.Redis.Configuration;
+    options.InstanceName = siteSettings.Redis.InstanceName;
 });
 
 
