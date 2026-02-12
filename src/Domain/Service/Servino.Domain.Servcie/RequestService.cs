@@ -8,6 +8,11 @@ namespace Servino.Domain.Service;
 
 public class RequestService(IRequestRepository requestRepo) : IRequestService
 {
+    public async Task<decimal> GetBasePriceByRequestIdAsync(int requestId, CancellationToken ct)
+    {
+        return await requestRepo.GetBasePriceByRequestIdAsync(requestId, ct);
+    }
+
     public async Task<int> CreateAsync(CreateRequestDto command, CancellationToken ct)
     {
         return await requestRepo.CreateAsync(command, ct);

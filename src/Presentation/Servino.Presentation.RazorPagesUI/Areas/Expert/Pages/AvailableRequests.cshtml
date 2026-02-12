@@ -1,4 +1,5 @@
 ﻿@page
+@using Servino.Framework.Extensions
 @model Servino.Presentation.RazorPagesUI.Areas.Expert.Pages.AvailableRequestsModel
 @{
     Layout = "Layouts/_ContentNavbarLayout";
@@ -18,7 +19,7 @@
                 <div class="card h-100 shadow-sm border-0">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0 text-truncate" title="@item.Title">@item.Title</h5>
-                        <span class="badge bg-label-secondary">@item.DateRequired</span>
+                        <span class="badge bg-label-secondary">@item.DateRequired.ToShamsi()</span>
                     </div>
 
                     <div class="card-body">
@@ -31,11 +32,6 @@
                                 <small class="text-muted">@item.CityName</small>
                             </div>
                         </div>
-
-                        <p class="text-muted small mb-3">
-                            تعداد پیشنهادات:
-                            <span class="fw-bold text-dark">@item.SuggestionCount</span>
-                        </p>
 
                         <div class="d-grid gap-2">
                             <a asp-page="./RequestDetails"

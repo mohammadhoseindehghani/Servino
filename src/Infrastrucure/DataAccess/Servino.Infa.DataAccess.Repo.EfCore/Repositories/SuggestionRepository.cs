@@ -9,6 +9,12 @@ namespace Servino.Infa.DataAccess.Repo.EfCore.Repositories;
 
 public class SuggestionRepository(AppDbContext context) : ISuggestionRepository
 {
+    public async Task<bool> IsExpertSendSuggestionBeforeAsync(int expertId, int resquestId, CancellationToken ct)
+    {
+        return await context.Suggestions.Where(s => s.RequestId == resquestId)
+            .AnyAsync(s => s.ExpertId == expertId, ct);
+    }
+
     public async Task<bool> CreateAsync(CreateSuggestionDto command, CancellationToken ct)
     {
         var suggestion = new Suggestion()

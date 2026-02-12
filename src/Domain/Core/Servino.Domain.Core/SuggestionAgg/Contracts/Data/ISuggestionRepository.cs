@@ -3,7 +3,8 @@
 namespace Servino.Domain.Core.SuggestionAgg.Contracts.Data;
 
 public interface ISuggestionRepository
-{
+{ 
+    Task<bool> IsExpertSendSuggestionBeforeAsync(int expertId, int requestId, CancellationToken ct);
     Task<bool> CreateAsync(CreateSuggestionDto command, CancellationToken ct);
     Task<List<SuggestionSummaryDto>> GetByRequestIdAsync(int requestId, CancellationToken ct);
     Task<SuggestionDto?> GetByIdAsync(int id, CancellationToken ct);

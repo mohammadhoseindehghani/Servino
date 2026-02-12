@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Servino.Domain.Core._common;
+using Servino.Domain.Core.RequestAgg.Contracts.Service;
 using Servino.Domain.Core.SuggestionAgg.Contracts.AppService;
 using Servino.Domain.Core.SuggestionAgg.Contracts.Service;
 using Servino.Domain.Core.SuggestionAgg.Dtos;
@@ -7,7 +8,7 @@ using Servino.Framework.Caching;
 
 namespace Servino.Domain.AppService;
 
-public class SuggestionAppService(ISuggestionService suggestionService, ICacheService cache,
+public class SuggestionAppService(ISuggestionService suggestionService,IRequestService requestService, ICacheService cache,
     ILogger<SuggestionAppService> logger) : ISuggestionAppService
 {
     public async Task<Result<bool>> CreateAsync(CreateSuggestionDto command, CancellationToken ct)
@@ -18,9 +19,13 @@ public class SuggestionAppService(ISuggestionService suggestionService, ICacheSe
         if (command.ExpertId <= 0)
             return Result<bool>.Failure("متخصص امکان ارسال پیشنهاد را ندارد");
 
-        if (command.SuggestedPrice < 100000)
-            return Result<bool>.Failure("مبلغ پیشنهادی نمیتوند کمتر از 100 هزار تومان باشد.");
+        var check = await suggestionService.IsExpertSendSuggestionBeforeAsync(command.ExpertId, command.RequestId, ct);
+        if (check)
+            return Result<bool>.Failure("برای این درخواست قبلا پیشنهاد ارسال کردید.");
 
+        var basePrice = await requestService.GetBasePriceByRequestIdAsync(command.RequestId, ct);
+        if (command.SuggestedPrice < basePrice)
+            return Result<bool>.Failure($"مبلغ پیشنهادی نمیتوند کمتر از مبلغ پایه: {basePrice} باشد.");
 
         if (command.SuggestedDate <= DateTime.Now)
             return Result<bool>.Failure("تاریخ پیشنهادی نمیتواند در گذشته باشد.");

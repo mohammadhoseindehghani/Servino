@@ -6,6 +6,11 @@ namespace Servino.Domain.Service;
 
 public class SuggestionService(ISuggestionRepository suggestionRepo) : ISuggestionService
 {
+    public async Task<bool> IsExpertSendSuggestionBeforeAsync(int expertId, int requestId, CancellationToken ct)
+    {
+        return await suggestionRepo.IsExpertSendSuggestionBeforeAsync(expertId, requestId, ct);
+    }
+
     public async Task<bool> CreateAsync(CreateSuggestionDto command, CancellationToken ct)
     {
         return await suggestionRepo.CreateAsync(command, ct);

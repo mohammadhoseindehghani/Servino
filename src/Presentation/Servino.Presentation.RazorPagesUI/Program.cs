@@ -1,9 +1,10 @@
 ﻿using Hangfire;
+using Serilog;
+using System.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Serilog;
 using Servino.Domain.AppService;
 using Servino.Domain.Core.UserAgg.Contracts.Service;
 using Servino.Domain.Service;
@@ -18,7 +19,6 @@ using Servino.Infrastructure.BackgroundJobs;
 using Servino.Presentation.RazorPagesUI.Configurations;
 using Servino.Presentation.RazorPagesUI.CustomMiddleware;
 using Servino.Presentation.RazorPagesUI.Services.File;
-using System.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,10 +43,9 @@ builder.Services.AddScoped<IDbConnection>(sp =>
 });
 
 
-builder.Services.AddHangfire(config =>
+builder.Services.AddHangfire((sp,config) =>
 {
-    var siteSettings = builder.Services.BuildServiceProvider().GetRequiredService<SiteSettings>();
-
+    var siteSettings = sp.GetRequiredService<SiteSettings>();
     config.UseSqlServerStorage(siteSettings.ConnectionStrings.SqlConnection); 
 });
 
@@ -137,7 +136,7 @@ using (var scope = app.Services.CreateScope())
     recurringJobManager.AddOrUpdate<RequestReminderJob>(
         "check-requests-without-suggestion",
         job => job.CheckRequestsWithoutSuggestion(JobCancellationToken.Null),
-        Cron.Weekly); // Adjust frequency as needed
+        Cron.Weekly); 
 }
 
 

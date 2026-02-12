@@ -6,6 +6,7 @@ namespace Servino.Domain.Core.RequestAgg.Contracts.Service;
 
 public interface IRequestService
 {
+    Task<decimal> GetBasePriceByRequestIdAsync(int requestId, CancellationToken ct);
     Task<int> CreateAsync(CreateRequestDto command, CancellationToken ct);
     Task<bool> UpdateAsync(UpdateRequestDto command, CancellationToken ct);
     Task<RequestFullDto?> GetByIdAsync(int id, CancellationToken ct);

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Servino.Domain.Core._common;
+using Servino.Domain.Core.HomeServiceAgg.Entity;
 using Servino.Domain.Core.RequestAgg.Contracts.Data;
 using Servino.Domain.Core.RequestAgg.Dtos;
 using Servino.Domain.Core.RequestAgg.Entity;
@@ -10,6 +11,20 @@ namespace Servino.Infa.DataAccess.Repo.EfCore.Repositories;
 
 public class RequestRepository(AppDbContext context) : IRequestRepository
 {
+    public async Task<decimal> GetBasePriceByRequestIdAsync(int requestId, CancellationToken ct)
+    {
+        var basePrice = await context.Requests
+            .Where(s => s.Id == requestId)
+            .Select(s => s.HomeService.BasePrice)
+            .SingleOrDefaultAsync(ct);
+
+        if (basePrice == 0)
+            throw new InvalidOperationException("Suggestion not found.");
+
+        return basePrice;
+    }
+
+
     public async Task<int> CreateAsync(CreateRequestDto dto, CancellationToken ct)
     {
         var request = new Request
