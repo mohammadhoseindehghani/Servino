@@ -29,6 +29,27 @@
             <li><strong>شهر:</strong> @Model.Request.CityName</li>
             <li><strong>آدرس:</strong> @Model.Request.Address</li>
             <li><strong>توضیحات:</strong> @Model.Request.Description</li>
+            <li>
+                <strong>تصاویر:</strong>
+
+                @if (Model.Request.ImagePaths != null && Model.Request.ImagePaths.Any())
+                {
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        @foreach (var imagePath in Model.Request.ImagePaths)
+                        {
+                            <img src="@imagePath"
+                                 alt="تصویر درخواست"
+                                 class="img-thumbnail"
+                                 style="width:120px;height:120px;object-fit:cover;cursor:pointer"
+                                 onclick="window.open('@imagePath','_blank')" />
+                        }
+                    </div>
+                }
+                else
+                {
+                    <span class="text-muted">تصویری ثبت نشده است</span>
+                }
+            </li>
             <li><strong>تاریخ مورد نیاز:</strong> @Model.Request.DateRequired.ToShamsi()</li>
         </ul>
 
