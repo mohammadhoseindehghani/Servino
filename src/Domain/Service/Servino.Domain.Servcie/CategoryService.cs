@@ -24,7 +24,7 @@ public class CategoryService(ICategoryRepository categoryRepo, ICategoryDapperRe
 
     public async Task<CategoryDto?> GetByIdAsync(int id, CancellationToken ct)
     {
-        return await categoryRepo.GetByIdAsync(id, ct);
+        return await dapperCategoryRepo.GetByIdAsync(id, ct);
     }
 
     public async Task<List<CategorySummaryDto>> GetAllAsync(PaginationRequestDto search, CancellationToken ct)
@@ -39,12 +39,12 @@ public class CategoryService(ICategoryRepository categoryRepo, ICategoryDapperRe
 
     public async Task<List<CategoryClientDto>> GetCategoriesByParentIdAsync(int? parentId, CancellationToken ct)
     {
-        return await categoryRepo.GetCategoriesByParentIdAsync(parentId, ct);
+        return await dapperCategoryRepo.GetCategoriesByParentIdAsync(parentId, ct);
     }
 
     public async Task<List<ServiceClientDto>> GetServicesByCategoryIdAsync(int categoryId, CancellationToken ct)
     {
-        return await categoryRepo.GetServicesByCategoryIdAsync(categoryId, ct);
+        return await dapperCategoryRepo.GetServicesByCategoryIdAsync(categoryId, ct);
     }
 
     public async Task<List<BreadcrumbDto>> GetBreadcrumbAsync(int categoryId, CancellationToken ct)

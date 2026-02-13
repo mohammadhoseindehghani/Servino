@@ -11,9 +11,23 @@ public class CityRepositoryDapper(IDbConnection connection) : ICityDapperReposit
 
     public async Task<CityDto?> GetByIdAsync(int id, CancellationToken ct)
     {
-        string sql = "SELECT Id, Title, ProvinceId FROM Cities WHERE Id = @Id AND IsDeleted = 0";
-        return await connection.QueryFirstOrDefaultAsync<CityDto>(sql, new { Id = id });
+        string sql = @"
+SELECT 
+    Id, 
+    Title, 
+    ProvinceId
+FROM Cities
+WHERE Id = @Id
+  AND IsDeleted = 0;";
+
+        var command = new CommandDefinition(
+            sql,
+            new { Id = id },
+            cancellationToken: ct);
+
+        return await connection.QueryFirstOrDefaultAsync<CityDto>(command);
     }
+
 
     public async Task<List<CityDto>> GetAllAsync(PaginationRequestDto search, CancellationToken ct)
     {
@@ -31,8 +45,22 @@ public class CityRepositoryDapper(IDbConnection connection) : ICityDapperReposit
 
     public async Task<List<SelectListDto>> GetCitiesByProvinceIdAsync(int provinceId, CancellationToken ct)
     {
-        string sql = "SELECT Id, Title FROM Cities WHERE ProvinceId = @ProvinceId AND IsDeleted = 0";
-        var cities = await connection.QueryAsync<SelectListDto>(sql, new { ProvinceId = provinceId });
+        string sql = @"
+SELECT 
+    Id, 
+    Title
+FROM Cities
+WHERE ProvinceId = @ProvinceId
+  AND IsDeleted = 0
+ORDER BY Title;";
+
+        var command = new CommandDefinition(
+            sql,
+            new { ProvinceId = provinceId },
+            cancellationToken: ct);
+
+        var cities = await connection.QueryAsync<SelectListDto>(command);
         return cities.AsList();
     }
+
 }

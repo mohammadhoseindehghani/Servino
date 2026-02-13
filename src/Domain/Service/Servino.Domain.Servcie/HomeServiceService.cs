@@ -29,7 +29,7 @@ public class HomeServiceService(IHomeServiceRepository homeServiceRepo, IHomeSer
 
     public async Task<HomeServiceDto?> GetByIdAsync(int id, CancellationToken ct)
     {
-        return await homeServiceRepo.GetByIdAsync(id, ct);
+        return await dapperHomeServiceRepo.GetByIdAsync(id, ct);
     }
 
     public async Task<List<HomeServiceSummaryDto>> GetAllAsync(PaginationRequestDto search, CancellationToken ct)

@@ -10,9 +10,20 @@ public class ProvinceRepositoryDapper(IDbConnection connection) : IProvinceDappe
 {
     public async Task<ProvinceDto?> GetByIdAsync(int id, CancellationToken ct)
     {
-        string sql = "SELECT Id, Title FROM Provinces WHERE Id = @Id AND IsDeleted = 0";
-        return await connection.QueryFirstOrDefaultAsync<ProvinceDto>(sql, new { Id = id });
+        string sql = @"
+SELECT Id, Title 
+FROM Provinces 
+WHERE Id = @Id 
+  AND IsDeleted = 0;";
+
+        var command = new CommandDefinition(
+            sql,
+            new { Id = id },
+            cancellationToken: ct);
+
+        return await connection.QueryFirstOrDefaultAsync<ProvinceDto>(command);
     }
+
 
     public async Task<List<ProvinceDto>> GetAllAsync(PaginationRequestDto search, CancellationToken ct)
     {

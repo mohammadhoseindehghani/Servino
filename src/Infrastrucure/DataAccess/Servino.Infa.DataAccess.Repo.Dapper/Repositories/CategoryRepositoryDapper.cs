@@ -17,17 +17,44 @@ public class CategoryRepositoryDapper(IDbConnection connection) : ICategoryDappe
 
     public async Task<List<CategorySummaryDto>> GetAllAsync(PaginationRequestDto search, CancellationToken ct)
     {
-        string sql = "SELECT Id, Title, ParentId, ImagePath FROM Categories WHERE IsDeleted = 0";
+        var pageNumber = search.PageNumber < 1 ? 1 : search.PageNumber;
+        var pageSize = search.PageSize < 1 ? 10 : search.PageSize;
+        var offset = (pageNumber - 1) * pageSize;
 
-        if (!string.IsNullOrWhiteSpace(search.SearchKey))
+        var sql = @"
+SELECT
+    c.Id,
+    c.Title,
+    p.Title AS ParentTitle,
+    (
+        SELECT COUNT(1)
+        FROM Categories sc
+        WHERE sc.ParentId = c.Id
+          AND sc.IsDeleted = 0
+    ) AS SubCategoriesCount,
+    c.IsActive,
+    c.ImagePath
+FROM Categories c
+LEFT JOIN Categories p ON p.Id = c.ParentId
+WHERE c.IsDeleted = 0
+  AND (@SearchKey IS NULL OR c.Title LIKE @SearchKey OR p.Title LIKE @SearchKey)
+ORDER BY c.CreatedAt DESC, c.Id DESC
+OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;";
+
+        var param = new
         {
-            sql += " AND Title LIKE @SearchKey";
-        }
+            SearchKey = string.IsNullOrWhiteSpace(search.SearchKey) ? null : $"%{search.SearchKey}%",
+            Offset = offset,
+            PageSize = pageSize
+        };
 
-        var categories = await connection.QueryAsync<CategorySummaryDto>(sql, new { SearchKey = "%" + search.SearchKey + "%" });
+        var result = await connection.QueryAsync<CategorySummaryDto>(
+            new CommandDefinition(sql, param, cancellationToken: ct));
 
-        return categories.AsList();
+        return result.AsList();
     }
+
+
 
     public async Task<List<CategoryClientDto>> GetCategoriesByParentIdAsync(int? parentId, CancellationToken ct)
     {
