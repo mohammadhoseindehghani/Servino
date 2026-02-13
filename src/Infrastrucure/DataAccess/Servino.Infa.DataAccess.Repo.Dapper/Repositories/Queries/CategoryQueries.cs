@@ -34,14 +34,31 @@ OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;";
 
     public const string GetByParentId = @"
 SELECT 
-    Id, 
-    Title, 
-    ImagePath
-FROM Categories
-WHERE ParentId = @ParentId
-  AND IsDeleted = 0 
-  AND IsActive = 1
-ORDER BY Title;";
+    c.Id, 
+    c.Title, 
+    c.ImagePath,
+    CAST(
+        CASE WHEN EXISTS (
+            SELECT 1
+            FROM Categories sc
+            WHERE sc.ParentId = c.Id
+              AND ISNULL(sc.IsDeleted, 0) = 0
+              AND ISNULL(sc.IsActive, 0) = 1
+        )
+        THEN 1 ELSE 0 END
+    AS bit) AS HasChildren
+FROM Categories c
+WHERE
+    (
+        (@ParentId IS NULL AND (c.ParentId IS NULL OR c.ParentId = 0))
+        OR
+        (c.ParentId = @ParentId)
+    )
+    AND ISNULL(c.IsDeleted, 0) = 0
+    AND ISNULL(c.IsActive, 0) = 1
+ORDER BY c.Title;";
+
+
 
     public const string GetServicesByCategoryId = @"
 SELECT 

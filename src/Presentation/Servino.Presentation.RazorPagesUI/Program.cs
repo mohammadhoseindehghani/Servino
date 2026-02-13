@@ -22,8 +22,6 @@ using Servino.Presentation.RazorPagesUI.Services.File;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-
 builder.Services.Configure<SiteSettings>(builder.Configuration.GetSection("SiteSettings"));
 builder.Services.AddSingleton(resolver =>
     resolver.GetRequiredService<IOptions<SiteSettings>>().Value);
@@ -51,10 +49,6 @@ builder.Services.AddHangfire((sp,config) =>
 
 
 builder.Services.AddHangfireServer();
-
-builder.Services.AddHangfireServer();
-
-
 
 builder.Host.UseSerilog((context, configuration) =>
 {
@@ -86,24 +80,15 @@ builder.Services.AddScoped<DbInitializer>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddRazorPages();
 
-
-
-
 builder.Services.AddScoped<RequestReminderJob>();
 
 
 
 builder.Services.AddDapperRepositoryServices(builder.Configuration);
-
 builder.Services.AddEfRepositoryService(builder.Configuration);
-
 builder.Services.AddScoped<IIdentityService, IdentityService>();
-
 builder.Services.AddServiceServices(builder.Configuration);
-
 builder.Services.AddApplicationServices(builder.Configuration);
-
-
 
 
 builder.Services.AddScoped<IFileService, FileService>();
@@ -125,8 +110,6 @@ builder.Services.AddStackExchangeRedisCache(options =>
 var app = builder.Build();
 app.UseMiddleware<RequestLoggingMiddleware>();
 
-
-
 app.UseHangfireDashboard("/hangfire");
 
 using (var scope = app.Services.CreateScope())
@@ -138,9 +121,6 @@ using (var scope = app.Services.CreateScope())
         job => job.CheckRequestsWithoutSuggestion(JobCancellationToken.Null),
         Cron.Weekly); 
 }
-
-
-
 
 using (var scope = app.Services.CreateScope())
 {
@@ -167,7 +147,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
 
 app.UseAuthentication(); 
 app.UseAuthorization();  
