@@ -1,8 +1,9 @@
-﻿using System.Data;
-using Dapper;
+﻿using Dapper;
 using Servino.Domain.Core._common;
 using Servino.Domain.Core.LocationAgg.Contracts.Data;
 using Servino.Domain.Core.LocationAgg.Dtos;
+using Servino.Infa.DataAccess.Repo.Dapper.Repositories.Queries;
+using System.Data;
 
 namespace Servino.Infa.DataAccess.Repo.Dapper.Repositories;
 
@@ -10,39 +11,41 @@ public class ProvinceRepositoryDapper(IDbConnection connection) : IProvinceDappe
 {
     public async Task<ProvinceDto?> GetByIdAsync(int id, CancellationToken ct)
     {
-        string sql = @"
-SELECT Id, Title 
-FROM Provinces 
-WHERE Id = @Id 
-  AND IsDeleted = 0;";
-
         var command = new CommandDefinition(
-            sql,
+            ProvinceQueries.GetById,
             new { Id = id },
             cancellationToken: ct);
 
         return await connection.QueryFirstOrDefaultAsync<ProvinceDto>(command);
     }
-
-
     public async Task<List<ProvinceDto>> GetAllAsync(PaginationRequestDto search, CancellationToken ct)
     {
-        string sql = "SELECT Id, Title FROM Provinces WHERE IsDeleted = 0";
+        var pageNumber = search.PageNumber < 1 ? 1 : search.PageNumber;
+        var pageSize = search.PageSize < 1 ? 10 : search.PageSize;
+        var offset = (pageNumber - 1) * pageSize;
 
-        if (!string.IsNullOrWhiteSpace(search.SearchKey))
+        var param = new
         {
-            sql += " AND Title LIKE @SearchKey";
-        }
+            SearchKey = string.IsNullOrWhiteSpace(search.SearchKey) ? null : $"%{search.SearchKey}%",
+            Offset = offset,
+            PageSize = pageSize
+        };
 
-        var provinces = await connection.QueryAsync<ProvinceDto>(sql, new { SearchKey = "%" + search.SearchKey + "%" });
+        var command = new CommandDefinition(
+            ProvinceQueries.GetAllPaged,
+            param,
+            cancellationToken: ct);
 
+        var provinces = await connection.QueryAsync<ProvinceDto>(command);
         return provinces.AsList();
     }
-
     public async Task<List<SelectListDto>> GetAllForDropdownAsync(CancellationToken ct)
     {
-        string sql = "SELECT Id, Title FROM Provinces WHERE IsDeleted = 0";
-        var provinces = await connection.QueryAsync<SelectListDto>(sql);
+        var command = new CommandDefinition(
+            ProvinceQueries.GetAllForDropdown,
+            cancellationToken: ct);
+
+        var provinces = await connection.QueryAsync<SelectListDto>(command);
         return provinces.AsList();
     }
 }
