@@ -166,12 +166,70 @@ A complete **Admin Dashboard** with:
 
 ---
 
+## 🚀 Phase 3 – Performance & API Expansion
+
+This phase focused on performance optimization through caching and expanding the system's reach via RESTful APIs.
+
+### 🔹 Caching Strategy
+- Integrated **Redis** for distributed caching ⚡
+- Cached frequently accessed data (e.g., categories, services) to minimize database hits and improve response time.
+
+### 🔹 Customer Workflow Completion
+Implemented the full lifecycle of a service request:
+- **Compare Proposals**: View and compare offers from different experts.
+- **Selection**: Choose the best proposal based on price and expert history.
+- **Order Finalization**: Confirm completion of the service.
+- **Payments**: Secure payment processing 💳.
+- **Feedback**: Rate experts and submit reviews ⭐.
+
+### 🔹 Web API Implementation
+Added a dedicated **Web API** project to expose core functionalities:
+- **User Registration**: API endpoints for registering Customers and Experts.
+- **Public Data**: Endpoints to fetch Lists of Categories and Services.
+
+---
+
+## 🚀 Phase 4 – Optimization & Advanced Interactions
+
+In the final phase, high-traffic read operations were optimized using Micro-ORM, background processing was introduced, and user interaction flows were refined.
+
+### 🔹 Dapper Integration (Performance Boost)
+Replaced EF Core repositories with **Dapper** for high-performance read operations. The corresponding EF repositories were removed.  
+The following lists are now fetched using raw SQL/Dapper for maximum speed:
+- Cities 🏙️
+- Categories 📂
+- Sub-categories 📁
+- Services 🛠️
+
+### 🔹 Background Jobs & Async Processing
+- Integrated **Hangfire** for managing background jobs and long-running tasks.
+- Used Hangfire for:
+  - Sending notifications (e.g., order status changes)
+  - Deferred and scheduled tasks
+  - Non-blocking post-order operations
+- Persistent background jobs backed by database storage.
+- Centralized dashboard for monitoring and retrying failed jobs.
+
+### 🔹 Enhanced User Interactions
+#### For Customers:
+- **Expert Insight**: Ability to view the full profile and previous reviews of experts who submitted proposals for their requests before making a final decision.
+
+#### For Experts:
+- **Smart Bidding**: Ability to view service requests that match their skills and registered categories.
+- **Proposal Management**: View request details and submit proposals with price and estimated completion time.
+
+> **Phase 4** focused on performance optimization, asynchronous processing, and richer interactions between customers and experts while keeping the Onion Architecture intact.
+
+
+---
+
 ## ⚙️ Key Technical Features
 
 - ASP.NET Core
 - EF Core & Dapper
 - Fluent API entity configurations
 - Microsoft Identity
+- Redis Caching
 - OTP-based authentication
 - Serilog + Seq centralized logging
 - Persian (Jalali) date support 📅
@@ -187,6 +245,3 @@ A complete **Admin Dashboard** with:
 ### 1️⃣ Clone the repository
 ```bash
 git clone https://github.com/mohammadhoseindehghani/Servino.git
-```
-
-
