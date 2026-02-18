@@ -9,7 +9,6 @@ using Servino.Domain.Core.SuggestionAgg.Contracts.Service;
 using Servino.Domain.Core.SuggestionAgg.Dtos;
 using Servino.Domain.Core.SuggestionAgg.Enum;
 using Servino.Domain.Core.UserAgg.Contracts.Service;
-using Servino.Framework.Caching;
 
 namespace Servino.Domain.AppService;
 
@@ -19,7 +18,6 @@ public class RequestAppService(
         IExpertHomeServiceService expertHomeServiceService,
         ISuggestionService suggestionService,
         IUserService userService,
-        ICacheService cache,
         ILogger<RequestAppService> logger) : IRequestAppService
 {
     public async Task<Result<int>> CreateAsync(CreateRequestDto command, CancellationToken ct)
@@ -44,13 +42,7 @@ public class RequestAppService(
             if (command.HomeServiceId <= 0)
                 return Result<int>.Failure("انتخاب خدمات الزامی است.");
 
-
             var newId = await requestService.CreateAsync(command, ct);
-
-            await cache.BumpStampAsync(CacheKeys.StampAllRequests, CacheTtl.Stamps, ct);
-            await cache.BumpStampAsync(CacheKeys.StampAvailableRequests, CacheTtl.Stamps, ct);
-            await cache.BumpStampAsync(CacheKeys.StampCustomerRequests(command.CustomerId), CacheTtl.Stamps, ct);
-
 
             return Result<int>.Success(newId, "درخواست با موفقیت ثبت شد.");
         }
@@ -79,16 +71,6 @@ public class RequestAppService(
 
             var isUpdated = await requestService.UpdateAsync(command, ct);
 
-            if (isUpdated)
-            {
-                await cache.RemoveAsync(CacheKeys.RequestDetails(command.Id), ct);
-                await cache.RemoveAsync(CacheKeys.RequestFull(command.Id), ct);
-                await cache.BumpStampAsync(CacheKeys.StampAllRequests, CacheTtl.Stamps, ct);
-                await cache.BumpStampAsync(CacheKeys.StampAvailableRequests, CacheTtl.Stamps, ct);
-                await cache.BumpStampAsync(CacheKeys.StampCustomerRequests(existingRequest.CustomerId), CacheTtl.Stamps, ct);
-            }
-
-
             return !isUpdated ? Result<bool>.Failure("عملیات ویرایش انجام نشد.")
                 : Result<bool>.Success(true, "درخواست با موفقیت ویرایش شد.");
         }
@@ -107,13 +89,7 @@ public class RequestAppService(
     {
         try
         {
-            var key = CacheKeys.RequestFull(id);
-
-            var request = await cache.GetOrSetAsync(
-                key,
-                async () => await requestService.GetByIdAsync(id, ct),
-                CacheTtl.Full,
-                ct);
+            var request = await requestService.GetByIdAsync(id, ct);
 
             return request == null
                 ? Result<RequestFullDto>.Failure("درخواست یافت نشد.", "404")
@@ -126,15 +102,11 @@ public class RequestAppService(
         }
     }
 
-
     public async Task<Result<RequestDetailDto>> GetDetailsByIdAsync(int id, CancellationToken ct)
     {
         try
         {
-            var key = $"request:details:{id}";
-
-            var details = await cache.GetOrSetAsync(key,
-                async () => await requestService.GetDetailsByIdAsync(id, ct), ttl: TimeSpan.FromMinutes(5), ct);
+            var details = await requestService.GetDetailsByIdAsync(id, ct);
 
             return details == null
                 ? Result<RequestDetailDto>.Failure("جزئیات درخواست یافت نشد.", "404")
@@ -147,61 +119,31 @@ public class RequestAppService(
         }
     }
 
-
-
     public async Task<List<RequestSummaryDto>> GetAllAsync(PaginationRequestDto search, int? categoryId, int? cityId, CancellationToken ct)
     {
-        var stamp = await cache.GetOrCreateStampAsync(CacheKeys.StampAllRequests, CacheTtl.Stamps, ct);
-
-        var key =
-            $"requests:all:{stamp}" +
-            $":cat:{categoryId ?? 0}" +
-            $":city:{cityId ?? 0}" +
-            $":p:{search.PageNumber}" +
-            $":s:{search.PageSize}" +
-            $":q:{search.SearchKey ?? ""}";
-
-        return await cache.GetOrSetAsync(
-            key,
-            async () => await requestService.GetAllAsync(search, categoryId, cityId, ct),
-            CacheTtl.Lists, ct);
+        return await requestService.GetAllAsync(search, categoryId, cityId, ct);
     }
 
     public async Task<List<RequestSummaryDto>> GetByCustomerIdAsync(int customerId, CancellationToken ct)
     {
-        var stampKey = CacheKeys.StampCustomerRequests(customerId);
-        var stamp = await cache.GetOrCreateStampAsync(stampKey, CacheTtl.Stamps, ct);
-
-        var key = $"requests:customer:{customerId}:{stamp}";
-
-        return await cache.GetOrSetAsync(
-            key,
-            async () => await requestService.GetByCustomerIdAsync(customerId, ct), CacheTtl.Lists, ct);
+        return await requestService.GetByCustomerIdAsync(customerId, ct);
     }
-
 
     public async Task<List<RequestSummaryDto>> GetAvailableForExpertAsync(int expertId, CancellationToken ct)
     {
-        var stamp = await cache.GetOrCreateStampAsync(CacheKeys.StampAvailableRequests, CacheTtl.Stamps, ct);
-        var key = $"requests:available:{expertId}:{stamp}";
+        var expertProfile = await expertService.GetByUserId(expertId, ct);
+        if (expertProfile == null || expertProfile.CityId == null) return [];
 
-        return await cache.GetOrSetAsync(key, async () =>
-        {
-            var expertProfile = await expertService.GetByUserId(expertId, ct);
-            if (expertProfile == null || expertProfile.CityId == null) return [];
+        var skillIds = await expertHomeServiceService.GetSelectedServiceIdsAsync(expertProfile.ExpertId, ct);
+        if (skillIds == null || !skillIds.Any()) return [];
 
-            var skillIds = await expertHomeServiceService.GetSelectedServiceIdsAsync(expertProfile.ExpertId, ct);
-            if (skillIds == null || !skillIds.Any()) return [];
-
-            return await requestService.GetAvailableForExpertAsync(expertProfile.ExpertId, skillIds, expertProfile.CityId.Value, ct);
-        }, CacheTtl.Lists, ct);
+        return await requestService.GetAvailableForExpertAsync(expertProfile.ExpertId, skillIds, expertProfile.CityId.Value, ct);
     }
 
     public async Task<List<RequestSummaryDto>> GetAvailableForExpertAsync(int expertId, List<int> expertServiceIds, int cityId, CancellationToken ct)
     {
         return await requestService.GetAvailableForExpertAsync(expertId, expertServiceIds, cityId, ct);
     }
-
 
     public async Task<Result<bool>> CancelRequestAsync(int requestId, int customerId, CancellationToken ct)
     {
@@ -232,15 +174,6 @@ public class RequestAppService(
             };
 
             var result = await requestService.UpdateAsync(updateDto, ct);
-
-            if (result)
-            {
-                await cache.RemoveAsync(CacheKeys.RequestDetails(requestId), ct);
-                await cache.RemoveAsync(CacheKeys.RequestFull(requestId), ct);
-                await cache.BumpStampAsync(CacheKeys.StampAllRequests, CacheTtl.Stamps, ct);
-                await cache.BumpStampAsync(CacheKeys.StampAvailableRequests, CacheTtl.Stamps, ct);
-                await cache.BumpStampAsync(CacheKeys.StampCustomerRequests(request.CustomerId), CacheTtl.Stamps, ct);
-            }
 
             return result
                 ? Result<bool>.Success(true, "درخواست شما لغو شد.")
@@ -294,10 +227,6 @@ public class RequestAppService(
             await userService.ChangeBalanceAsync(suggestion.ExpertUserId, expertShare, ct);
             await userService.ChangeBalanceAsync(adminUserId, adminShare, ct);
 
-            await cache.BumpStampAsync(CacheKeys.StampAllRequests, CacheTtl.Stamps, ct);
-            await cache.BumpStampAsync(CacheKeys.StampAvailableRequests, CacheTtl.Stamps, ct);
-            await cache.BumpStampAsync(CacheKeys.StampCustomerRequests(request.CustomerId), CacheTtl.Stamps, ct);
-
             var updateDto = new UpdateRequestDto
             {
                 Id = request.Id,
@@ -314,9 +243,6 @@ public class RequestAppService(
 
             await requestService.UpdateAsync(updateDto, ct);
 
-            await cache.RemoveAsync($"request:details:{requestId}", ct);
-            await cache.RemoveAsync($"request:full:{requestId}", ct);
-
             return Result<bool>.Success(true, "پرداخت با موفقیت انجام شد و سفارش بسته شد.");
         }
         catch (Exception ex)
@@ -325,6 +251,7 @@ public class RequestAppService(
             return Result<bool>.Failure($"خطای سیستمی: {ex.Message}");
         }
     }
+
     public async Task<Result<bool>> SelectExpertAsync(int requestId, int suggestionId, int customerId, CancellationToken ct)
     {
         try
@@ -378,15 +305,6 @@ public class RequestAppService(
 
             await requestService.UpdateAsync(updateRequestDto, ct);
 
-            await cache.RemoveAsync($"request:details:{requestId}", ct);
-            await cache.RemoveAsync($"request:full:{requestId}", ct);
-            await cache.RemoveAsync($"suggestions:request:{requestId}", ct);
-
-            await cache.BumpStampAsync(CacheKeys.StampAllRequests, CacheTtl.Stamps, ct);
-            await cache.BumpStampAsync(CacheKeys.StampAvailableRequests, CacheTtl.Stamps, ct);
-            await cache.BumpStampAsync(CacheKeys.StampCustomerRequests(request.CustomerId), CacheTtl.Stamps, ct);
-
-
             return Result<bool>.Success(true, "متخصص با موفقیت انتخاب شد.");
         }
         catch (Exception ex)
@@ -395,26 +313,4 @@ public class RequestAppService(
             return Result<bool>.Failure("خطای سیستمی.");
         }
     }
-
-
-
-
-
-    private static class CacheKeys
-    {
-        public static string RequestDetails(int id) => $"request:details:{id}";
-        public static string RequestFull(int id) => $"request:full:{id}";
-        public static string StampAllRequests => "stamp:requests:all";
-        public static string StampAvailableRequests => "stamp:requests:available";
-        public static string StampCustomerRequests(int customerId) => $"stamp:requests:customer:{customerId}";
-    }
-
-    private static class CacheTtl
-    {
-        public static readonly TimeSpan Details = TimeSpan.FromMinutes(5);
-        public static readonly TimeSpan Full = TimeSpan.FromMinutes(5);
-        public static readonly TimeSpan Lists = TimeSpan.FromMinutes(2);
-        public static readonly TimeSpan Stamps = TimeSpan.FromHours(7);
-    }
-
 }

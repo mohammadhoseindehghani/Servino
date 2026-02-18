@@ -183,5 +183,4 @@ public class CategoryAppService(ICategoryService categoryService, ILogger<Catego
         public static readonly TimeSpan Stamps = TimeSpan.FromHours(6);  
 
     }
-
 }

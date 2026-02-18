@@ -7,16 +7,14 @@ using Servino.Framework.Caching;
 
 namespace Servino.Domain.AppService.UserAgg;
 
-public class AdminAppService(IAdminService adminService, ICacheService cache, ILogger<AdminAppService> logger) : IAdminAppService
+public class AdminAppService(IAdminService adminService, ILogger<AdminAppService> logger) : IAdminAppService
 {
-    public async Task<Result<AdminProfileDto>> GetByUserIdAsync(int userId, CancellationToken ct)
+    public async Task<Result<AdminProfileDto>> GetByUserIdAsync(
+        int userId, CancellationToken ct)
     {
         try
         {
-            var key = CacheKeys.AdminProfile(userId);
-
-            var profile = await cache.GetOrSetAsync(key,
-                async () => await adminService.GetByUserIdAsync(userId, ct), CacheTtl.AdminProfile, ct);
+            var profile = await adminService.GetByUserIdAsync(userId, ct);
 
             return profile == null
                 ? Result<AdminProfileDto>.Failure("اطلاعات یافت نشد.")
@@ -24,21 +22,11 @@ public class AdminAppService(IAdminService adminService, ICacheService cache, IL
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "System error in AdminAppService.GetByUserIdAsync | UserId: {UserId}", userId);
-            return Result<AdminProfileDto>.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
+            logger.LogError(ex,
+                "System error in AdminAppService.GetByUserIdAsync | UserId: {UserId}", userId);
+
+            return Result<AdminProfileDto>
+                .Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
         }
     }
-
-
-
-    private static class CacheKeys
-    {
-        public static string AdminProfile(int userId) => $"admin:profile:{userId}";
-    }
-
-    private static class CacheTtl
-    {
-        public static readonly TimeSpan AdminProfile = TimeSpan.FromMinutes(5);
-    }
-
 }
