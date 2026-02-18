@@ -1,6 +1,7 @@
 ﻿using Servino.Domain.Core.ExpertHomeServiceAgg.Contracts.Data;
 using Servino.Domain.Core.ExpertHomeServiceAgg.Contracts.Service;
 using Servino.Domain.Core.ExpertHomeServiceAgg.Entity;
+using Servino.Domain.Core.UserAgg.Dtos;
 
 namespace Servino.Domain.Service;
 
@@ -25,5 +26,10 @@ public class ExpertHomeServiceService(IExpertHomeServiceRepository repo) : IExpe
 
             await repo.AddRangeAsync(list, ct);
         }
+    }
+
+    public async Task<List<ExpertServiceItemDto>> GetExpertServicesByExpertIdAsync(int expertId, CancellationToken ct)
+    {
+        return await repo.GetExpertServicesByExpertIdAsync(expertId, ct);
     }
 }

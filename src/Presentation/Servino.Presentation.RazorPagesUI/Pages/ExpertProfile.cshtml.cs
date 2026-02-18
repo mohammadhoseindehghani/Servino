@@ -12,6 +12,7 @@ public class ExpertProfileModel(IExpertAppService expertAppService, ICommentAppS
 {
     public ExpertProfileDto ExpertProfile { get; set; } = new();
     public List<CommentDto> Comments { get; set; } = new();
+    public List<ExpertServiceItemDto> ExpertServices { get; set; } = new();
     public PaginationRequestDto Pagination { get; set; } = new();
     public int TotalComments { get; set; }
 
@@ -26,6 +27,9 @@ public class ExpertProfileModel(IExpertAppService expertAppService, ICommentAppS
 
         ExpertProfile = expertResult.Data;
 
+        ExpertServices = await expertAppService
+            .GetExpertServicesByExpertIdAsync(expertId, ct);
+
         var commentResult = await commentAppService.GetApprovedByExpertIdAsync(expertId, Pagination, ct);
         if (commentResult.IsSuccess)
         {
@@ -37,6 +41,5 @@ public class ExpertProfileModel(IExpertAppService expertAppService, ICommentAppS
     }
 
     public int TotalPages => (int)Math.Ceiling((double)TotalComments / Pagination.PageSize);
-
 }
 

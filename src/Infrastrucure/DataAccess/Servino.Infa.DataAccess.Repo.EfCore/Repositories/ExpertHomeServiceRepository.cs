@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Servino.Domain.Core.ExpertHomeServiceAgg.Contracts.Data;
 using Servino.Domain.Core.ExpertHomeServiceAgg.Entity;
+using Servino.Domain.Core.UserAgg.Dtos;
 using Servino.Infa.Db.SqlServer.EfCore.DbContexts;
 
 namespace Servino.Infa.DataAccess.Repo.EfCore.Repositories;
@@ -25,5 +26,15 @@ public class ExpertHomeServiceRepository(AppDbContext context) : IExpertHomeServ
     {
         await context.ExpertHomeServices.AddRangeAsync(expertServices, ct);
         await context.SaveChangesAsync(ct);
+    }
+    public async Task<List<ExpertServiceItemDto>> GetExpertServicesByExpertIdAsync(int expertId, CancellationToken ct)
+    {
+        return await context.ExpertHomeServices.Where(e => e.ExpertId == expertId)
+            .Select(e => new ExpertServiceItemDto
+            {
+                HomeServiceId = e.Id,
+                HomeServiceTitle = e.HomeService.Title,
+                IsSelected = true
+            }).ToListAsync(ct);
     }
 }

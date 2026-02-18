@@ -10,4 +10,5 @@ public interface IExpertAppService
     Task<Result<bool>> UpdateProfile(UpdateExpertProfileDto command, CancellationToken ct);
     Task<Result<List<ExpertServiceItemDto>>> GetServicesForEditAsync(int userId, CancellationToken ct);
     Task<Result<bool>> UpdateServicesAsync(int userId, List<int> selectedIds, CancellationToken ct);
+    Task<List<ExpertServiceItemDto>> GetExpertServicesByExpertIdAsync(int expertId, CancellationToken ct);
 }

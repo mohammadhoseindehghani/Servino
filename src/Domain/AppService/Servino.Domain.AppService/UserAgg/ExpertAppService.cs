@@ -102,6 +102,10 @@ public class ExpertAppService(
         }
     }
 
+    public async Task<List<ExpertServiceItemDto>> GetExpertServicesByExpertIdAsync(int expertId, CancellationToken ct)
+    {
+        return await expertHomeServiceService.GetExpertServicesByExpertIdAsync(expertId, ct);
+    }
 
     private static class CacheKeys
     {
