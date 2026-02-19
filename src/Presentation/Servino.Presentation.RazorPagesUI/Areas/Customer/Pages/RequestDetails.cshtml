@@ -1,0 +1,233 @@
+﻿@page "{id:int}"
+@using Servino.Domain.Core.RequestAgg.Enum
+@using Servino.Domain.Core.SuggestionAgg.Dtos
+@using Servino.Framework.Extensions
+@model Servino.Presentation.RazorPagesUI.Areas.Customer.Pages.RequestDetailsModel
+@{
+    Layout = "Layouts/_ContentNavbarLayout";
+    ViewData["Title"] = "جزئیات سفارش";
+}
+
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/sweetalert2/sweetalert2.dist.css" />
+}
+@section VendorScripts {
+    <script src="~/vendor/libs/sweetalert2/sweetalert2.dist.js"></script>
+}
+
+@if (!string.IsNullOrEmpty(Model.MessageType) && !string.IsNullOrEmpty(Model.MessageText))
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            Swal.fire({
+                title: '@(Model.MessageType == "success" ? "موفق!" : "خطا!")',
+                text: '@Html.Raw(Model.MessageText)',
+                icon: '@Model.MessageType',
+                confirmButtonText: 'باشه',
+                customClass: { confirmButton: 'btn btn-primary' }
+            });
+        });
+    </script>
+}
+
+<h4 class="py-3 mb-4">
+    <span class="text-muted fw-light">سفارش‌ها /</span> جزئیات درخواست
+</h4>
+
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">@Model.RequestDetail.Title</h5>
+                @{
+                    var statusBadge = Model.RequestDetail.RequestStatus switch
+                    {
+                        RequestStatus.Paid => "bg-label-success", 
+                        RequestStatus.Done => "bg-label-info",
+                        RequestStatus.Started => "bg-label-primary",
+                        RequestStatus.Canceled => "bg-label-danger",
+                        _ => "bg-label-warning"
+                    };
+                }
+                <span class="badge @statusBadge">@Model.RequestDetail.RequestStatus</span>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="fw-bold text-muted">دسته‌بندی:</label>
+                        <p>@Model.RequestDetail.Title</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="fw-bold text-muted">تاریخ مورد نیاز:</label>
+                        <p dir="ltr">@Model.RequestDetail.DateRequired.ToShamsi()</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="fw-bold text-muted">آدرس:</label>
+                        <p>@Model.RequestDetail.CityName - @Model.RequestDetail.Address</p>
+                    </div>
+                    <div class="col-12">
+                        <label class="fw-bold text-muted">توضیحات:</label>
+                        <p>@Model.RequestDetail.Description</p>
+                    </div>
+                </div>
+
+                @if (Model.RequestDetail.RequestStatus == RequestStatus.Started)
+                {
+                    <hr />
+                    <div class="alert alert-primary d-flex align-items-center" role="alert">
+                        <i class="ti ti-info-circle me-2"></i>
+                        <div>آیا کار به اتمام رسیده است؟ با تایید زیر، هزینه پرداخت و سفارش بسته می‌شود.</div>
+                    </div>
+                    <form method="post" asp-page-handler="FinishWork">
+                        <input type="hidden" name="requestId" value="@Model.RequestDetail.Id" />
+                        <button type="submit" class="btn btn-success w-100" onclick="return confirm('آیا از اتمام و پرداخت مطمئن هستید؟')">
+                            <i class="ti ti-check me-1"></i> تایید انجام کار و پرداخت
+                        </button>
+                    </form>
+                }
+                else if (Model.RequestDetail.RequestStatus == RequestStatus.Paid)
+                {
+                    <hr />
+                    <div class="alert alert-success d-flex align-items-center" role="alert">
+                        <i class="ti ti-circle-check me-2"></i>
+                        <div>سفارش تکمیل و پرداخت شده است.</div>
+                    </div>
+
+                    @if (Model.HasComment)
+                    {
+                        <div class="card border">
+                            <div class="card-body">
+                                <h6 class="mb-1">@Model.MyComment!.Title</h6>
+                                <div class="text-muted mb-2">
+                                    امتیاز: @((int)Model.MyComment.Rating) / 5
+                                </div>
+                                <p class="mb-0">@Model.MyComment.Text</p>
+
+                                <small class="text-muted d-block mt-2">
+                                    وضعیت: @(Model.MyComment.IsApproved ? "تایید شده" : "در انتظار تایید")
+                                </small>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#commentModal">
+                            <i class="ti ti-star me-1"></i> ثبت نظر و امتیاز برای متخصص
+                        </button>
+                    }
+                }
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="card">
+            <h5 class="card-header border-bottom">پیشنهادات متخصصین</h5>
+            <div class="table-responsive text-nowrap">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>متخصص</th>
+                            <th>قیمت</th>
+                            <th>تاریخ پیشنهادی</th>
+                            <th>مدت</th>
+                            <th>توضیحات</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Suggestions.Any())
+                        {
+                            @foreach (var item in Model.Suggestions)
+                            {
+                                var isWinner = item.Status == Servino.Domain.Core.SuggestionAgg.Enum.SuggestionStatus.Accepted;
+                                <tr class="@(isWinner ? "table-success" : "")">
+                                    <td>
+                                        <a href="/ExpertProfile/@item.ExpertId" class="fw-semibold text-primary">
+                                            @item.ExpertFullName
+                                        </a>
+
+                                        @if (isWinner)
+                                        {
+                                            <span class="badge bg-success ms-1">انتخاب شده</span>
+                                        }
+                                    </td>
+
+
+
+                                    <td class="text-primary fw-bold">@item.SuggestedPrice.ToString("N0") تومان</td>
+                                    <td>@item.SuggestedDate.ToShamsi()</td>
+                                    <td>@item.EstimatedDurationHours ساعت</td>
+                                    <td><span class="d-inline-block text-truncate" style="max-width: 150px;">@(item.Note ?? "-")</span></td>
+                                    <td>
+                                        @if (Model.RequestDetail.RequestStatus == RequestStatus.WaitingForExperts ||
+                                                                        Model.RequestDetail.RequestStatus == RequestStatus.WaitingForSelection)
+                                        {
+                                            <form method="post" asp-page-handler="SelectExpert" class="d-inline">
+                                                <input type="hidden" name="requestId" value="@Model.RequestDetail.Id" />
+                                                <input type="hidden" name="suggestionId" value="@item.Id" />
+                                                <button type="submit" class="btn btn-sm btn-primary" onclick="return confirm('آیا مطمئن هستید؟')">انتخاب</button>
+                                            </form>
+                                        }
+                                        else if (isWinner)
+                                        {
+                                            <i class="ti ti-check text-success"></i>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="6" class="text-center py-4 text-muted">هنوز پیشنهادی ثبت نشده است.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="commentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-label-primary">
+                <h5 class="modal-title text-white">ثبت دیدگاه</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" asp-page-handler="SubmitComment">
+                <div class="modal-body">
+                    <input type="hidden" name="requestId" value="@Model.RequestDetail.Id" />
+
+                    <div class="mb-3">
+                        <label class="form-label">امتیاز به متخصص</label>
+                        <select name="rating" class="form-select">
+                            <option value="5">۵ - عالی</option>
+                            <option value="4">۴ - خوب</option>
+                            <option value="3">۳ - معمولی</option>
+                            <option value="2">۲ - ضعیف</option>
+                            <option value="1">۱ - خیلی بد</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">عنوان نظر</label>
+                        <input type="text" name="title" class="form-control" required placeholder="مثلا: بسیار راضی بودم" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">متن نظر</label>
+                        <textarea name="commentText" class="form-control" rows="3" required placeholder="تجربه خود را بنویسید..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">انصراف</button>
+                    <button type="submit" class="btn btn-primary">ثبت نظر</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

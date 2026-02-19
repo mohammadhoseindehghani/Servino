@@ -1,0 +1,91 @@
+@{
+    TempData.Keep();
+    string? currentPage = Convert.ToString(ViewContext.RouteData.Values["Page"])!;
+}
+
+<!-- Menu -->
+@* ! Do this simple *@
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+
+    @* ! Hide app brand if navbar-full *@
+    <div class='app-brand demo @((@ViewData["navbarFull"] != null && Convert.ToBoolean(@ViewData["navbarFull"])) ? "d-xl-none" : "")'>
+        <a asp-page="/Index" class="app-brand-link">
+            <span class="app-brand-logo demo">
+                @await Html.PartialAsync("_Partials/_Macros")
+            </span>
+            <span class="app-brand-text demo menu-text fw-bold">@TempData.Peek("appName")</span>
+        </a>
+
+        <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+            <i class="ti menu-toggle-icon d-none d-xl-block ti-sm align-middle"></i>
+            <i class="ti ti-x d-block d-xl-none ti-sm align-middle"></i>
+        </a>
+    </div>
+
+    <div class="menu-inner-shadow"></div>
+
+    @* ! Full version menu-items *@
+    <ul class="menu-inner py-1">
+
+
+        <!-- Front Pages -->
+
+
+        <li class='menu-item@(currentPage == "/Dashboard" ? " active" : "")'>
+            <a asp-area="Admin" asp-page="/Dashboard" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-database"></i>
+                <div data-i18n="داشبرد">داشبرد</div>
+            </a>
+        </li>
+        <li class='menu-item@(currentPage == "/Profile" ? " active" : "")'>
+            <a asp-area="Admin" asp-page="/Profile" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-database"></i>
+                <div data-i18n="پروفایل">پروفایل</div>
+            </a>
+        </li>
+        <li class='menu-item@(currentPage == "/UserManager" ? " active" : "")'>
+            <a asp-area="Admin" asp-page="/UserManager" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-database"></i>
+                <div data-i18n="مدیریت کاربران ">مدیریت کاربران </div>
+            </a>
+        </li>
+        <li class='menu-item@(currentPage == "/CategoryManager" ? " active" : "")'>
+            <a asp-area="Admin" asp-page="/CategoryManager" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-database"></i>
+                <div data-i18n="مدیریت دسته بندی ها">مدیریت دسته بندی ها </div>
+            </a>
+        </li>
+        <li class='menu-item@(currentPage == "/HomeServiceManager" ? " active" : "")'>
+            <a asp-area="Admin" asp-page="/HomeServiceManager" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-database"></i>
+                <div data-i18n="مدیریت سرویس ها">مدیریت سرویس ها </div>
+            </a>
+        </li>
+        <li class='menu-item@(currentPage == "/commentManager" ? " active" : "")'>
+            <a asp-area="Admin" asp-page="/commentManager" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-database"></i>
+                <div data-i18n="کامنت ها">کامنت ها </div>
+            </a>
+        </li>
+        <li class='menu-item@(currentPage == "/suggestions" ? " active" : "")'>
+            <a asp-area="Admin" asp-page="/suggestions" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-database"></i>
+                <div data-i18n="پیشنهاد ها ">پیشنهاد ها </div>
+            </a>
+        </li>
+        <li class='menu-item@(currentPage == "/Requests" ? " active" : "")'>
+            <a asp-area="Admin" asp-page="/requests" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-database"></i>
+                <div data-i18n="درخواست ها">درخواست ها </div>
+            </a>
+        </li>
+        <li class='menu-item@(currentPage == "/UserCRUD" ? " active" : "")'>
+            <a asp-area="Admin" asp-page="/admin/UserCRUD" class="menu-link">
+                <i class="menu-icon tf-icons ti ti-database"></i>
+                <div data-i18n="ایتم">ایتم </div>
+            </a>
+        </li>
+    </ul>
+
+</aside>
+<!-- / Menu -->

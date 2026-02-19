@@ -1,0 +1,27 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+
+<div class="row">
+    <div class="col-6 mb-2">
+        <strong>مبلغ پیشنهادی:</strong>
+        @Model.Price.ToString("N0") تومان
+    </div>
+
+    <div class="col-6 mb-2">
+        <strong>مدت انجام:</strong>
+        @Model.DurationInDays روز
+    </div>
+
+    <div class="col-12 mt-3">
+        <strong>توضیحات:</strong>
+        <p class="text-muted">@Model.Description</p>
+    </div>
+
+    <div class="col-12 text-end text-muted small">
+        ثبت شده در @Model.CreatedAt
+    </div>
+</div>

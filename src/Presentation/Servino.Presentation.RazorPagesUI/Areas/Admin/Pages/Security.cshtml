@@ -1,0 +1,111 @@
+﻿@page
+@model SecurityModel
+@{
+    Layout = "Layouts/_ContentNavbarLayout";
+    ViewData["Title"] = "امنیت حساب";
+}
+
+
+
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/select2/select2.dist.css" />
+    <link rel="stylesheet" href="~/vendor/libs/&#64;form-validation/umd/styles/index.min.css" />
+}
+
+@section VendorScripts {
+    <script src="~/vendor/libs/select2/select2.dist.js"></script>
+    <script src="~/vendor/libs/select2/i18n/fa.dist.js"></script>
+    <script src="~/vendor/libs/&#64;form-validation/umd/bundle/popular.min.js"></script>
+    <script src="~/vendor/libs/&#64;form-validation/umd/plugin-bootstrap5/index.min.js"></script>
+    <script src="~/vendor/libs/&#64;form-validation/umd/plugin-auto-focus/index.min.js"></script>
+    <script src="~/vendor/libs/cleavejs/cleave.dist.js"></script>
+    <script src="~/vendor/libs/cleavejs/cleave-phone.dist.js"></script>
+}
+
+@section PageScripts {
+    <script src="~/js/pages-account-settings-security.dist.js"></script>
+    <script src="~/js/modal-enable-otp.dist.js"></script>
+}
+@section PageStyles {
+    <link rel="stylesheet" href="~/vendor/css/pages/page-account-settings.dist.css" />
+}
+
+@* ************** Content ************** *@
+<h4 class="py-3 mb-4">
+    <span class="text-muted fw-light">تنظیمات حساب/</span>
+    امنیت حساب
+</h4>
+
+<div class="row">
+    <div class="col-md-12">
+        <ul class="nav nav-pills flex-column flex-md-row mb-4">
+            <li class="nav-item"><a class="nav-link" href="Account"><i class="ti-xs ti ti-users me-1"></i> حساب کاربری</a></li>
+            <li class="nav-item"><a class="nav-link active" href="javascript:void(0);"><i class="ti-xs ti ti-lock me-1"></i> امنیت حساب</a></li>
+
+        </ul>
+        <!-- Change Password -->
+        <div class="card mb-4">
+            <h5 class="card-header">تغییر رمز عبور</h5>
+            <div class="card-body">
+                <form id="formAccountSettings" method="POST" onsubmit="return false">
+                    <div class="row">
+                        <div class="mb-3 col-md-6 form-password-toggle">
+                            <label class="form-label" for="currentPassword">رمز عبور فعلی</label>
+                            <div class="input-group input-group-merge">
+                                <input class="form-control" type="password" name="currentPassword" id="currentPassword" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" />
+                                <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="mb-3 col-md-6 form-password-toggle">
+                            <label class="form-label" for="newPassword">رمز عبور جدید</label>
+                            <div class="input-group input-group-merge">
+                                <input class="form-control" type="password" id="newPassword" name="newPassword" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" />
+                                <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 col-md-6 form-password-toggle">
+                            <label class="form-label" for="confirmPassword">تأیید رمز عبور جدید</label>
+                            <div class="input-group input-group-merge">
+                                <input class="form-control" type="password" name="confirmPassword" id="confirmPassword" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" />
+                                <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-4">
+                            <h6>الزامات رمز عبور:</h6>
+                            <ul class="ps-3 mb-0">
+                                <li class="mb-1">حداقل 8 کارکتر</li>
+                                <li class="mb-1">حداقل یک حرف کوچک</li>
+                                <li>حداقل یک عدد یا نماد خاص</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <button class="btn btn-primary me-2" type="submit">بروزرسانی رمز</button>
+                            <button class="btn btn-label-secondary" type="reset">لغو</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!--/ Change Password -->
+        <!-- Two-steps verification -->
+        <div class="card mb-4">
+            <h5 class="card-header">تأیید دو مرحله ای</h5>
+            <div class="card-body">
+                <h5 class="mb-3">احراز هویت دو مرحله ای هنوز فعال نشده است.</h5>
+                <p class="w-75">
+                    احراز هویت دو مرحله ای با نیاز به بیش از یک رمز عبور برای ورود، یک لایه امنیتی اضافی به حساب شما اضافه می کند.
+                    <a href="javascript:void(0);">بیشتر بدانید.</a>
+                </p>
+                <button class="btn btn-primary mt-2" data-bs-target="#enableOTP" data-bs-toggle="modal"> فعال کردن احراز هویت دو مرحله ای</button>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        @await Html.PartialAsync("_Partials/_Modals/ModalEnableOtp")
+        <!-- /Modal -->
+        <!--/ Two-steps verification -->
+    </div>
+</div>

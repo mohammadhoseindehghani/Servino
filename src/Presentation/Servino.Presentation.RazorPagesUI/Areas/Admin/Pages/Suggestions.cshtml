@@ -1,0 +1,308 @@
+﻿@page
+@model Servino.Presentation.RazorPagesUI.Areas.Admin.Pages.SuggestionsModel
+@{
+    Layout = "Layouts/_ContentNavbarLayouT";
+    ViewData["Title"] = "مدیریت پیشنهادهای کارشناسان";
+}
+
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/datatables-bs5/datatables.bootstrap5.dist.css">
+    <link rel="stylesheet" href="~/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.dist.css">
+    <link rel="stylesheet" href="~/vendor/libs/datatables-buttons-bs5/buttons.bootstrap5.dist.css">
+    <link rel="stylesheet" href="~/vendor/libs/sweetalert2/sweetalert2.dist.css">
+}
+
+@section VendorScripts {
+    <script src="~/vendor/libs/datatables-bs5/datatables-bootstrap5.dist.js"></script>
+    <script src="~/vendor/libs/datatables-bs5/i18n/fa.dist.js"></script>
+    <script src="~/vendor/libs/sweetalert2/sweetalert2.dist.js"></script>
+}
+
+<h4 class="py-3 mb-4">
+    <span class="text-muted fw-light">مدیریت سفارش‌ها /</span> پیشنهادهای کارشناسان
+</h4>
+
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="content-left">
+                        <span>کل پیشنهادها</span>
+                        <h3 class="mb-0 me-2">2,847</h3>
+                    </div>
+                    <div class="avatar">
+                        <span class="avatar-initial rounded bg-label-primary">
+                            <i class="ti ti-message-dollar ti-sm"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="content-left">
+                        <span>در انتظار بررسی</span>
+                        <h3 class="mb-0 me-2 text-warning">842</h3>
+                    </div>
+                    <div class="avatar">
+                        <span class="avatar-initial rounded bg-label-warning">
+                            <i class="ti ti-clock ti-sm"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="content-left">
+                        <span>پذیرفته شده</span>
+                        <h3 class="mb-0 me-2 text-success">1,624</h3>
+                    </div>
+                    <div class="avatar">
+                        <span class="avatar-initial rounded bg-label-success">
+                            <i class="ti ti-check ti-sm"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-start justify-content-between">
+                    <div class="content-left">
+                        <span>رد شده</span>
+                        <h3 class="mb-0 me-2 text-danger">381</h3>
+                    </div>
+                    <div class="avatar">
+                        <span class="avatar-initial rounded bg-label-danger">
+                            <i class="ti ti-x ti-sm"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="card-title mb-0">لیست تمام پیشنهادهای ارسال‌شده</h5>
+        <div class="btn-group">
+            <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="ti ti-filter me-1"></i> فیلتر وضعیت پیشنهاد
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="javascript:void(0);" data-filter="all">همه پیشنهادها</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0);" data-filter="pending">در انتظار</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0);" data-filter="accepted">پذیرفته شده</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0);" data-filter="rejected">رد شده</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card-datatable table-responsive">
+        <table id="suggestionsTable" class="table table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th></th>
+                    <th>شماره درخواست</th>
+                    <th>عنوان خدمت</th>
+                    <th>مشتری</th>
+                    <th>کارشناس</th>
+                    <th>قیمت پیشنهادی</th>
+                    <th>مدت زمان تخمینی</th>
+                    <th>یادداشت کارشناس</th>
+                    <th>وضعیت</th>
+                    <th>تاریخ پیشنهاد</th>
+                    <th>جزئیات</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td></td>
+                    <td><a href="/Admin/Requests/View/1024" class="fw-medium">#R1024</a></td>
+                    <td>تعمیر پکیج دیواری ایران رادیاتور</td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <img src="~/img/avatars/3.png" class="rounded-circle me-2" width="32" height="32">
+                            مهتاب کرامتی
+                        </div>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <img src="~/img/avatars/8.png" class="rounded-circle me-2" width="32" height="32">
+                            رضا احمدی
+                        </div>
+                    </td>
+                    <td><strong>1,850,000</strong> ریال</td>
+                    <td>۳ ساعت</td>
+                    <td class="text-truncate" style="max-width: 180px;">
+                        مشکل از برد الکترونیکی است. تعویض قطعه لازم است. زمان حضور: فردا صبح
+                    </td>
+                    <td><span class="badge bg-label-success">پذیرفته شده</span></td>
+                    <td>۱۴۰۴/۰۹/۱۲ - ۱۴:۳۰</td>
+                    <td>
+                        <button class="btn btn-icon btn-sm btn-primary" title="مشاهده جزئیات"
+                                data-bs-toggle="modal" data-bs-target="#viewSuggestionModal"
+                                data-request="#R1024"
+                                data-service="تعمیر پکیج دیواری ایران رادیاتور"
+                                data-customer="مهتاب کرامتی"
+                                data-expert="رضا احمدی"
+                                data-price="1,850,000 ریال"
+                                data-duration="۳ ساعت"
+                                data-note="مشکل از برد الکترونیکی است. تعویض قطعه لازم است. زمان حضور: فردا صبح"
+                                data-status="پذیرفته شده"
+                                data-date="۱۴۰۴/۰۹/۱۲ - ۱۴:۳۰">
+                            <i class="ti ti-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td></td>
+                    <td><a href="/Admin/Requests/View/987" class="fw-medium">#R987</a></td>
+                    <td>نظافت کامل آپارتمان ۱۲۰ متری</td>
+                    <td>علی محمدی</td>
+                    <td>فاطمه حسینی</td>
+                    <td><strong>950,000</strong> ریال</td>
+                    <td>۵ ساعت</td>
+                    <td class="text-truncate" style="max-width: 180px;">با مواد شوینده حرفه‌ای و تیم ۲ نفره انجام می‌شود.</td>
+                    <td><span class="badge bg-label-warning">در انتظار</span></td>
+                    <td>۱۴۰۴/۰۹/۱۵ - ۰۹:۴۵</td>
+                    <td>
+                        <button class="btn btn-icon btn-sm btn-primary" title="مشاهده جزئیات" data-bs-toggle="modal" data-bs-target="#viewSuggestionModal"
+                                data-request="#R987" data-service="نظافت کامل آپارتمان ۱۲۰ متری" data-customer="علی محمدی"
+                                data-expert="فاطمه حسینی" data-price="950,000 ریال" data-duration="۵ ساعت"
+                                data-note="با مواد شوینده حرفه‌ای و تیم ۲ نفره انجام می‌شود." data-status="در انتظار"
+                                data-date="۱۴۰۴/۰۹/۱۵ - ۰۹:۴۵">
+                            <i class="ti ti-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td></td>
+                    <td>#R856</td>
+                    <td>نصب کولر گازی</td>
+                    <td>سارا رضایی</td>
+                    <td>حسین کاظمی</td>
+                    <td><strong>2,200,000</strong> ریال</td>
+                    <td>۴ ساعت</td>
+                    <td>قیمت شامل نصب و گاز اضافی نمی‌شود.</td>
+                    <td><span class="badge bg-label-danger">رد شده</span></td>
+                    <td>۱۴۰۴/۰۹/۱۰ - ۱۶:۲۰</td>
+                    <td><!-- دکمه مشاهده --></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="viewSuggestionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">جزئیات پیشنهاد کارشناس</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <strong>شماره درخواست:</strong> <span id="modalRequest"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <strong>عنوان خدمت:</strong> <span id="modalService"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <strong>مشتری:</strong> <span id="modalCustomer"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <strong>کارشناس:</strong> <span id="modalExpert"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <strong>قیمت پیشنهادی:</strong> <span id="modalPrice" class="text-primary fw-bold"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <strong>مدت زمان تخمینی:</strong> <span id="modalDuration"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <strong>تاریخ و ساعت پیشنهاد:</strong> <span id="modalDate"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <strong>وضعیت:</strong> <span id="modalStatus" class="badge"></span>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <strong>یادداشت کارشناس:</strong>
+                        <p class="mt-2 p-3 bg-light rounded" id="modalNote">-</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('[data-bs-target="#viewSuggestionModal"]').forEach(btn => {
+        btn.addEventListener('click', function () {
+            document.getElementByUserId('modalRequest').textContent = this.getAttribute('data-request');
+            document.getElementByUserId('modalService').textContent = this.getAttribute('data-service');
+            document.getElementByUserId('modalCustomer').textContent = this.getAttribute('data-customer');
+            document.getElementByUserId('modalExpert').textContent = this.getAttribute('data-expert');
+            document.getElementByUserId('modalPrice').textContent = this.getAttribute('data-price');
+            document.getElementByUserId('modalDuration').textContent = this.getAttribute('data-duration');
+            document.getElementByUserId('modalDate').textContent = this.getAttribute('data-date');
+
+            const status = this.getAttribute('data-status');
+            const statusEl = document.getElementByUserId('modalStatus');
+            statusEl.textContent = status;
+            if (status === 'پذیرفته شده') {
+                statusEl.className = 'badge bg-label-success';
+            } else if (status === 'در انتظار') {
+                statusEl.className = 'badge bg-label-warning';
+            } else {
+                statusEl.className = 'badge bg-label-danger';
+            }
+
+            const note = this.getAttribute('data-note') || '-';
+            document.getElementByUserId('modalNote').textContent = note;
+        });
+    });
+
+    $(document).ready(function () {
+        const table = $('#suggestionsTable').DataTable({
+            language: { url: '/vendor/libs/datatables-bs5/i18n/fa.dist.js' },
+            responsive: true,
+            order: [[9, 'desc']], 
+            columnDefs: [
+                { orderable: false, targets: [0, 10] },
+                { className: "text-center", targets: [8] }
+            ],
+            pageLength: 25
+        });
+
+        $('[data-filter]').on('click', function () {
+            const filter = $(this).data('filter');
+            if (filter === 'all') {
+                table.column(8).search('').draw();
+            } else if (filter === 'pending') {
+                table.column(8).search('در انتظار').draw();
+            } else if (filter === 'accepted') {
+                table.column(8).search('پذیرفته شده').draw();
+            } else if (filter === 'rejected') {
+                table.column(8).search('رد شده').draw();
+            }
+        });
+    });
+</script>

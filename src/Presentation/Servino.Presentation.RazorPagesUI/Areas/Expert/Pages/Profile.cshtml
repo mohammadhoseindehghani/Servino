@@ -1,0 +1,245 @@
+﻿@page
+@model Servino.Presentation.RazorPagesUI.Areas.Expert.Pages.ProfileModel
+@{
+    Layout = "Layouts/_ContentNavbarLayout";
+    ViewData["Title"] = "پروفایل متخصص";
+}
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/select2/select2.dist.css" />
+    <link rel="stylesheet" href="~/vendor/libs/sweetalert2/sweetalert2.dist.css" />
+}
+@section VendorScripts {
+    <script src="~/vendor/libs/select2/select2.dist.js"></script>
+    <script src="~/vendor/libs/select2/i18n/fa.dist.js"></script>
+    <script src="~/vendor/libs/sweetalert2/sweetalert2.dist.js"></script>
+}
+
+@if (!string.IsNullOrEmpty(Model.MessageText))
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            Swal.fire({
+                title: '@(Model.MessageType == "success" ? "موفق!" : "خطا!")',
+                text: '@Html.Raw(Model.MessageText)',
+                icon: '@(Model.MessageType == "success" ? "success" : "error")',
+                confirmButtonText: 'باشه'
+            }).then(() => {
+                const url = new URL(window.location);
+                url.searchParams.delete('msg');
+                url.searchParams.delete('text');
+                window.history.replaceState({}, '', url);
+            });
+        });
+    </script>
+}
+
+<h4 class="py-3 mb-4">
+    <span class="text-muted fw-light">تنظیمات /</span> پروفایل متخصص
+</h4>
+<div class="row">
+    <div class="col-md-12">
+        <ul class="nav nav-pills flex-column flex-md-row mb-4">
+            <li class="nav-item"><a class="nav-link active" href="javascript:void(0);"><i class="ti-xs ti ti-user me-1"></i> مشخصات فردی</a></li>
+            <li class="nav-item"><a class="nav-link" asp-page="./HomeServices"><i class="ti-xs ti ti-tools me-1"></i> خدمات من</a></li>
+        </ul>
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">اطلاعات حساب</h5>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editExpertModal">
+                    <i class="ti ti-edit me-1"></i> ویرایش پروفایل
+                </button>
+                <a asp-page="/Security" asp-area="Expert" class="btn btn-primary">
+                    <i class="ti ti-edit me-1"></i>
+                    اطلاعات امنیتی
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-4 mb-4">
+                    <img src="@(string.IsNullOrEmpty(Model.ExpertProfile.ProfileImagePath) ? "/img/avatars/default.png" : Model.ExpertProfile.ProfileImagePath)"
+                         alt="Avatar" class="d-block w-px-100 h-px-100 rounded object-fit-cover"
+                         onerror="this.onerror=null;this.src='/img/avatars/default.png';" />
+                    <div>
+                        <h4>@Model.ExpertProfile.FirstName @Model.ExpertProfile.LastName</h4>
+                        <span class="badge bg-label-success">متخصص</span>
+                        <div class="text-muted mt-1 small dir-ltr">@Model.ExpertProfile.Email</div>
+                    </div>
+                </div>
+                <hr class="my-4" />
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-bold text-muted">نام و نام خانوادگی:</label>
+                        <p class="mb-0 fs-5">@Model.ExpertProfile.FirstName @Model.ExpertProfile.LastName</p>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-bold text-muted">شماره موبایل:</label>
+                        <p class="mb-0 fs-5 dir-ltr text-end">@Model.ExpertProfile.Phone</p>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-bold text-muted">شهر:</label>
+                        <p class="mb-0 fs-5">@Model.CityName</p>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-bold text-muted">آدرس:</label>
+                        <p class="mb-0 fs-5">@(string.IsNullOrWhiteSpace(Model.ExpertProfile.Address) ? "-" : Model.ExpertProfile.Address)</p>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-bold text-muted">شماره کارت:</label>
+                        <p class="mb-0 fs-5 dir-ltr text-end">@(string.IsNullOrWhiteSpace(Model.ExpertProfile.BankCardNumber) ? "-" : Model.ExpertProfile.BankCardNumber)</p>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-bold text-muted">شماره شبا:</label>
+                        <p class="mb-0 fs-5 dir-ltr text-end">@(string.IsNullOrWhiteSpace(Model.ExpertProfile.ShebaNumber) ? "-" : Model.ExpertProfile.ShebaNumber)</p>
+                    </div>
+                    <div class="col-md-12 mb-4">
+                        <label class="form-label fw-bold text-muted">بیوگرافی:</label>
+                        <p class="mb-0 fs-5 text-break">@(string.IsNullOrWhiteSpace(Model.ExpertProfile.Bio) ? "-" : Model.ExpertProfile.Bio)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="editExpertModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-label-primary">
+                <h5 class="modal-title">ویرایش اطلاعات فردی</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="d-flex align-items-start align-items-sm-center gap-4 mb-4">
+                        <img src="@(string.IsNullOrEmpty(Model.ExpertProfile.ProfileImagePath) ? "/img/avatars/default.png" : Model.ExpertProfile.ProfileImagePath)"
+                             alt="user-avatar" class="d-block w-px-100 h-px-100 rounded object-fit-cover" id="modalAvatar"
+                             onerror="this.onerror=null;this.src='/img/avatars/default.png';" />
+                        <div class="button-wrapper">
+                            <label for="upload" class="btn btn-primary me-2 mb-3" tabindex="0">
+                                <span class="d-none d-sm-block">تغییر عکس پروفایل</span>
+                                <i class="ti ti-upload d-block d-sm-none"></i>
+                                <input type="file" id="upload" class="account-file-input" hidden accept="image/png,image/jpeg,image/jpg"
+                                       asp-for="Input.NewImageFile" onchange="previewImage(this)" />
+                            </label>
+                            <div class="text-muted small">فرمت‌های مجاز: JPG, PNG. حداکثر 5MB</div>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">نام <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" asp-for="Input.FirstName" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">نام خانوادگی <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" asp-for="Input.LastName" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">استان</label>
+                            <select id="provinceSelect" class="form-select select2-modal" asp-items="Model.Provinces" style="width:100%">
+                                <option value="">انتخاب استان...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">شهر</label>
+                            <select id="citySelect" class="form-select select2-modal" asp-for="Input.CityId" style="width:100%" data-selected="@Model.Input.CityId">
+                                <option value="">ابتدا استان را انتخاب کنید</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">آدرس کامل</label>
+                            <input type="text" class="form-control" asp-for="Input.Address" placeholder="نام خیابان، کوچه، پلاک..." />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">شماره کارت</label>
+                            <input type="text" class="form-control dir-ltr" asp-for="Input.BankCardNumber" 
+                                   placeholder="xxxx-xxxx-xxxx-xxxx" 
+                                   maxlength="16" 
+                                   pattern="[0-9]{16}" 
+                                   title="شماره کارت باید ۱۶ رقم باشد" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">شماره شبا</label>
+                            <div class="input-group">
+                                <span class="input-group-text">IR</span>
+                                <input type="text" class="form-control dir-ltr" asp-for="Input.ShebaNumber" 
+                                       placeholder="۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰۰" 
+                                       maxlength="24" 
+                                       pattern="[0-9]{24}" 
+                                       title="شماره شبا باید ۲۴ رقم (بدون IR) باشد" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label">درباره من (بیوگرافی)</label>
+                            <textarea class="form-control" rows="4" asp-for="Input.Bio" placeholder="توضیحی کوتاه درباره تخصص و تجربیات خود بنویسید..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">انصراف</button>
+                    <button type="submit" class="btn btn-primary">ذخیره تغییرات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section PageScripts {
+    <script>
+        $(document).ready(function () {
+            $('.select2-modal').select2({
+                language: "fa",
+                dir: "rtl",
+                dropdownParent: $('#editExpertModal'),
+                width: '100%'
+            });
+
+            var initialProvinceId = '@Model.CurrentProvinceId';
+            var currentCityId = '@Model.Input.CityId';
+            if (initialProvinceId) {
+                loadCities(initialProvinceId, currentCityId);
+            }
+
+            $('#provinceSelect').on('change', function () {
+                var provinceId = $(this).val();
+                loadCities(provinceId, null);
+            });
+        });
+
+        function loadCities(provinceId, selectedCityId) {
+            var $citySelect = $('#citySelect');
+            $citySelect.empty().append('<option value="">در حال بارگذاری...</option>');
+            $citySelect.prop('disabled', true);
+
+            if (provinceId) {
+                $.ajax({
+                    url: '?handler=GetCities',
+                    data: { provinceId: provinceId },
+                    success: function (data) {
+                        $citySelect.empty().append('<option value="">انتخاب شهر...</option>');
+                        $.each(data, function (index, item) {
+                            var isSelected = (selectedCityId && item.id == selectedCityId) ? 'selected' : '';
+                            $citySelect.append(`<option value="${item.id}" ${isSelected}>${item.title}</option>`);
+                        });
+                        $citySelect.prop('disabled', false);
+                        $citySelect.trigger('change');
+                    },
+                    error: function () {
+                        $citySelect.empty().append('<option value="">خطا در دریافت اطلاعات</option>');
+                    }
+                });
+            } else {
+                $citySelect.empty().append('<option value="">ابتدا استان را انتخاب کنید</option>');
+                $citySelect.prop('disabled', true);
+            }
+        }
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#modalAvatar').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}

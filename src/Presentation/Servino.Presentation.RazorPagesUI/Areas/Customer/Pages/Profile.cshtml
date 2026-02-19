@@ -1,0 +1,218 @@
+﻿@page
+@model Servino.Presentation.RazorPagesUI.Areas.Customer.Pages.ProfileModel
+@{
+    Layout = "Layouts/_ContentNavbarLayout";
+    ViewData["Title"] = "پروفایل کاربری";
+
+    var avatarPath = string.IsNullOrEmpty(Model.DisplayData.ProfileImagePath)
+                     ? "/img/avatars/default.png"
+                     : Model.DisplayData.ProfileImagePath;
+}
+
+@section VendorStyles {
+    <link rel="stylesheet" href="~/vendor/libs/select2/select2.dist.css" />
+    <link rel="stylesheet" href="~/vendor/libs/sweetalert2/sweetalert2.dist.css" />
+}
+@section VendorScripts {
+    <script src="~/vendor/libs/select2/select2.dist.js"></script>
+    <script src="~/vendor/libs/select2/i18n/fa.dist.js"></script>
+    <script src="~/vendor/libs/sweetalert2/sweetalert2.dist.js"></script>
+}
+
+@if (!string.IsNullOrEmpty(Model.MessageText))
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            Swal.fire({
+                title: '@(Model.MessageType == "success" ? "موفق!" : "خطا!")',
+                text: '@Html.Raw(Model.MessageText)',
+                icon: '@(Model.MessageType == "success" ? "success" : "error")',
+                confirmButtonText: 'باشه',
+                customClass: { confirmButton: 'btn btn-primary' }
+            }).then(() => {
+                const url = new URL(window.location);
+                url.searchParams.delete('msg');
+                url.searchParams.delete('text');
+                window.history.replaceState({}, '', url);
+            });
+        });
+    </script>
+}
+
+<h4 class="py-3 mb-4">
+    <span class="text-muted fw-light">تنظیمات /</span> پروفایل من
+</h4>
+
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">اطلاعات حساب</h5>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                    <i class="ti ti-edit me-1"></i> ویرایش پروفایل
+                </button>
+                <a asp-page="/Security" asp-area="Customer" class="btn btn-primary">
+                    <i class="ti ti-edit me-1"></i>
+                    اطلاعات امنیتی
+                </a>
+
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-4 mb-4">
+                    <img src="@avatarPath" alt="Avatar" class="d-block w-px-100 h-px-100 rounded object-fit-cover"
+                         onerror="this.onerror=null;this.src='/img/avatars/default.png';" />
+                    <div>
+                        <h4>@Model.DisplayData.FirstName @Model.DisplayData.LastName</h4>
+                        <span class="badge bg-label-info">مشتری</span>
+                        <div class="text-muted mt-1 small dir-ltr">@Model.DisplayData.Email</div>
+                    </div>
+                </div>
+                <hr class="my-4" />
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-bold text-muted">نام و نام خانوادگی:</label>
+                        <p class="mb-0 fs-5">@Model.DisplayData.FirstName @Model.DisplayData.LastName</p>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-bold text-muted">شماره موبایل:</label>
+                        <p class="mb-0 fs-5 dir-ltr text-end">@Model.DisplayData.Phone</p>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-bold text-muted">شهر:</label>
+                        <p class="mb-0 fs-5">@Model.CityName</p>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label fw-bold text-muted">موجودی کیف پول:</label>
+                        <p class="mb-0 fs-5 text-success">@Model.DisplayData.Balance.ToString("N0") تومان</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-label-primary">
+                <h5 class="modal-title">ویرایش اطلاعات فردی</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="d-flex align-items-start gap-4 mb-4">
+                        <img src="@avatarPath" alt="user-avatar" class="d-block w-px-100 h-px-100 rounded object-fit-cover" id="modalAvatarPreview"
+                             onerror="this.onerror=null;this.src='/img/avatars/default.png';" />
+                        <div class="button-wrapper">
+                            <label for="upload" class="btn btn-primary me-2 mb-3" tabindex="0">
+                                <span class="d-none d-sm-block">تغییر عکس پروفایل</span>
+                                <i class="ti ti-upload d-block d-sm-none"></i>
+                                <input type="file" id="upload" name="upload" class="account-file-input" hidden accept="image/png,image/jpeg,image/jpg" onchange="previewImage(this)" />
+                            </label>
+                            <div class="text-muted small">فرمت‌های مجاز: JPG, PNG.</div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">نام</label>
+                            <input type="text" class="form-control" asp-for="Input.FirstName" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">نام خانوادگی</label>
+                            <input type="text" class="form-control" asp-for="Input.LastName" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">استان</label>
+                            <select id="provinceSelect" class="form-select select2-modal" asp-items="Model.Provinces" style="width:100%">
+                                <option value="">انتخاب استان...</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">شهر</label>
+                            <select id="citySelect" class="form-select select2-modal" asp-for="Input.CityId" style="width:100%" data-selected="@Model.Input.CityId">
+                                <option value="">ابتدا استان را انتخاب کنید</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">انصراف</button>
+                    <button type="submit" class="btn btn-primary">ذخیره تغییرات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section PageScripts {
+    <script>
+        $(document).ready(function () {
+            $('.select2-modal').select2({
+                language: "fa",
+                dir: "rtl",
+                dropdownParent: $('#editProfileModal'),
+                width: '100%'
+            });
+
+
+            var initialProvinceId = $('#provinceSelect').val();
+            var currentCityId = $('#citySelect').data('selected');
+
+            if (initialProvinceId) {
+                loadCities(initialProvinceId, currentCityId);
+            }
+
+            $('#provinceSelect').on('change', function () {
+                var provinceId = $(this).val();
+                loadCities(provinceId, null); 
+            });
+        });
+
+        function loadCities(provinceId, selectedCityId) {
+            var $citySelect = $('#citySelect');
+
+            $citySelect.empty().append('<option value="">در حال بارگذاری...</option>');
+            $citySelect.prop('disabled', true);
+
+            if (provinceId) {
+                $.ajax({
+                    url: '?handler=GetCities',
+                    data: { provinceId: provinceId },
+                    success: function (data) {
+                        $citySelect.empty().append('<option value="">انتخاب شهر...</option>');
+
+                        $.each(data, function (index, item) {
+                            var isSelected = (selectedCityId && item.id == selectedCityId) ? 'selected' : '';
+                            $citySelect.append(`<option value="${item.id}" ${isSelected}>${item.title}</option>`);
+                        });
+
+                        $citySelect.prop('disabled', false);
+                        $citySelect.trigger('change');
+                    },
+                    error: function() {
+                        $citySelect.empty().append('<option value="">خطا در دریافت اطلاعات</option>');
+                    }
+                });
+            } else {
+                $citySelect.empty().append('<option value="">ابتدا استان را انتخاب کنید</option>');
+                $citySelect.prop('disabled', true);
+            }
+        }
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#modalAvatarPreview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}
