@@ -1,8 +1,21 @@
 <Solution>
   <Folder Name="/src/" />
-  <Folder Name="/src/API/" />
-  <Folder Name="/src/Core/" />
-  <Folder Name="/src/Infrastructure/" />
-  <Folder Name="/src/UI/" />
-  <Folder Name="/test/" />
+  <Folder Name="/src/API/">
+    <Project Path="src/API/app.WebApi/app.WebApi.csproj" Id="bf5ce551-370f-415a-9505-c5842c77783f" />
+  </Folder>
+  <Folder Name="/src/Core/">
+    <Project Path="src/Core/app.Application/app.Application.csproj" Id="f08e9dc9-834a-4e2e-80e5-70f7ed63c791" />
+    <Project Path="src/Core/app.Domain/app.Domain.csproj" Id="da65a873-203e-40f0-8ed6-7348374696df" />
+  </Folder>
+  <Folder Name="/src/Infrastructure/">
+    <Project Path="src/Infrastructure/app.Identity/app.Identity.csproj" Id="42b400a6-6aac-4b09-bb09-84b95c017d23" />
+    <Project Path="src/Infrastructure/app.Infrastructure/app.Infrastructure.csproj" Id="9a9c06ff-d6d0-4f0b-a6b3-d48bd2127b5b" />
+    <Project Path="src/Infrastructure/app.Persistence/app.Persistence.csproj" Id="7b4d71c0-55f6-4055-8c38-ece219423263" />
+  </Folder>
+  <Folder Name="/src/UI/">
+    <Project Path="src/UI/app.MVC/app.MVC.csproj" Id="9e39c394-313e-4894-a945-219a422b02ae" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/app.UnitTests/app.UnitTests.csproj" Id="38672ba8-9302-4658-b554-075c4bbf3dc9" />
+  </Folder>
 </Solution>
