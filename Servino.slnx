@@ -16,6 +16,6 @@
     <Project Path="src/UI/app.MVC/app.MVC.csproj" Id="9e39c394-313e-4894-a945-219a422b02ae" />
   </Folder>
   <Folder Name="/test/">
-    <Project Path="test/app.UnitTests/app.UnitTests.csproj" Id="38672ba8-9302-4658-b554-075c4bbf3dc9" />
+    <Project Path="test/app.UnitTest/app.UnitTest.csproj" Id="3d4e0367-b7a0-49aa-98cc-b8b734d1f78e" />
   </Folder>
 </Solution>
