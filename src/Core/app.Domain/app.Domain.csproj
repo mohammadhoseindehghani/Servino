@@ -6,4 +6,14 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="CategoryAgg\Enums\" />
+    <Folder Include="Exceptions\" />
+    <Folder Include="ExpertHomeServiceAgg\Enums\" />
+    <Folder Include="HomeServiceAgg\Enums\" />
+    <Folder Include="LocationAgg\Enums\" />
+    <Folder Include="RequestAgg\Enums\" />
+    <Folder Include="UserAgg\Enums\" />
+  </ItemGroup>
+
 </Project>

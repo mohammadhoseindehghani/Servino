@@ -1,4 +1,4 @@
-﻿using app.Domain.Enums;
+﻿using app.Domain.CommentAgg.Enums;
 
 namespace app.Application.DTOs.CommentDTOs;
 

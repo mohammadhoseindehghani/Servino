@@ -7,11 +7,29 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.1.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageReference Include="MediatR" Version="14.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\app.Domain\app.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="16.1.1" />
+    <Folder Include="Features\Categories\Queries\" />
+    <Folder Include="Features\Comments\Commands\" />
+    <Folder Include="Features\Comments\Queries\" />
+    <Folder Include="Features\HomeServices\Commands\" />
+    <Folder Include="Features\HomeServices\Queries\" />
+    <Folder Include="Features\Locations\Commands\" />
+    <Folder Include="Features\Locations\Queries\" />
+    <Folder Include="Features\Requests\Commands\" />
+    <Folder Include="Features\Requests\Queries\" />
+    <Folder Include="Features\Suggestions\Commands\" />
+    <Folder Include="Features\Suggestions\Queries\" />
+    <Folder Include="Features\Users\Commands\" />
+    <Folder Include="Features\Users\Queries\" />
   </ItemGroup>
 
 </Project>

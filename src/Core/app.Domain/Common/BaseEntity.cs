@@ -1,12 +1,14 @@
 ﻿namespace app.Domain.Common;
 
-public class BaseEntity
+public abstract class BaseEntity
 {
-    public int Id { get; set; }
-    public DateTime CreationDate { get; set; }
-    public string CreatedBy { get; set; }
-    public DateTime LastModifiedDate { get; set; }
-    public string LastModifiedBy { get; set; }
+    public int Id { get; protected set; }
 
+    public DateTime CreatedAt { get; protected set; } = DateTime.UtcNow;
+    public DateTime? LastModifiedAt { get; protected set; }
+
+    public void MarkAsModified()
+    {
+        LastModifiedAt = DateTime.UtcNow;
+    }
 }
-

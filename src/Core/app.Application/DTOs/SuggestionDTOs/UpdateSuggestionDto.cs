@@ -1,5 +1,5 @@
 ﻿using app.Application.DTOs.Common;
-using app.Domain.Enums;
+using app.Domain.SuggestionAgg.Enums;
 
 namespace app.Application.DTOs.SuggestionDTOs;
 
