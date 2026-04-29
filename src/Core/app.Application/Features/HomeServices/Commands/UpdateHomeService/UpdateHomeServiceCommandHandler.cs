@@ -1,0 +1,56 @@
+﻿using app.Application.Common;
+using app.Application.Contracts.Repositories;
+using app.Application.Contracts.Services;
+using app.Application.DTOs.HomeServiceDTOs;
+using MediatR;
+using Microsoft.Extensions.Logging;
+
+namespace app.Application.Features.HomeServices.Commands.UpdateHomeService;
+
+public class UpdateHomeServiceCommandHandler(
+    IHomeServiceRepository homeServiceRepository,
+    ICacheService cache,
+    ILogger<UpdateHomeServiceCommandHandler> logger)
+    : IRequestHandler<UpdateHomeServiceCommand, Result<bool>>
+{
+
+    public async Task<Result<bool>> Handle(UpdateHomeServiceCommand request, CancellationToken ct)
+    {
+        try
+        {
+            var dto = new HomeServiceDto
+            {
+                Id = request.Id,
+                Title = request.Title,
+                BasePrice = request.BasePrice,
+                CategoryId = request.CategoryId
+            };
+
+            var isUpdated = await homeServiceRepository.UpdateAsync(dto, ct);
+
+            if (isUpdated)
+            {
+                await cache.RemoveAsync(CacheKeys.HomeServiceDetails(request.Id), ct);
+                await cache.RemoveAsync(CacheKeys.HomeServicesAll(request.Title, 1, 10), ct);
+            }
+
+            return !isUpdated
+                ? Result<bool>.Failure("خدمت یافت نشد یا ویرایش انجام نشد.")
+                : Result<bool>.Success(true, "خدمت با موفقیت ویرایش شد.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex,
+                "Error while updating HomeService | Id: {Id}",
+                request.Id);
+
+            return Result<bool>.Failure("خطای سیستمی رخ داده است.");
+        }
+    }
+    private static class CacheKeys
+    {
+        public static string HomeServiceDetails(int id) => $"homeService:details:{id}";
+        public static string HomeServicesAll(string searchKey, int pageNumber, int pageSize) =>
+            $"homeServices:all:{searchKey}:{pageNumber}:{pageSize}";
+    }
+}
