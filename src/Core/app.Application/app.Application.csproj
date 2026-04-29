@@ -19,12 +19,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Comments\Commands\" />
-    <Folder Include="Features\Comments\Queries\" />
     <Folder Include="Features\HomeServices\Commands\" />
     <Folder Include="Features\HomeServices\Queries\" />
-    <Folder Include="Features\Locations\Commands\" />
-    <Folder Include="Features\Locations\Queries\" />
+    <Folder Include="Features\Province\Commands\" />
+    <Folder Include="Features\Province\Queries\" />
     <Folder Include="Features\Requests\Commands\" />
     <Folder Include="Features\Requests\Queries\" />
     <Folder Include="Features\Suggestions\Commands\" />
