@@ -9,7 +9,9 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="16.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageReference Include="IPE.SmsIr" Version="1.2.7" />
     <PackageReference Include="MediatR" Version="14.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
   </ItemGroup>
 
   <ItemGroup>
@@ -17,7 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Categories\Queries\" />
     <Folder Include="Features\Comments\Commands\" />
     <Folder Include="Features\Comments\Queries\" />
     <Folder Include="Features\HomeServices\Commands\" />
