@@ -12,6 +12,6 @@ public record SuggestionDto : BaseDto
     public DateTime SuggestedDate { get; init; }
     public int EstimatedDurationHours { get; init; }
     public string? Note { get; init; }
-    public SuggestionStatus Status { get; init; }
+    public SuggestionStatus Status { get; set; }
     public DateTime CreatedAt { get; init; }
 }

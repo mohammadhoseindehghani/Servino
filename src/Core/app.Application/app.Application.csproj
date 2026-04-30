@@ -19,8 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Requests\Commands\" />
-    <Folder Include="Features\Requests\Queries\" />
     <Folder Include="Features\Suggestions\Commands\" />
     <Folder Include="Features\Suggestions\Queries\" />
     <Folder Include="Features\Users\Commands\" />
