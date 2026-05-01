@@ -1,6 +1,7 @@
 ﻿using app.Application.Common;
 using app.Application.Contracts.Repositories;
 using app.Application.DTOs.RequestDTOs;
+using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -8,11 +9,17 @@ namespace app.Application.Features.Requests.Commands.CreateRequest;
 
 public class CreateRequestCommandHandler(
     IRequestRepository requestRepository,
-    ILogger<CreateRequestCommandHandler> logger)
+    ILogger<CreateRequestCommandHandler> logger,
+    IValidator<CreateRequestCommand> validator)
     : IRequestHandler<CreateRequestCommand, Result<int>>
 {
     public async Task<Result<int>> Handle(CreateRequestCommand request, CancellationToken ct)
     {
+        var resultValidation = await validator.ValidateAsync(request, ct);
+
+        if (!resultValidation.IsValid)
+            throw new ValidationException(resultValidation.Errors);
+
         try
         {
             var dto = new CreateRequestDto

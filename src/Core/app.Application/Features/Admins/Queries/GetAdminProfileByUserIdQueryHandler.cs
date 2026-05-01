@@ -1,6 +1,7 @@
 ﻿using app.Application.Common;
 using app.Application.Contracts.Repositories;
 using app.Application.DTOs.UserDTOs;
+using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -8,13 +9,18 @@ namespace app.Application.Features.Admins.Queries;
 
 public class GetAdminProfileByUserIdQueryHandler(
     IAdminRepository adminRepository,
-    ILogger<GetAdminProfileByUserIdQueryHandler> logger)
+    ILogger<GetAdminProfileByUserIdQueryHandler> logger,
+    IValidator<GetAdminProfileByUserIdQuery> validator)
     : IRequestHandler<GetAdminProfileByUserIdQuery, Result<AdminProfileDto>>
 {
     public async Task<Result<AdminProfileDto>> Handle(
         GetAdminProfileByUserIdQuery request,
         CancellationToken ct)
     {
+        var resultValidation = await validator.ValidateAsync(request, ct);
+
+        if (!resultValidation.IsValid)
+            throw new ValidationException(resultValidation.Errors);
         try
         {
             var profile = await adminRepository.GetByUserIdAsync(request.UserId, ct);

@@ -1,6 +1,7 @@
 ﻿using app.Application.Common;
 using app.Application.Contracts.Repositories;
 using app.Domain.ExpertHomeServiceAgg.Entities;
+using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -9,13 +10,19 @@ namespace app.Application.Features.Experts.Commands.UpdateExpertServices;
 public class UpdateExpertServicesCommandHandler(
     IExpertRepository expertRepository,
     IExpertHomeServiceRepository expertHomeServiceRepository,
-    ILogger<UpdateExpertServicesCommandHandler> logger)
+    ILogger<UpdateExpertServicesCommandHandler> logger,
+    IValidator<UpdateExpertServicesCommand> validator)
     : IRequestHandler<UpdateExpertServicesCommand, Result<bool>>
 {
     public async Task<Result<bool>> Handle(
         UpdateExpertServicesCommand request,
         CancellationToken ct)
     {
+        var resultValidation = await validator.ValidateAsync(request, ct);
+
+        if (!resultValidation.IsValid)
+            throw new ValidationException(resultValidation.Errors);
+
         var expertId = await expertRepository.GetIdByUserIdAsync(request.UserId, ct);
         if (expertId == 0)
             return Result<bool>.Failure("اکسپرت یافت نشد.");

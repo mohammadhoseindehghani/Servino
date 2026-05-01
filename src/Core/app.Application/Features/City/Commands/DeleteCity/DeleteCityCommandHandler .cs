@@ -1,16 +1,22 @@
 ﻿using app.Application.Common;
 using app.Application.Contracts.Repositories;
 using app.Application.Contracts.Services;
+using FluentValidation;
 using MediatR;
 
 namespace app.Application.Features.City.Commands.DeleteCity;
 
-public class DeleteCityCommandHandler(ICityRepository cityRepository, ICacheService cache)
+public class DeleteCityCommandHandler(ICityRepository cityRepository, ICacheService cache, IValidator<DeleteCityCommand> validator)
     : IRequestHandler<DeleteCityCommand, Result<bool>>
 {
 
     public async Task<Result<bool>> Handle(DeleteCityCommand request, CancellationToken ct)
     {
+        var resultValidation = await validator.ValidateAsync(request, ct);
+
+        if (!resultValidation.IsValid)
+            throw new ValidationException(resultValidation.Errors);
+
         var result = await cityRepository.DeleteAsync(request.Id, ct);
 
         if (result)

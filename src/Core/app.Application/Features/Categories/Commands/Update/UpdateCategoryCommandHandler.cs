@@ -2,6 +2,7 @@
 using app.Application.Contracts.Repositories;
 using app.Application.Contracts.Services;
 using app.Application.DTOs.CategoryDTOs;
+using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -10,10 +11,16 @@ namespace app.Application.Features.Categories.Commands.Update;
 public class UpdateCategoryCommandHandler (
     ICategoryRepository categoryRepository,
     ICacheService cache,
-    ILogger<UpdateCategoryCommandHandler> logger) : IRequestHandler<UpdateCategoryCommand, Result<bool>>
+    ILogger<UpdateCategoryCommandHandler> logger,
+    IValidator<UpdateCategoryCommand> validator) : IRequestHandler<UpdateCategoryCommand, Result<bool>>
 {
     public async Task<Result<bool>> Handle(UpdateCategoryCommand request, CancellationToken ct)
     {
+        var result = await validator.ValidateAsync(request, ct);
+
+        if (!result.IsValid)
+            throw new ValidationException(result.Errors);
+
         var dto = new CategoryDto
         {
             Title = request.Title,

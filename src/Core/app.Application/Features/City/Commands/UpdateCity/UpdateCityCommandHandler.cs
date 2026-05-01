@@ -1,16 +1,21 @@
 ﻿using app.Application.Common;
 using app.Application.Contracts.Repositories;
 using app.Application.Contracts.Services;
+using FluentValidation;
 using MediatR;
 
 namespace app.Application.Features.City.Commands.UpdateCity;
 
-public class UpdateCityCommandHandler(ICityRepository cityRepository, ICacheService cache)
+public class UpdateCityCommandHandler(ICityRepository cityRepository, ICacheService cache, IValidator<UpdateCityCommand> validator)
     : IRequestHandler<UpdateCityCommand, Result<bool>>
 {
-
     public async Task<Result<bool>> Handle(UpdateCityCommand request, CancellationToken ct)
     {
+        var resultValidation = await validator.ValidateAsync(request, ct);
+
+        if (!resultValidation.IsValid)
+            throw new ValidationException(resultValidation.Errors);
+
         var result = await cityRepository.UpdateAsync(request.Id, request.Title, request.ProvinceId, ct);
 
         if (result)

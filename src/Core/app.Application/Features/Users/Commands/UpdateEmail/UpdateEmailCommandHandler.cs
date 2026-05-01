@@ -2,18 +2,25 @@
 using app.Application.Contracts.Repositories;
 using app.Application.Contracts.Services;
 using app.Application.DTOs.UserDTOs;
+using FluentValidation;
 using MediatR;
 
 namespace app.Application.Features.Users.Commands.UpdateEmail;
 
 public class UpdateEmailCommandHandler(
     IUserRepository userRepository,
-    IIdentityService identityService)
+    IIdentityService identityService,
+    IValidator<UpdateEmailCommand> validator)
     : IRequestHandler<UpdateEmailCommand, Result<bool>>
 {
 
     public async Task<Result<bool>> Handle(UpdateEmailCommand request, CancellationToken ct)
     {
+        var resultValidation = await validator.ValidateAsync(request, ct);
+
+        if (!resultValidation.IsValid)
+            throw new ValidationException(resultValidation.Errors);
+
         var user = await userRepository.GetByIdAsync(request.UserId, ct);
         if (user == null) return Result<bool>.Failure("کاربر یافت نشد.");
 

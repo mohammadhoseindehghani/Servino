@@ -3,6 +3,7 @@ using app.Application.Contracts.Repositories;
 using app.Application.Contracts.Services;
 using app.Application.DTOs.IdentityDTOs;
 using app.Application.DTOs.UserDTOs;
+using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -13,11 +14,17 @@ public class CreateUserByAdminCommandHandler(
     ICustomerRepository customerRepository,
     IExpertRepository expertRepository,
     IIdentityService identityService,
-    ILogger<CreateUserByAdminCommandHandler> logger)
+    ILogger<CreateUserByAdminCommandHandler> logger,
+    IValidator<CreateUserByAdminCommand> validator)
     : IRequestHandler<CreateUserByAdminCommand, Result<bool>>
 {
     public async Task<Result<bool>> Handle(CreateUserByAdminCommand request, CancellationToken ct)
     {
+        var resultValidation = await validator.ValidateAsync(request, ct);
+
+        if (!resultValidation.IsValid)
+            throw new ValidationException(resultValidation.Errors);
+
         var c = request.Command;
 
         if (await userRepository.IsEmailExistAsync(c.Email, ct))

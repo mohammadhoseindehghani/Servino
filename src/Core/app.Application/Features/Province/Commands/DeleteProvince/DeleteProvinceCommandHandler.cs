@@ -1,6 +1,7 @@
 ﻿using app.Application.Common;
 using app.Application.Contracts.Repositories;
 using app.Application.Contracts.Services;
+using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -9,12 +10,18 @@ namespace app.Application.Features.Province.Commands.DeleteProvince;
 public class DeleteProvinceCommandHandler(
     IProvinceRepository provinceRepository,
     ICacheService cache,
-    ILogger<DeleteProvinceCommandHandler> logger)
+    ILogger<DeleteProvinceCommandHandler> logger,
+    IValidator<DeleteProvinceCommand> validator)
     : IRequestHandler<DeleteProvinceCommand, Result<bool>>
 {
 
     public async Task<Result<bool>> Handle(DeleteProvinceCommand request, CancellationToken ct)
     {
+        var resultValidation = await validator.ValidateAsync(request, ct);
+
+        if (!resultValidation.IsValid)
+            throw new ValidationException(resultValidation.Errors);
+
         try
         {
             var result = await provinceRepository.DeleteAsync(request.Id, ct);

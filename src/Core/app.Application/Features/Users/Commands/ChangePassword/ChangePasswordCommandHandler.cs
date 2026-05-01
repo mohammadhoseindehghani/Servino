@@ -1,15 +1,22 @@
 ﻿using app.Application.Common;
 using app.Application.Contracts.Repositories;
 using app.Application.Contracts.Services;
+using FluentValidation;
 using MediatR;
 
 namespace app.Application.Features.Users.Commands.ChangePassword;
 
-public class ChangePasswordCommandHandler(IIdentityService identityService, IUserRepository userRepository)
+public class ChangePasswordCommandHandler(IIdentityService identityService, IUserRepository userRepository,
+    IValidator<ChangePasswordCommand> validator)
     : IRequestHandler<ChangePasswordCommand, Result<bool>>
 {
     public async Task<Result<bool>> Handle(ChangePasswordCommand request, CancellationToken ct)
     {
+        var resultValidation = await validator.ValidateAsync(request, ct);
+
+        if (!resultValidation.IsValid)
+            throw new ValidationException(resultValidation.Errors);
+
         var user = await userRepository.GetByIdAsync(request.Command.UserId, ct);
         if (user == null)
             return Result<bool>.Failure("کاربر یافت نشد.");

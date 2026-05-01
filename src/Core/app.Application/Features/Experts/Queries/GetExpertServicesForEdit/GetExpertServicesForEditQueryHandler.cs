@@ -1,6 +1,7 @@
 ﻿using app.Application.Common;
 using app.Application.Contracts.Repositories;
 using app.Application.DTOs.UserDTOs;
+using FluentValidation;
 using MediatR;
 
 namespace app.Application.Features.Experts.Queries.GetExpertServicesForEdit;
@@ -8,7 +9,8 @@ namespace app.Application.Features.Experts.Queries.GetExpertServicesForEdit;
 public class GetExpertServicesForEditQueryHandler(
     IExpertRepository expertRepository,
     IHomeServiceRepository homeServiceRepository,
-    IExpertHomeServiceRepository expertHomeServiceRepository)
+    IExpertHomeServiceRepository expertHomeServiceRepository,
+    IValidator<GetExpertServicesForEditQuery> validator)
     : IRequestHandler<GetExpertServicesForEditQuery, Result<List<ExpertServiceItemDto>>>
 {
 
@@ -16,6 +18,11 @@ public class GetExpertServicesForEditQueryHandler(
         GetExpertServicesForEditQuery request,
         CancellationToken ct)
     {
+        var resultValidation = await validator.ValidateAsync(request, ct);
+
+        if (!resultValidation.IsValid)
+            throw new ValidationException(resultValidation.Errors);
+
         var expertId = await expertRepository.GetIdByUserIdAsync(request.UserId, ct);
         if (expertId == 0)
             return Result<List<ExpertServiceItemDto>>

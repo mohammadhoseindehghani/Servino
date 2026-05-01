@@ -1,6 +1,7 @@
 ﻿using app.Application.Common;
 using app.Application.Contracts.Repositories;
 using app.Application.Contracts.Services;
+using FluentValidation;
 using MediatR;
 
 namespace app.Application.Features.Users.Commands.DeleteUserCommand;
@@ -9,11 +10,17 @@ public class DeleteUserCommandHandler(
     IUserRepository userRepository,
     IExpertRepository expertRepository,
     ICustomerRepository customerRepository,
-    IIdentityService identityService)
+    IIdentityService identityService,
+    IValidator<DeleteUserCommand> validator)
     : IRequestHandler<DeleteUserCommand, Result<bool>>
 {
     public async Task<Result<bool>> Handle(DeleteUserCommand request, CancellationToken ct)
     {
+        var resultValidation = await validator.ValidateAsync(request, ct);
+
+        if (!resultValidation.IsValid)
+            throw new ValidationException(resultValidation.Errors);
+
         var user = await userRepository.GetByIdAsync(request.UserId, ct);
         if (user is null)
             return Result<bool>.Failure("کاربر یافت نشد.");

@@ -2,6 +2,7 @@
 using app.Application.Contracts.Repositories;
 using app.Application.Contracts.Services;
 using app.Application.DTOs.HomeServiceDTOs;
+using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -10,12 +11,18 @@ namespace app.Application.Features.HomeServices.Commands.UpdateHomeService;
 public class UpdateHomeServiceCommandHandler(
     IHomeServiceRepository homeServiceRepository,
     ICacheService cache,
-    ILogger<UpdateHomeServiceCommandHandler> logger)
+    ILogger<UpdateHomeServiceCommandHandler> logger,
+    IValidator<UpdateHomeServiceCommand> validator)
     : IRequestHandler<UpdateHomeServiceCommand, Result<bool>>
 {
 
     public async Task<Result<bool>> Handle(UpdateHomeServiceCommand request, CancellationToken ct)
     {
+        var resultValidation = await validator.ValidateAsync(request, ct);
+
+        if (!resultValidation.IsValid)
+            throw new ValidationException(resultValidation.Errors);
+
         try
         {
             var dto = new HomeServiceDto

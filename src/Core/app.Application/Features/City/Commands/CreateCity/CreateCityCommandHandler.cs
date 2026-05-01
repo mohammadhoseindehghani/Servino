@@ -1,26 +1,32 @@
 ﻿using app.Application.Common;
 using app.Application.Contracts.Repositories;
 using app.Application.Contracts.Services;
+using FluentValidation;
 using MediatR;
 
 namespace app.Application.Features.City.Commands.CreateCity;
 
-public class CreateCityCommandHandler(ICityRepository cityRepository, ICacheService cache)
+public class CreateCityCommandHandler(ICityRepository cityRepository, ICacheService cache, IValidator<CreateCityCommand> validator)
     : IRequestHandler<CreateCityCommand, Result<bool>>
 {
     public async Task<Result<bool>> Handle(CreateCityCommand request, CancellationToken ct)
     {
-        var result = await cityRepository.CreateAsync(request.Title, request.ProvinceId, ct);
+        var result = await validator.ValidateAsync(request, ct);
 
-        if (result)
+        if (!result.IsValid)
+            throw new ValidationException(result.Errors);
+
+        var resultOp = await cityRepository.CreateAsync(request.Title, request.ProvinceId, ct);
+
+        if (resultOp)
         {
             await cache.RemoveAsync(CacheKeys.CitiesAll("", 1, 10), ct);
             await cache.RemoveAsync(CacheKeys.CitiesByProvinceId(request.ProvinceId), ct);
         }
 
-        return !result
+        return !resultOp
             ? Result<bool>.Failure("عملیات ایجاد با شکست مواجه شد")
-            : Result<bool>.Success(result);
+            : Result<bool>.Success(resultOp);
     }
     private static class CacheKeys
     { 

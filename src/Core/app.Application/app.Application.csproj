@@ -18,4 +18,8 @@
     <ProjectReference Include="..\app.Domain\app.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Common\Behaviors\" />
+  </ItemGroup>
+
 </Project>

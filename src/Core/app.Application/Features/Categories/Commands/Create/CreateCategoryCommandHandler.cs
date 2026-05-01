@@ -4,17 +4,24 @@ using app.Application.Contracts.Services;
 using app.Application.DTOs.CategoryDTOs;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using FluentValidation;
 
 namespace app.Application.Features.Categories.Commands.Create;
 
 public class CreateCategoryCommandHandler(
     ICategoryRepository categoryRepository,
     ICacheService cache,
-    ILogger<CreateCategoryCommandHandler> logger)
+    ILogger<CreateCategoryCommandHandler> logger,
+    IValidator<CreateCategoryCommand> validator)
     : IRequestHandler<CreateCategoryCommand, Result<bool>>
 {
     public async Task<Result<bool>> Handle(CreateCategoryCommand request, CancellationToken ct)
     {
+        var result = await validator.ValidateAsync(request, ct);
+
+        if (!result.IsValid)
+            throw new ValidationException(result.Errors);
+
         try
         {
             var dto = new CategoryDto

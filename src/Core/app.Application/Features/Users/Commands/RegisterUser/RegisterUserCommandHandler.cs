@@ -2,6 +2,7 @@
 using app.Application.Contracts.Repositories;
 using app.Application.Contracts.Services;
 using app.Application.DTOs.UserDTOs;
+using FluentValidation;
 using MediatR;
 
 namespace app.Application.Features.Users.Commands.RegisterUser;
@@ -10,12 +11,18 @@ public class RegisterUserCommandHandler(
     IUserRepository userRepository,
     IExpertRepository expertRepository,
     ICustomerRepository customerRepository,
-    IIdentityService identityService)
+    IIdentityService identityService,
+    IValidator<RegisterUserCommand> validator)
     : IRequestHandler<RegisterUserCommand, Result<bool>>
 {
 
     public async Task<Result<bool>> Handle(RegisterUserCommand request, CancellationToken ct)
     {
+        var resultValidation = await validator.ValidateAsync(request, ct);
+
+        if (!resultValidation.IsValid)
+            throw new ValidationException(resultValidation.Errors);
+
         var c = request.Command;
         if (await userRepository.IsEmailExistAsync(c.Email, ct))
             return Result<bool>.Failure("این ایمیل قبلاً در سیستم ثبت شده است.");

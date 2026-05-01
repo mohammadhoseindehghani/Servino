@@ -1,6 +1,7 @@
 ﻿using app.Application.Common;
 using app.Application.Contracts.Repositories;
 using app.Application.DTOs.UserDTOs;
+using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -8,13 +9,19 @@ namespace app.Application.Features.Experts.Queries.GetExpertProfileByUserId;
 
 public class GetExpertProfileByUserIdQueryHandler(
     IExpertRepository expertRepository,
-    ILogger<GetExpertProfileByUserIdQueryHandler> logger)
+    ILogger<GetExpertProfileByUserIdQueryHandler> logger,
+    IValidator<GetExpertProfileByUserIdQuery> validator)
     : IRequestHandler<GetExpertProfileByUserIdQuery, Result<ExpertProfileDto>>
 {
     public async Task<Result<ExpertProfileDto>> Handle(
         GetExpertProfileByUserIdQuery request,
         CancellationToken ct)
     {
+        var resultValidation = await validator.ValidateAsync(request, ct);
+
+        if (!resultValidation.IsValid)
+            throw new ValidationException(resultValidation.Errors);
+
         try
         {
             var profile = await expertRepository.GetByUserIdAsync(request.UserId, ct);

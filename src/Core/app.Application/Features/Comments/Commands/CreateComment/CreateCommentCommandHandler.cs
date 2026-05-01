@@ -4,18 +4,24 @@ using app.Application.DTOs.CommentDTOs;
 using app.Domain.CommentAgg.Enums;
 using app.Domain.SuggestionAgg.Enums;
 using MediatR;
+using FluentValidation;
 
 namespace app.Application.Features.Comments.Commands.CreateComment;
 
 public class CreateCommentCommandHandler(
     ICommentRepository commentRepository,
     IRequestRepository requestRepository,
-    ISuggestionRepository suggestionRepository)
+    ISuggestionRepository suggestionRepository,
+    IValidator<CreateCommentCommand> validator)
     : IRequestHandler<CreateCommentCommand, Result<bool>>
 {
-
     public async Task<Result<bool>> Handle(CreateCommentCommand request, CancellationToken ct)
     {
+        var resultValidation = await validator.ValidateAsync(request, ct);
+
+        if (!resultValidation.IsValid)
+            throw new ValidationException(resultValidation.Errors);
+
         var requestEntity = await requestRepository.GetByIdAsync(request.RequestId, ct);
         if (requestEntity == null)
             return Result<bool>.Failure("درخواست یافت نشد.");

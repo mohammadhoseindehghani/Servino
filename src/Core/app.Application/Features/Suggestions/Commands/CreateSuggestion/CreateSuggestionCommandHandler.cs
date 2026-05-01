@@ -1,5 +1,6 @@
 ﻿using app.Application.Common;
 using app.Application.Contracts.Repositories;
+using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -8,13 +9,19 @@ namespace app.Application.Features.Suggestions.Commands.CreateSuggestion;
 public class CreateSuggestionCommandHandler(
     ISuggestionRepository suggestionRepository,
     IRequestRepository requestRepository,
-    ILogger<CreateSuggestionCommandHandler> logger)
+    ILogger<CreateSuggestionCommandHandler> logger,
+    IValidator<CreateSuggestionCommand> validator)
     : IRequestHandler<CreateSuggestionCommand, Result<bool>>
 {
 
     public async Task<Result<bool>> Handle(CreateSuggestionCommand request,
         CancellationToken ct)
     {
+        var resultValidation = await validator.ValidateAsync(request, ct);
+
+        if (!resultValidation.IsValid)
+            throw new ValidationException(resultValidation.Errors);
+
         try
         {
             var dto = request.Command;
