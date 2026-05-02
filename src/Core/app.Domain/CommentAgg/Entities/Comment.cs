@@ -1,5 +1,5 @@
-﻿using app.Domain.CommentAgg.Enums;
-using app.Domain.Common;
+﻿using app.Domain._common;
+using app.Domain.CommentAgg.Enums;
 using app.Domain.RequestAgg.Entities;
 using app.Domain.UserAgg.Entities;
 

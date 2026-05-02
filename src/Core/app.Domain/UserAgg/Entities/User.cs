@@ -1,4 +1,4 @@
-﻿using app.Domain.Common;
+﻿using app.Domain._common;
 using app.Domain.LocationAgg.Entities;
 
 namespace app.Domain.UserAgg.Entities;

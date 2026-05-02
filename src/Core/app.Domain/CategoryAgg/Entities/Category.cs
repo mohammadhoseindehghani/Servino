@@ -1,4 +1,4 @@
-﻿using app.Domain.Common;
+﻿using app.Domain._common;
 using app.Domain.HomeServiceAgg.Entities;
 
 namespace app.Domain.CategoryAgg.Entities;

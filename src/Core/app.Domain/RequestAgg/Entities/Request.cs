@@ -1,5 +1,5 @@
-﻿using app.Domain.CommentAgg.Entities;
-using app.Domain.Common;
+﻿using app.Domain._common;
+using app.Domain.CommentAgg.Entities;
 using app.Domain.HomeServiceAgg.Entities;
 using app.Domain.LocationAgg.Entities;
 using app.Domain.SuggestionAgg.Entities;

@@ -1,4 +1,4 @@
-﻿using app.Domain.Common;
+﻿using app.Domain._common;
 
 namespace app.Domain.UserAgg.Entities;
 
