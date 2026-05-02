@@ -13,6 +13,8 @@ public static class ApplicationServiceRegistration
 
         //Automapper
         services.AddAutoMapper(cfg => { }, typeof(ApplicationServiceRegistration).Assembly);
+
+        //Mediator
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(assembly);
