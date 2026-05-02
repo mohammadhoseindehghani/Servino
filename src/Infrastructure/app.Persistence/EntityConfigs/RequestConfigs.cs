@@ -1,4 +1,5 @@
-﻿using app.Domain.RequestAgg.Entities;
+﻿using app.Domain.CommentAgg.Entities;
+using app.Domain.RequestAgg.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
