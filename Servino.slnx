@@ -12,6 +12,7 @@
     <Project Path="src/Infrastructure/app.Infrastructure/app.Infrastructure.csproj" Id="9a9c06ff-d6d0-4f0b-a6b3-d48bd2127b5b" />
     <Project Path="src/Infrastructure/app.Persistence/app.Persistence.csproj" Id="7b4d71c0-55f6-4055-8c38-ece219423263" />
   </Folder>
+  <Folder Name="/src/Infrastructure/Email/" />
   <Folder Name="/src/UI/">
     <Project Path="src/UI/app.MVC/app.MVC.csproj" Id="9e39c394-313e-4894-a945-219a422b02ae" />
   </Folder>
