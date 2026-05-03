@@ -1,8 +1,18 @@
+using app.Application;
+using app.Infrastructure;
+using app.Persistence;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+builder.Services.ConfigureInfrastructureServices(builder.Configuration);
+builder.Services.AddApplicationServices();
+builder.Services.ConfigurePersistenceServices(builder.Configuration);
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 

@@ -9,7 +9,7 @@ namespace app.Infrastructure;
 
 public static class InfrastructureServicesRegistration
 {
-    public static IServiceCollection ConfigureInfrastructureServices(this ServiceCollection services, 
+    public static IServiceCollection ConfigureInfrastructureServices(this IServiceCollection services, 
         IConfiguration configuration)
     {
         services.AddScoped<IIdentityService, IIdentityService>();
@@ -17,6 +17,8 @@ public static class InfrastructureServicesRegistration
 
         services.Configure<EmailSetting>(configuration.GetSection("EmailSettings"));
         services.AddScoped<IEmailSender, EmailSender>();
+
+        return services;
 
 
     }
