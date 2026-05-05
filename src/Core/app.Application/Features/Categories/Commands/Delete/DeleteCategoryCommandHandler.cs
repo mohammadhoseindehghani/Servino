@@ -10,9 +10,9 @@ namespace app.Application.Features.Categories.Commands.Delete;
 public class DeleteCategoryCommandHandler(
     ICategoryRepository categoryRepository,
     ICacheService cache,
-    ILogger<DeleteCategoryCommandHandler> logger) : IRequestHandler<DeleteCategoryCommand, Result<bool>>
+    ILogger<DeleteCategoryCommandHandler> logger) : IRequestHandler<DeleteCategoryCommand, Result>
 {
-    public async Task<Result<bool>> Handle(DeleteCategoryCommand request, CancellationToken ct)
+    public async Task<Result> Handle(DeleteCategoryCommand request, CancellationToken ct)
     {
         try
         {
@@ -25,15 +25,15 @@ public class DeleteCategoryCommandHandler(
                 await cache.BumpStampAsync(CacheKeys.StampAvailableRequests, CacheTtl.Stamps, ct);
             }
 
-            return !isDeleted ? Result<bool>.Failure("دسته‌بندی یافت نشد یا قابل حذف نیست (ممکن است دارای زیرمجموعه باشد).")
-                : Result<bool>.Success(true, "دسته‌بندی با موفقیت حذف شد.");
+            return !isDeleted ? Result.Failure("دسته‌بندی یافت نشد یا قابل حذف نیست (ممکن است دارای زیرمجموعه باشد).")
+                : Result.Success("دسته‌بندی با موفقیت حذف شد.");
         }
         catch (Exception ex)
         {
             logger.LogError(ex,
                 "System error in CategoryAppService.DeleteAsync | CategoryId: {CategoryId}",
                 request.Id);
-            return Result<bool>.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
+            return Result.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
         }
     }
 

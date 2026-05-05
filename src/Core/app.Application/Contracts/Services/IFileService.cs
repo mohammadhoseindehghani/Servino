@@ -5,6 +5,6 @@ namespace app.Application.Contracts.Services;
 
 public interface IFileService
 {
-    Task<string> Upload(IFormFile file, string folder, CancellationToken cancellationToken);
-    Task DeleteFile(string? path, CancellationToken cancellationToken);
+    Task<string> UploadAsync(IFormFile file, string folder, CancellationToken cancellationToken);
+    Task DeleteFileAsync(string? path, CancellationToken cancellationToken);
 }

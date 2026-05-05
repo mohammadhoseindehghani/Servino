@@ -5,4 +5,4 @@ using MediatR;
 namespace app.Application.Features.Categories.Commands.Create;
 
 public record CreateCategoryCommand(string Title, string? ImagePath, int? ParentId)
-    : IRequest<Result<bool>>;
+    : IRequest<Result<int>>;

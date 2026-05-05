@@ -5,7 +5,7 @@ namespace app.Application.Contracts.Repositories;
 
 public interface ICategoryRepository
 {
-    Task<bool> CreateAsync(CategoryDto command, CancellationToken ct);
+    Task<int> CreateAsync(CategoryDto command, CancellationToken ct);
     Task<bool> UpdateAsync(CategoryDto command, CancellationToken ct);
     Task<bool> DeleteAsync(int id, CancellationToken ct); 
     Task<CategoryDto?> GetByIdAsync(int id, CancellationToken ct);

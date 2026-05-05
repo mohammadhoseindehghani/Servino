@@ -8,7 +8,7 @@ namespace app.Persistence.Repositories;
 
 public class CategoryRepository(AppDbContext context) : ICategoryRepository
 {
-    public async Task<bool> CreateAsync(CategoryDto command, CancellationToken ct)
+    public async Task<int> CreateAsync(CategoryDto command, CancellationToken ct)
     {
         var category = new Category
         {
@@ -19,7 +19,8 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
         };
 
         context.Categories.Add(category);
-        return await context.SaveChangesAsync(ct) > 0;
+        await context.SaveChangesAsync(ct);
+        return category.Id;
     }
 
     public async Task<bool> UpdateAsync(CategoryDto command, CancellationToken ct)

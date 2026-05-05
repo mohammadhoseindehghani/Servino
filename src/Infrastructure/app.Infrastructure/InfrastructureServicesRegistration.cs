@@ -26,13 +26,17 @@ public static class InfrastructureServicesRegistration
 
         services.Configure<RedisSettings>(configuration.GetSection("Redis"));
 
+        services.Configure<RedisSettings>(configuration.GetSection("Redis"));
+
         services.AddStackExchangeRedisCache(options =>
         {
-            var redis = configuration.Get<RedisSettings>();
-            options.Configuration = redis.Configuration;
-            options.InstanceName = redis.InstanceName;
-        });
+            var redis = configuration.GetSection("Redis").Get<RedisSettings>();
+            if (redis is null)
+                throw new InvalidOperationException("Redis configuration section 'Redis' is missing in appsettings.json");
 
+            options.Configuration = redis.Configuration;   
+            options.InstanceName = redis.InstanceName;     
+        });
 
 
         services.Configure<EmailSetting>(configuration.GetSection("EmailSettings"));

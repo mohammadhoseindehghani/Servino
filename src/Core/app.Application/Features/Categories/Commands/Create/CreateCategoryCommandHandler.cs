@@ -13,42 +13,33 @@ public class CreateCategoryCommandHandler(
     ICacheService cache,
     ILogger<CreateCategoryCommandHandler> logger,
     IValidator<CreateCategoryCommand> validator)
-    : IRequestHandler<CreateCategoryCommand, Result<bool>>
+    : IRequestHandler<CreateCategoryCommand, Result<int>>
 {
-    public async Task<Result<bool>> Handle(CreateCategoryCommand request, CancellationToken ct)
+    public async Task<Result<int>> Handle(CreateCategoryCommand request, CancellationToken ct)
     {
         var result = await validator.ValidateAsync(request, ct);
 
         if (!result.IsValid)
             throw new ValidationException(result.Errors);
 
-        try
+
+        var dto = new CategoryDto
         {
-            var dto = new CategoryDto
-            {
-                Title = request.Title,
-                ImagePath = request.ImagePath,
-                ParentId = request.ParentId
-            };
-            var isCreated = await categoryRepository.CreateAsync(dto, ct);
+            Title = request.Title,
+            ImagePath = request.ImagePath,
+            ParentId = request.ParentId
+        };
+        var id = await categoryRepository.CreateAsync(dto, ct);
 
-            await cache.BumpStampAsync(CacheKeys.StampAllRequests, CacheTtl.Stamps, ct);
-            await cache.BumpStampAsync(CacheKeys.StampAvailableRequests, CacheTtl.Stamps, ct);
+        await cache.BumpStampAsync(CacheKeys.StampAllRequests, CacheTtl.Stamps, ct);
+        await cache.BumpStampAsync(CacheKeys.StampAvailableRequests, CacheTtl.Stamps, ct);
 
+        if (id <= 0)
+            Result<int>.Failure("خطایی در ایجاد دسته‌بندی رخ داد. ممکن است عنوان تکراری باشد.");
+        
+        return Result<int>.Success(id, "دسته‌بندی با موفقیت ایجاد شد.");
 
-            return !isCreated
-                ? Result<bool>.Failure("خطایی در ایجاد دسته‌بندی رخ داد. ممکن است عنوان تکراری باشد.")
-                : Result<bool>.Success(true, "دسته‌بندی با موفقیت ایجاد شد.");
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex,
-                "System error in CategoryAppService.CreateAsync | Title: {Title} | ParentId: {ParentId}",
-                request.Title, request.ParentId);
-            return Result<bool>.Failure("خطای سیستمی رخ داده است. لطفاً مجدداً تلاش کنید.");
-        }
     }
-
 
     private static class CacheKeys
     {
