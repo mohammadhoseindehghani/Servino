@@ -12,12 +12,17 @@ public class Category : BaseEntity
     public int? ParentId { get; set; }
 
     public Category? Parent { get; set; }
-    public ICollection<Category> SubCategories { get; set; } 
-    public ICollection<HomeService> Services { get; set; }
+    public List<Category> SubCategories { get; set; } 
+    public List<HomeService> Services { get; set; }
 
-    public Category()
+    private Category()
     {
-        SubCategories = new List<Category>();
-        Services = new List<HomeService>();
+    }
+
+    public Category(string title, string? imagePath, int? parentId)
+    {
+        Title = title;
+        ImagePath = imagePath;
+        ParentId = parentId;
     }
 }

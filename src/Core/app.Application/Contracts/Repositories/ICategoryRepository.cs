@@ -1,13 +1,14 @@
 ﻿using app.Application.Common;
 using app.Application.DTOs.CategoryDTOs;
+using app.Domain.CategoryAgg.Entities;
 
 namespace app.Application.Contracts.Repositories;
 
 public interface ICategoryRepository
 {
-    Task<int> CreateAsync(CategoryDto command, CancellationToken ct);
-    Task<bool> UpdateAsync(CategoryDto command, CancellationToken ct);
-    Task<bool> DeleteAsync(int id, CancellationToken ct); 
+    Task<int> CreateAsync(Category category, CancellationToken ct);
+    Task UpdateAsync(CategoryDto command, CancellationToken ct);
+    Task DeleteAsync(int id, CancellationToken ct); 
     Task<CategoryDto?> GetByIdAsync(int id, CancellationToken ct);
     Task<List<CategorySummaryDto>> GetAllAsync(PaginationRequestDto search, CancellationToken ct);
     Task<int> GetCountAsync(CancellationToken ct);

@@ -8,22 +8,14 @@ namespace app.Persistence.Repositories;
 
 public class CategoryRepository(AppDbContext context) : ICategoryRepository
 {
-    public async Task<int> CreateAsync(CategoryDto command, CancellationToken ct)
+    public async Task<int> CreateAsync(Category category, CancellationToken ct)
     {
-        var category = new Category
-        {
-            Title = command.Title,
-            ImagePath = command.ImagePath,
-            ParentId = command.ParentId,
-            IsActive = true
-        };
-
         context.Categories.Add(category);
         await context.SaveChangesAsync(ct);
         return category.Id;
     }
 
-    public async Task<bool> UpdateAsync(CategoryDto command, CancellationToken ct)
+    public async Task UpdateAsync(CategoryDto command, CancellationToken ct)
     {
         var affectedRows = await context.Categories
             .Where(c => c.Id == command.Id && !c.IsDeleted)
@@ -31,13 +23,10 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
                     .SetProperty(c => c.Title, command.Title)
                     .SetProperty(c => c.ParentId, command.ParentId)
                     .SetProperty(c => c.ImagePath, c => command.ImagePath ?? c.ImagePath)
-                    .SetProperty(c => c.UpdatedAt, DateTime.Now),
-                ct);
-
-        return affectedRows > 0;
+                    .SetProperty(c => c.UpdatedAt, DateTime.Now), ct);
     }
 
-    public async Task<bool> DeleteAsync(int id, CancellationToken ct)
+    public async Task DeleteAsync(int id, CancellationToken ct)
     {
         var affectedRows = await context.Categories
             .Where(c => c.Id == id && !c.IsDeleted)
@@ -45,8 +34,6 @@ public class CategoryRepository(AppDbContext context) : ICategoryRepository
                     .SetProperty(c => c.IsDeleted, true)
                     .SetProperty(c => c.DeletedAt, DateTime.UtcNow),
                 ct);
-
-        return affectedRows > 0;
     }
 
     public async Task<CategoryDto?> GetByIdAsync(int id, CancellationToken ct)

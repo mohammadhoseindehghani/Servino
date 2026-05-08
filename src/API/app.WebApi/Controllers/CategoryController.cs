@@ -21,22 +21,17 @@ namespace app.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromForm] CreateCategoryDto model, CancellationToken ct)
         {
-            string? imagePath = null;
-            if (model.Image != null)
-            {
-                imagePath = await fileService.UploadAsync(model.Image, "Categories", ct);
-            }
+            var command = new CreateCategoryCommand(
+                model.Title,
+                model.Image,
+                model.ParentId
+            );
 
-            var command = new CreateCategoryCommand(model.Title, imagePath, model.ParentId);
             var result = await mediator.Send(command, ct);
 
-            if (!result.IsSuccess)
-            {
-                await fileService.DeleteFileAsync(imagePath, ct);
-                return BadRequest(result.ErrorCode);
-            }
-
-            return CreatedAtAction(nameof(GetById), new { id = result.Data }, result);
+            return result.IsSuccess
+                ? CreatedAtAction(nameof(GetById), new { id = result.Data }, result.Data)
+                : BadRequest(result.Message);
         }
 
         [HttpDelete("{id:int}")] 
@@ -53,17 +48,12 @@ namespace app.WebApi.Controllers
         [HttpPut("{id:int}")] 
         public async Task<IActionResult> Update(int id, [FromForm] UpdateCategoryDto model, CancellationToken ct) 
         {
-            string? newImagePath = null;
-            newImagePath = await fileService.UploadAsync(model.Image, "Categories", ct);
 
-            var command = new UpdateCategoryCommand(id, model.Title, newImagePath, model.ParentId);
+            var command = new UpdateCategoryCommand(id, model.Title, model.Image, model.ParentId);
             var result = await mediator.Send(command, ct);
 
             if (!result.IsSuccess)
-            {
-                await fileService.DeleteFileAsync(newImagePath, ct);
                 return BadRequest(result.Message);
-            }
 
             return NoContent(); 
         }

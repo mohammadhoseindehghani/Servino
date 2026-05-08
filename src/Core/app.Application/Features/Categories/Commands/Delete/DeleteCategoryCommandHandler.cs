@@ -10,23 +10,30 @@ namespace app.Application.Features.Categories.Commands.Delete;
 public class DeleteCategoryCommandHandler(
     ICategoryRepository categoryRepository,
     ICacheService cache,
-    ILogger<DeleteCategoryCommandHandler> logger) : IRequestHandler<DeleteCategoryCommand, Result>
+    ILogger<DeleteCategoryCommandHandler> logger,
+    IFileService fileService) : IRequestHandler<DeleteCategoryCommand, Result>
 {
     public async Task<Result> Handle(DeleteCategoryCommand request, CancellationToken ct)
     {
         try
         {
-            var isDeleted = await categoryRepository.DeleteAsync(request.Id, ct);
 
-            if (isDeleted)
-            {
-                await cache.RemoveAsync(CacheKeys.CategoryDetails(request.Id), ct);
-                await cache.BumpStampAsync(CacheKeys.StampAllRequests, CacheTtl.Stamps, ct);
-                await cache.BumpStampAsync(CacheKeys.StampAvailableRequests, CacheTtl.Stamps, ct);
-            }
+            var category = await categoryRepository.GetByIdAsync(request.Id, ct);
 
-            return !isDeleted ? Result.Failure("دسته‌بندی یافت نشد یا قابل حذف نیست (ممکن است دارای زیرمجموعه باشد).")
-                : Result.Success("دسته‌بندی با موفقیت حذف شد.");
+            if (category == null)
+                return Result.Failure("دسته بندی یافت نشد.", "NOT_FOUND");
+
+            if (category.ImagePath != null)
+                await fileService.DeleteFileAsync(category.ImagePath, ct);
+
+            await categoryRepository.DeleteAsync(request.Id, ct);
+
+            await cache.RemoveAsync(CacheKeys.CategoryDetails(request.Id), ct);
+            await cache.BumpStampAsync(CacheKeys.StampAllRequests, CacheTtl.Stamps, ct);
+            await cache.BumpStampAsync(CacheKeys.StampAvailableRequests, CacheTtl.Stamps, ct);
+
+            return Result.Success("دسته بندی با موفقیت حذف شد.");
+
         }
         catch (Exception ex)
         {

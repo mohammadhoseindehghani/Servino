@@ -2,9 +2,10 @@
 using app.Application.Contracts.Repositories;
 using app.Application.Contracts.Services;
 using app.Application.DTOs.CategoryDTOs;
+using app.Domain.CategoryAgg.Entities;
+using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using FluentValidation;
 
 namespace app.Application.Features.Categories.Commands.Create;
 
@@ -12,44 +13,41 @@ public class CreateCategoryCommandHandler(
     ICategoryRepository categoryRepository,
     ICacheService cache,
     ILogger<CreateCategoryCommandHandler> logger,
-    IValidator<CreateCategoryCommand> validator)
+    IValidator<CreateCategoryCommand> validator,
+    IFileService fileService)
     : IRequestHandler<CreateCategoryCommand, Result<int>>
 {
     public async Task<Result<int>> Handle(CreateCategoryCommand request, CancellationToken ct)
     {
-        var result = await validator.ValidateAsync(request, ct);
+        var validation = await validator.ValidateAsync(request, ct);
+        if (!validation.IsValid)
+            return Result<int>.Failure(validation.Errors.First().ErrorMessage, "VALIDATION_ERROR");
 
-        if (!result.IsValid)
-            throw new ValidationException(result.Errors);
+        string? imagePath = null;
 
-
-        var dto = new CategoryDto
+        try
         {
-            Title = request.Title,
-            ImagePath = request.ImagePath,
-            ParentId = request.ParentId
-        };
-        var id = await categoryRepository.CreateAsync(dto, ct);
+            if (request.Image != null)
+                imagePath = await fileService.UploadAsync(request.Image, "Categories", ct);
 
-        await cache.BumpStampAsync(CacheKeys.StampAllRequests, CacheTtl.Stamps, ct);
-        await cache.BumpStampAsync(CacheKeys.StampAvailableRequests, CacheTtl.Stamps, ct);
+            var category = new Category(request.Title, imagePath, request.ParentId);
 
-        if (id <= 0)
-            Result<int>.Failure("خطایی در ایجاد دسته‌بندی رخ داد. ممکن است عنوان تکراری باشد.");
-        
-        return Result<int>.Success(id, "دسته‌بندی با موفقیت ایجاد شد.");
+            await categoryRepository.CreateAsync(category, ct);
 
-    }
+            await cache.BumpStampAsync("stamp:requests:all", TimeSpan.FromHours(6), ct);
+            await cache.BumpStampAsync("stamp:requests:available", TimeSpan.FromHours(6), ct);
 
-    private static class CacheKeys
-    {
-        public static string StampAllRequests => "stamp:requests:all";
-        public static string StampAvailableRequests => "stamp:requests:available";
-    }
+            return Result<int>.Success(category.Id, "دسته‌بندی با موفقیت ایجاد شد.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error creating category");
 
-    private static class CacheTtl
-    {
-        public static readonly TimeSpan Stamps = TimeSpan.FromHours(6);
+            if (imagePath != null)
+                await fileService.DeleteFileAsync(imagePath, ct);
+
+            throw; // for global exception 
+        }
     }
 }
 
