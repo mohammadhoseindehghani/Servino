@@ -10,6 +10,7 @@ using app.Application.Features.Categories.Queries.GetCategoryById;
 using app.Application.Features.Categories.Queries.GetServicesByCategoryId;
 using app.WebApi.Model;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace app.WebApi.Controllers
@@ -19,6 +20,9 @@ namespace app.WebApi.Controllers
     public class CategoryController(IMediator mediator, IFileService fileService) : ControllerBase
     {
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromForm] CreateCategoryDto model, CancellationToken ct)
         {
             var command = new CreateCategoryCommand(
@@ -34,7 +38,11 @@ namespace app.WebApi.Controllers
                 : BadRequest(result.Message);
         }
 
-        [HttpDelete("{id:int}")] 
+        
+        [HttpDelete("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await mediator.Send(new DeleteCategoryCommand(id));
@@ -45,7 +53,10 @@ namespace app.WebApi.Controllers
             return NoContent();
         }
 
-        [HttpPut("{id:int}")] 
+        [HttpPut("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, [FromForm] UpdateCategoryDto model, CancellationToken ct) 
         {
 
@@ -59,6 +70,7 @@ namespace app.WebApi.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAll([FromQuery]int pageNumber, [FromQuery] int pageSize, [FromQuery] string? search)
         {
             var result = await mediator.Send(new GetCategoriesQuery(pageNumber, pageSize, search));
@@ -66,6 +78,8 @@ namespace app.WebApi.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> GetById(int id)
         {
             var result = await mediator.Send(new GetCategoryByIdQuery(id));
@@ -77,6 +91,7 @@ namespace app.WebApi.Controllers
         }
 
         [HttpGet("{parentId:int}/subcategories")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAllByParentId(int parentId)
         {
             var result = await mediator.Send(new GetCategoriesByParentIdQuery(parentId));
@@ -85,6 +100,7 @@ namespace app.WebApi.Controllers
         }
 
         [HttpGet("{id:int}/services")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetServicesByCategoryId(int id)
         {
             var result = await mediator.Send(new GetServicesByCategoryIdQuery(id));
@@ -93,6 +109,7 @@ namespace app.WebApi.Controllers
         }
 
         [HttpGet("{id:int}/breadcrumb")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> GetBreadcrumb(int id) 
         {
             var result = await mediator.Send(new GetCategoryBreadcrumbQuery(id));

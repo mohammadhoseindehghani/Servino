@@ -15,7 +15,7 @@ public class IdentityService(
     RoleManager<IdentityRole> roleManager,
     ISmsService smsService,
     IMemoryCache cache,
-    IUserRepository userRepository) : IIdentityService
+    IJwtTokenService jwtTokenService) : IIdentityService
 {
 
     public async Task<LoginResultDto> LoginWithPasswordAsync(LoginWithPassDto loginDto, CancellationToken ct)
@@ -24,7 +24,8 @@ public class IdentityService(
         if (user == null)
             return new LoginResultDto { Succeeded = false, Message = "کاربری با این ایمیل یافت نشد." };
 
-        var result = await signInManager.PasswordSignInAsync(user, loginDto.Password, isPersistent: true, lockoutOnFailure: false);
+        var result = await signInManager.PasswordSignInAsync(
+            user, loginDto.Password, isPersistent: false, lockoutOnFailure: false);
 
         if (!result.Succeeded)
         {
@@ -34,13 +35,17 @@ public class IdentityService(
             return new LoginResultDto { Succeeded = false, Message = "رمز عبور اشتباه است." };
         }
 
+        var principal = await signInManager.CreateUserPrincipalAsync(user);
+        var token = jwtTokenService.GenerateToken(principal);
+
         var roles = await userManager.GetRolesAsync(user);
         string role = roles.FirstOrDefault() ?? "Customer";
 
         return new LoginResultDto
         {
             Succeeded = true,
-            Role = role
+            Role = role,
+            Token = token
         };
     }
 
@@ -91,8 +96,10 @@ public class IdentityService(
         {
             return new LoginResultDto { Succeeded = false, Message = "حساب کاربری شما غیرفعال شده است." };
         }
+        await signInManager.SignInAsync(user, isPersistent: false);
 
-        await signInManager.SignInAsync(user, isPersistent: true);
+        var principal = await signInManager.CreateUserPrincipalAsync(user);
+        var token = jwtTokenService.GenerateToken(principal);
 
         var roles = await userManager.GetRolesAsync(user);
         string role = roles.FirstOrDefault() ?? "Customer";
@@ -100,7 +107,8 @@ public class IdentityService(
         return new LoginResultDto
         {
             Succeeded = true,
-            Role = role
+            Role = role,
+            Token = token
         };
     }
 
