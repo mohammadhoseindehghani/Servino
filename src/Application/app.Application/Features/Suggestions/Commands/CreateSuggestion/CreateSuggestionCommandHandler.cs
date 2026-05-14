@@ -1,5 +1,7 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.RequestAgg;
+using app.Application.Contracts.Contracts.Services.Suggestion;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -7,8 +9,8 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.Suggestions.Commands.CreateSuggestion;
 
 public class CreateSuggestionCommandHandler(
-    ISuggestionRepository suggestionRepository,
-    IRequestRepository requestRepository,
+    ISuggestionService suggestionService,
+    IRequestService requestService,
     ILogger<CreateSuggestionCommandHandler> logger,
     IValidator<CreateSuggestionCommand> validator)
     : IRequestHandler<CreateSuggestionCommand, Result<bool>>
@@ -27,21 +29,21 @@ public class CreateSuggestionCommandHandler(
             var dto = request.Command;
 
             bool hasSentBefore =
-                await suggestionRepository.IsExpertSendSuggestionBeforeAsync(
+                await suggestionService.IsExpertSendSuggestionBeforeAsync(
                     dto.ExpertId, dto.RequestId, ct);
 
             if (hasSentBefore)
                 return Result<bool>.Failure("برای این درخواست قبلاً پیشنهاد ارسال کرده‌اید.");
 
             var basePrice =
-                await requestRepository.GetBasePriceByRequestIdAsync(dto.RequestId, ct);
+                await requestService.GetBasePriceByRequestIdAsync(dto.RequestId, ct);
 
             if (dto.SuggestedPrice < basePrice)
                 return Result<bool>.Failure(
                     $"مبلغ پیشنهادی نمیتواند کمتر از مبلغ پایه: {basePrice} باشد.");
 
             var created =
-                await suggestionRepository.CreateAsync(dto, ct);
+                await suggestionService.CreateAsync(dto, ct);
 
             return created
                 ? Result<bool>.Success(true, "پیشنهاد با موفقیت ثبت شد.")

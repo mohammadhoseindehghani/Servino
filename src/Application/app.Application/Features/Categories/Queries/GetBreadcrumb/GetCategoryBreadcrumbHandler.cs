@@ -1,5 +1,5 @@
 ﻿using app.Application.Contracts.Contracts.Providers_Services;
-using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.CategoryAgg;
 using app.Application.Contracts.DTOs.CategoryDTOs;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.Categories.Queries.GetBreadcrumb;
 
 public class GetCategoryBreadcrumbHandler(
-    ICategoryRepository categoryRepository,
+    ICategoryService categoryService,
     ICacheService cache,
     ILogger<GetCategoryBreadcrumbHandler> logger) 
     : IRequestHandler<GetCategoryBreadcrumbQuery, List<BreadcrumbDto>>
@@ -18,7 +18,7 @@ public class GetCategoryBreadcrumbHandler(
         var key = CacheKeys.Breadcrumb(request.CategoryId);
 
         return await cache.GetOrSetAsync(
-            key, async () => await categoryRepository.GetBreadcrumbAsync(request.CategoryId, ct),
+            key, async () => await categoryService.GetBreadcrumbAsync(request.CategoryId, ct),
             CacheTtl.Breadcrumb, ct);
     }
     private static class CacheKeys

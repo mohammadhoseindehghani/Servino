@@ -1,12 +1,12 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Providers_Services;
-using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.CityAgg;
 using FluentValidation;
 using MediatR;
 
 namespace app.Application.Features.City.Commands.DeleteCity;
 
-public class DeleteCityCommandHandler(ICityRepository cityRepository, ICacheService cache, IValidator<DeleteCityCommand> validator)
+public class DeleteCityCommandHandler(ICityService cityService, ICacheService cache, IValidator<DeleteCityCommand> validator)
     : IRequestHandler<DeleteCityCommand, Result<bool>>
 {
 
@@ -17,11 +17,11 @@ public class DeleteCityCommandHandler(ICityRepository cityRepository, ICacheServ
         if (!resultValidation.IsValid)
             throw new ValidationException(resultValidation.Errors);
 
-        var result = await cityRepository.DeleteAsync(request.Id, ct);
+        var result = await cityService.DeleteAsync(request.Id, ct);
 
         if (result)
         {
-            var city = await cityRepository.GetByIdAsync(request.Id, ct);
+            var city = await cityService.GetByIdAsync(request.Id, ct);
 
             if (city != null)
             {

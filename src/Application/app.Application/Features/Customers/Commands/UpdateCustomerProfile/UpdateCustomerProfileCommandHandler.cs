@@ -1,11 +1,11 @@
 ﻿using app.Application.Contracts.Common;
-using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.UserAgg;
 using FluentValidation;
 using MediatR;
 
 namespace app.Application.Features.Customers.Commands.UpdateCustomerProfile;
 
-public class UpdateCustomerProfileCommandHandler(ICustomerRepository customerRepository, IValidator<UpdateCustomerProfileCommand> validator)
+public class UpdateCustomerProfileCommandHandler(ICustomerService customerService, IValidator<UpdateCustomerProfileCommand> validator)
     : IRequestHandler<UpdateCustomerProfileCommand, Result<bool>>
 {
     public async Task<Result<bool>> Handle(
@@ -17,7 +17,7 @@ public class UpdateCustomerProfileCommandHandler(ICustomerRepository customerRep
         if (!resultValidation.IsValid)
             throw new ValidationException(resultValidation.Errors);
 
-        var result = await customerRepository.UpdateProfile(request.Profile, ct);
+        var result = await customerService.UpdateProfile(request.Profile, ct);
 
         return !result
             ? Result<bool>.Failure("آپدیت انجام نشد")

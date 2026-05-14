@@ -1,12 +1,13 @@
 ﻿using app.Application.Contracts.Contracts.Providers_Services;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.ProvinceAgg;
 using app.Application.Contracts.DTOs.LocationDTOs;
 using MediatR;
 
 namespace app.Application.Features.Province.Queries.GetProvinces;
 
 public class GetProvincesQueryHandler(
-    IProvinceRepository provinceRepository,
+    IProvinceService provinceService,
     ICacheService cache) : IRequestHandler<GetProvincesQuery, List<ProvinceDto>>
 {
 
@@ -19,7 +20,7 @@ public class GetProvincesQueryHandler(
 
         return await cache.GetOrSetAsync(
             key,
-            async () => await provinceRepository.GetAllAsync(request.Search, ct),
+            async () => await provinceService.GetAllAsync(request.Search, ct),
             CacheTtl.Provinces,
             ct);
     }

@@ -23,6 +23,11 @@ public class RequestService(IRequestRepository requestRepo) : IRequestService
         return await requestRepo.UpdateAsync(command, ct);
     }
 
+    public async Task<bool> DeleteAsync(int id, CancellationToken ct)
+    {
+        return await requestRepo.DeleteAsync(id, ct);
+    }
+
     public async Task<RequestFullDto?> GetByIdAsync(int id, CancellationToken ct)
     {
         return await requestRepo.GetByIdAsync(id, ct);

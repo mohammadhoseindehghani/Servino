@@ -1,6 +1,6 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Providers_Services;
-using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.UserAgg;
 using app.Application.Contracts.DTOs.UserDTOs;
 using FluentValidation;
 using MediatR;
@@ -8,7 +8,7 @@ using MediatR;
 namespace app.Application.Features.Users.Commands.UpdateEmail;
 
 public class UpdateEmailCommandHandler(
-    IUserRepository userRepository,
+    IUserService userService,
     IIdentityService identityService,
     IValidator<UpdateEmailCommand> validator)
     : IRequestHandler<UpdateEmailCommand, Result<bool>>
@@ -21,10 +21,10 @@ public class UpdateEmailCommandHandler(
         if (!resultValidation.IsValid)
             throw new ValidationException(resultValidation.Errors);
 
-        var user = await userRepository.GetByIdAsync(request.UserId, ct);
+        var user = await userService.GetByIdAsync(request.UserId, ct);
         if (user == null) return Result<bool>.Failure("کاربر یافت نشد.");
 
-        if (await userRepository.IsEmailExistAsync(request.NewEmail, ct))
+        if (await userService.IsEmailExistAsync(request.NewEmail, ct))
         {
             var currentEmail = await identityService.GetEmailByIdentityIdAsync(user.IdentityId, ct);
             if (currentEmail != request.NewEmail)
@@ -39,7 +39,7 @@ public class UpdateEmailCommandHandler(
             Id = request.UserId,
             Email = request.NewEmail
         };
-        await userRepository.UpdateAsync(updateUserDto, ct);
+        await userService.UpdateAsync(updateUserDto, ct);
         return Result<bool>.Success(true, "ایمیل با موفقیت تغییر یافت.");
     }
 }

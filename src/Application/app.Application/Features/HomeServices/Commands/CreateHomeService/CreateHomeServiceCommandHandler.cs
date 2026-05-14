@@ -1,6 +1,7 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Providers_Services;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.HomeServiceAgg;
 using app.Application.Contracts.DTOs.HomeServiceDTOs;
 using FluentValidation;
 using MediatR;
@@ -9,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.HomeServices.Commands.CreateHomeService;
 
 public class CreateHomeServiceCommandHandler(
-    IHomeServiceRepository homeServiceRepository,
+    IHomeServiceService homeServiceService,
     ICacheService cache,
     ILogger<CreateHomeServiceCommandHandler> logger,
     IValidator<CreateHomeServiceCommand> validator)
@@ -32,7 +33,7 @@ public class CreateHomeServiceCommandHandler(
                 CategoryId = request.CategoryId
             };
 
-            var isCreated = await homeServiceRepository.CreateAsync(dto, ct);
+            var isCreated = await homeServiceService.CreateAsync(dto, ct);
 
             if (isCreated)
                 await cache.RemoveAsync(CacheKeys.HomeServicesAll(request.Title, 1, 10), ct);

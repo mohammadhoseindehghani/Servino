@@ -1,6 +1,7 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Providers_Services;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.HomeServiceAgg;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -8,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.HomeServices.Commands.DeleteHomeService;
 
 public class DeleteHomeServiceCommandHandler(
-    IHomeServiceRepository homeServiceRepository,
+    IHomeServiceService homeServiceService,
     ICacheService cache,
     ILogger<DeleteHomeServiceCommandHandler> logger,
     IValidator<DeleteHomeServiceCommand> validator)
@@ -24,7 +25,7 @@ public class DeleteHomeServiceCommandHandler(
 
         try
         {
-            var isDeleted = await homeServiceRepository.DeleteAsync(request.Id, ct);
+            var isDeleted = await homeServiceService.DeleteAsync(request.Id, ct);
 
             if (isDeleted)
             {

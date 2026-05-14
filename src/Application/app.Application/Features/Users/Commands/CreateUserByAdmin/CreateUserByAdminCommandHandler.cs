@@ -1,6 +1,7 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Providers_Services;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.UserAgg;
 using app.Application.Contracts.DTOs.IdentityDTOs;
 using app.Application.Contracts.DTOs.UserDTOs;
 using FluentValidation;
@@ -10,7 +11,7 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.Users.Commands.CreateUserByAdmin;
 
 public class CreateUserByAdminCommandHandler(
-    IUserRepository userRepository,
+    IUserService userService,
     ICustomerRepository customerRepository,
     IExpertRepository expertRepository,
     IIdentityService identityService,
@@ -27,9 +28,9 @@ public class CreateUserByAdminCommandHandler(
 
         var c = request.Command;
 
-        if (await userRepository.IsEmailExistAsync(c.Email, ct))
+        if (await userService.IsEmailExistAsync(c.Email, ct))
             return Result<bool>.Failure("این ایمیل قبلاً ثبت شده است.");
-        if (await userRepository.IsMobileExistAsync(c.Mobile, ct))
+        if (await userService.IsMobileExistAsync(c.Mobile, ct))
             return Result<bool>.Failure("این شماره موبایل قبلاً ثبت شده است.");
 
         string? identityId = null;
@@ -55,10 +56,10 @@ public class CreateUserByAdminCommandHandler(
                 CityId = 1
             };
 
-            var ok = await userRepository.CreateAsync(createUserDto, ct);
+            var ok = await userService.CreateAsync(createUserDto, ct);
             if (!ok) throw new Exception("خطا در ذخیره اطلاعات کاربر.");
 
-            userId = await userRepository.GetIdByIdentityIdAsync(identityId, ct);
+            userId = await userService.GetIdByIdentityIdAsync(identityId, ct);
 
             bool roleResult = c.Role switch
             {
@@ -81,7 +82,7 @@ public class CreateUserByAdminCommandHandler(
             {
                 if (c.Role == "Customer") await customerRepository.HardDeleteByUserIdAsync(userId, ct);
                 if (c.Role == "Expert") await expertRepository.HardDeleteByUserIdAsync(userId, ct);
-                await userRepository.HardDeleteAsync(userId, ct);
+                await userService.HardDeleteAsync(userId, ct);
             }
 
             if (!string.IsNullOrWhiteSpace(identityId))

@@ -1,11 +1,11 @@
 ﻿using app.Application.Contracts.Contracts.Providers_Services;
-using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.CityAgg;
 using app.Application.Contracts.DTOs.LocationDTOs;
 using MediatR;
 
 namespace app.Application.Features.City.Queries.GetCities;
 
-public class GetCitiesQueryHandler(ICityRepository cityRepository, ICacheService cache)
+public class GetCitiesQueryHandler(ICityService cityService, ICacheService cache)
     : IRequestHandler<GetCitiesQuery, List<CityDto>>
 {
 
@@ -18,7 +18,7 @@ public class GetCitiesQueryHandler(ICityRepository cityRepository, ICacheService
 
         return await cache.GetOrSetAsync(
             key,
-            async () => await cityRepository.GetAllAsync(request.Search, ct),
+            async () => await cityService.GetAllAsync(request.Search, ct),
             CacheTtl.Cities,
             ct);
     }

@@ -1,6 +1,7 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Providers_Services;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.ProvinceAgg;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -8,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.Province.Commands.UpdateProvince;
 
 public class UpdateProvinceCommandHandler(
-    IProvinceRepository provinceRepository,
+    IProvinceService provinceService,
     ICacheService cache,
     ILogger<UpdateProvinceCommandHandler> logger,
     IValidator<UpdateProvinceCommand> validator)
@@ -24,7 +25,7 @@ public class UpdateProvinceCommandHandler(
 
         try
         {
-            var result = await provinceRepository.UpdateAsync(request.Id, request.Title, ct);
+            var result = await provinceService.UpdateAsync(request.Id, request.Title, ct);
 
             if (result)
             {

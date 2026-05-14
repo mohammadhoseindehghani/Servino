@@ -1,5 +1,6 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.RequestAgg;
 using app.Application.Contracts.DTOs.RequestDTOs;
 using FluentValidation;
 using MediatR;
@@ -8,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.Requests.Commands.CreateRequest;
 
 public class CreateRequestCommandHandler(
-    IRequestRepository requestRepository,
+    IRequestService requestService,
     ILogger<CreateRequestCommandHandler> logger,
     IValidator<CreateRequestCommand> validator)
     : IRequestHandler<CreateRequestCommand, Result<int>>
@@ -34,7 +35,7 @@ public class CreateRequestCommandHandler(
                 ImagePaths = request.ImagePaths
             };
 
-            var newId = await requestRepository.CreateAsync(dto, ct);
+            var newId = await requestService.CreateAsync(dto, ct);
 
             return Result<int>.Success(newId, "درخواست با موفقیت ثبت شد.");
         }

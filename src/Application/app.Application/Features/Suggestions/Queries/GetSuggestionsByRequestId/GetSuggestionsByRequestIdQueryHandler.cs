@@ -1,4 +1,4 @@
-﻿using app.Application.Contracts.Contracts.Repositories;
+﻿using app.Application.Contracts.Contracts.Services.Suggestion;
 using app.Application.Contracts.DTOs.SuggestionDTOs;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.Suggestions.Queries.GetSuggestionsByRequestId;
 
 public class GetSuggestionsByRequestIdQueryHandler(
-    ISuggestionRepository suggestionRepository,
+    ISuggestionService suggestionService,
     ILogger<GetSuggestionsByRequestIdQueryHandler> logger)
     : IRequestHandler<GetSuggestionsByRequestIdQuery, List<SuggestionSummaryDto>>
 {
@@ -16,7 +16,7 @@ public class GetSuggestionsByRequestIdQueryHandler(
     {
         try
         {
-            return await suggestionRepository.GetByRequestIdAsync(query.RequestId, ct);
+            return await suggestionService.GetByRequestIdAsync(query.RequestId, ct);
         }
         catch (Exception ex)
         {

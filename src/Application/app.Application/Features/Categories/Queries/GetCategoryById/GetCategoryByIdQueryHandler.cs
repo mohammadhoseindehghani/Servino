@@ -1,6 +1,7 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Providers_Services;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.CategoryAgg;
 using app.Application.Contracts.DTOs.CategoryDTOs;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -8,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.Categories.Queries.GetCategoryById;
 
 public class GetCategoryByIdQueryHandler(
-    ICategoryRepository categoryRepository,
+    ICategoryService categoryService,
     ICacheService cache,
     ILogger<GetCategoryByIdQueryHandler> logger
     ) : IRequestHandler<GetCategoryByIdQuery, Result<CategoryDto>>
@@ -19,7 +20,7 @@ public class GetCategoryByIdQueryHandler(
         {
             var key = CacheKeys.CategoryDetails(request.Id);
             var category = await cache.GetOrSetAsync(
-                key, async () => await categoryRepository.GetByIdAsync(request.Id, ct),
+                key, async () => await categoryService.GetByIdAsync(request.Id, ct),
                 CacheTtl.CategoryDetails, ct);
 
             return category == null

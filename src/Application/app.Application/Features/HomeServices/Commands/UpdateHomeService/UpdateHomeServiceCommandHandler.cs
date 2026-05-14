@@ -1,6 +1,7 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Providers_Services;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.HomeServiceAgg;
 using app.Application.Contracts.DTOs.HomeServiceDTOs;
 using FluentValidation;
 using MediatR;
@@ -9,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.HomeServices.Commands.UpdateHomeService;
 
 public class UpdateHomeServiceCommandHandler(
-    IHomeServiceRepository homeServiceRepository,
+    IHomeServiceService homeServiceService,
     ICacheService cache,
     ILogger<UpdateHomeServiceCommandHandler> logger,
     IValidator<UpdateHomeServiceCommand> validator)
@@ -33,7 +34,7 @@ public class UpdateHomeServiceCommandHandler(
                 CategoryId = request.CategoryId
             };
 
-            var isUpdated = await homeServiceRepository.UpdateAsync(dto, ct);
+            var isUpdated = await homeServiceService.UpdateAsync(dto, ct);
 
             if (isUpdated)
             {

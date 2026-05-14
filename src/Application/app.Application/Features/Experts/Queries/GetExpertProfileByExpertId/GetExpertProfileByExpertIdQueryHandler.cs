@@ -1,12 +1,13 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.UserAgg;
 using app.Application.Contracts.DTOs.UserDTOs;
 using FluentValidation;
 using MediatR;
 
 namespace app.Application.Features.Experts.Queries.GetExpertProfileByExpertId;
 
-public class GetExpertProfileByExpertIdQueryHandler(IExpertRepository expertRepository, IValidator<GetExpertProfileByExpertIdQuery> validator)
+public class GetExpertProfileByExpertIdQueryHandler(IExpertService expertService, IValidator<GetExpertProfileByExpertIdQuery> validator)
     : IRequestHandler<GetExpertProfileByExpertIdQuery, Result<ExpertProfileDto>>
 {
     public async Task<Result<ExpertProfileDto>> Handle(
@@ -18,7 +19,7 @@ public class GetExpertProfileByExpertIdQueryHandler(IExpertRepository expertRepo
         if (!resultValidation.IsValid)
             throw new ValidationException(resultValidation.Errors);
 
-        var profile = await expertRepository.GetByExpertIdAsync(request.ExpertId, ct);
+        var profile = await expertService.GetByExpertIdAsync(request.ExpertId, ct);
 
         return profile == null
             ? Result<ExpertProfileDto>.Failure("مشخصات متخصص یافت نشد")

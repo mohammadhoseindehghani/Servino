@@ -1,5 +1,7 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.ExpertHomeServiceAgg;
+using app.Application.Contracts.Contracts.Services.UserAgg;
 using app.Domain.ExpertHomeServiceAgg.Entities;
 using FluentValidation;
 using MediatR;
@@ -8,8 +10,8 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.Experts.Commands.UpdateExpertServices;
 
 public class UpdateExpertServicesCommandHandler(
-    IExpertRepository expertRepository,
-    IExpertHomeServiceRepository expertHomeServiceRepository,
+    IExpertService expertService,
+    IExpertHomeServiceService expertHomeServiceService,
     ILogger<UpdateExpertServicesCommandHandler> logger,
     IValidator<UpdateExpertServicesCommand> validator)
     : IRequestHandler<UpdateExpertServicesCommand, Result<bool>>
@@ -23,24 +25,14 @@ public class UpdateExpertServicesCommandHandler(
         if (!resultValidation.IsValid)
             throw new ValidationException(resultValidation.Errors);
 
-        var expertId = await expertRepository.GetIdByUserIdAsync(request.UserId, ct);
-        if (expertId == 0)
+        var expertDto = await expertService.GetByUserId(request.UserId, ct);
+        if (expertDto == null)
             return Result<bool>.Failure("اکسپرت یافت نشد.");
 
         try
         {
-            await expertHomeServiceRepository.DeleteAllByExpertIdAsync(expertId, ct);
+            await expertHomeServiceService.UpdateExpertServicesAsync(expertDto.ExpertId, request.SelectedIds, ct);
 
-            if (request.SelectedIds != null! && request.SelectedIds.Any())
-            {
-                var list = request.SelectedIds.Select(id => new ExpertHomeService
-                {
-                    ExpertId = expertId,
-                    HomeServiceId = id
-                }).ToList();
-
-                await expertHomeServiceRepository.AddRangeAsync(list, ct);
-            }
             return Result<bool>.Success(true);
         }
         catch (Exception ex)

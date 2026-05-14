@@ -1,5 +1,6 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.RequestAgg;
 using app.Application.Contracts.DTOs.RequestDTOs;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -7,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.Requests.Queries.GetRequestDetails;
 
 public class GetRequestDetailsQueryHandler(
-    IRequestRepository requestRepository,
+    IRequestService requestService,
     ILogger<GetRequestDetailsQueryHandler> logger)
     : IRequestHandler<GetRequestDetailsQuery, Result<RequestDetailDto>>
 {
@@ -16,7 +17,7 @@ public class GetRequestDetailsQueryHandler(
     {
         try
         {
-            var details = await requestRepository.GetDetailsByIdAsync(query.Id, ct);
+            var details = await requestService.GetDetailsByIdAsync(query.Id, ct);
 
             return details == null
                 ? Result<RequestDetailDto>.Failure("جزئیات درخواست یافت نشد.", "404")

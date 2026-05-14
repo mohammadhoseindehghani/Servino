@@ -10,7 +10,6 @@
     <PackageReference Include="AutoMapper" Version="16.1.1" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-    <PackageReference Include="IPE.SmsIr" Version="1.2.7" />
     <PackageReference Include="MediatR" Version="14.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
   </ItemGroup>
@@ -22,6 +21,7 @@
 
   <ItemGroup>
     <Folder Include="Features\Admins\Mappings\" />
+    <Folder Include="Features\Admins\Commands\" />
     <Folder Include="Features\City\Mappings\" />
     <Folder Include="Features\Customers\Mappings\" />
     <Folder Include="Features\Experts\Mappings\" />

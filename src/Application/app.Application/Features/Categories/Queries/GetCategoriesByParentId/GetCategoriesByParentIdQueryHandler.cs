@@ -1,5 +1,5 @@
 ﻿using app.Application.Contracts.Contracts.Providers_Services;
-using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.CategoryAgg;
 using app.Application.Contracts.DTOs.CategoryDTOs;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.Categories.Queries.GetCategoriesByParentId;
 
 public class GetCategoriesByParentIdQueryHandler(
-    ICategoryRepository categoryRepository,
+    ICategoryService categoryService,
     ICacheService cache,
     ILogger<GetCategoriesByParentIdQueryHandler> logger) 
     : IRequestHandler<GetCategoriesByParentIdQuery, List<CategoryClientDto>>
@@ -16,7 +16,7 @@ public class GetCategoriesByParentIdQueryHandler(
     {
         var key = CacheKeys.CategoriesByParentId(request.ParentId ?? 0);
 
-        return await cache.GetOrSetAsync(key, async () => await categoryRepository.GetCategoriesByParentIdAsync(request.ParentId, ct),
+        return await cache.GetOrSetAsync(key, async () => await categoryService.GetCategoriesByParentIdAsync(request.ParentId, ct),
             CacheTtl.Categories, ct);
     }
 

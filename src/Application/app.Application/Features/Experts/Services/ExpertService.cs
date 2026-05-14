@@ -1,5 +1,6 @@
 ﻿using app.Application.Contracts.Contracts.Repositories;
 using app.Application.Contracts.Contracts.Services.UserAgg;
+using app.Application.Contracts.DTOs.HomeServiceDTOs;
 using app.Application.Contracts.DTOs.UserDTOs;
 
 namespace app.Application.Features.Experts.Services;
@@ -34,5 +35,15 @@ public class ExpertService(IExpertRepository expertRepo) : IExpertService
     public async Task<bool> HardDeleteByUserIdAsync(int userId, CancellationToken ct)
     {
         return await expertRepo.HardDeleteByUserIdAsync(userId, ct);
+    }
+
+    public async Task<ExpertProfileDto?> GetByUserIdAsync(int userId, CancellationToken ct)
+    {
+        return await expertRepo.GetByUserIdAsync(userId, ct);
+    }
+
+    public async Task<int> GetIdByUserIdAsync(int userId, CancellationToken ct)
+    {
+        return await expertRepo.GetIdByUserIdAsync(userId, ct);
     }
 }

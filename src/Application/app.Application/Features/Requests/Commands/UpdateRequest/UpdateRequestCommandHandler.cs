@@ -1,5 +1,6 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.RequestAgg;
 using app.Application.Contracts.DTOs.RequestDTOs;
 using FluentValidation;
 using MediatR;
@@ -8,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.Requests.Commands.UpdateRequest;
 
 public class UpdateRequestCommandHandler(
-    IRequestRepository requestRepository,
+    IRequestService requestService,
     ILogger<UpdateRequestCommandHandler> logger,
     IValidator<UpdateRequestCommand> validator)
     : IRequestHandler<UpdateRequestCommand, Result<bool>>
@@ -33,7 +34,7 @@ public class UpdateRequestCommandHandler(
                 DateRequired = request.DateRequired
             };
 
-            var ok = await requestRepository.UpdateAsync(dto, ct);
+            var ok = await requestService.UpdateAsync(dto, ct);
 
             return ok
                 ? Result<bool>.Success(true, "درخواست با موفقیت بروزرسانی شد.")

@@ -1,11 +1,12 @@
 ﻿using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.ExpertHomeServiceAgg;
 using app.Application.Contracts.DTOs.UserDTOs;
 using FluentValidation;
 using MediatR;
 
 namespace app.Application.Features.Experts.Queries.GetExpertServicesByExpertId;
 
-public class GetExpertServicesByExpertIdQueryHandler(IExpertHomeServiceRepository expertHomeServiceRepository,
+public class GetExpertServicesByExpertIdQueryHandler(IExpertHomeServiceService expertHomeServiceService,
     IValidator<GetExpertServicesByExpertIdQuery> validator)
     : IRequestHandler<GetExpertServicesByExpertIdQuery, List<ExpertServiceItemDto>>
 {
@@ -18,7 +19,7 @@ public class GetExpertServicesByExpertIdQueryHandler(IExpertHomeServiceRepositor
         if (!resultValidation.IsValid)
             throw new ValidationException(resultValidation.Errors);
 
-        return await expertHomeServiceRepository
+        return await expertHomeServiceService
             .GetExpertServicesByExpertIdAsync(request.ExpertId, ct);
     }
 }

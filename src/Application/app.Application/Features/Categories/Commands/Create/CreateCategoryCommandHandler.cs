@@ -1,6 +1,6 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Providers_Services;
-using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.CategoryAgg;
 using app.Domain.CategoryAgg.Entities;
 using FluentValidation;
 using MediatR;
@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.Categories.Commands.Create;
 
 public class CreateCategoryCommandHandler(
-    ICategoryRepository categoryRepository,
+    ICategoryService categoryService,
     ICacheService cache,
     ILogger<CreateCategoryCommandHandler> logger,
     IValidator<CreateCategoryCommand> validator,
@@ -31,7 +31,7 @@ public class CreateCategoryCommandHandler(
 
             var category = new Category(request.Title, imagePath, request.ParentId);
 
-            await categoryRepository.CreateAsync(category, ct);
+            await categoryService.CreateAsync(category, ct);
 
             await cache.BumpStampAsync("stamp:requests:all", TimeSpan.FromHours(6), ct);
             await cache.BumpStampAsync("stamp:requests:available", TimeSpan.FromHours(6), ct);

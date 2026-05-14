@@ -1,14 +1,15 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.UserAgg;
 using app.Application.Contracts.DTOs.UserDTOs;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace app.Application.Features.Admins.Queries;
+namespace app.Application.Features.Admins.Queries.GetAdminProfileByUserId;
 
 public class GetAdminProfileByUserIdQueryHandler(
-    IAdminRepository adminRepository,
+    IAdminService adminService,
     ILogger<GetAdminProfileByUserIdQueryHandler> logger,
     IValidator<GetAdminProfileByUserIdQuery> validator)
     : IRequestHandler<GetAdminProfileByUserIdQuery, Result<AdminProfileDto>>
@@ -23,7 +24,7 @@ public class GetAdminProfileByUserIdQueryHandler(
             throw new ValidationException(resultValidation.Errors);
         try
         {
-            var profile = await adminRepository.GetByUserIdAsync(request.UserId, ct);
+            var profile = await adminService.GetByUserIdAsync(request.UserId, ct);
 
             return profile == null
                 ? Result<AdminProfileDto>.Failure("اطلاعات یافت نشد.")

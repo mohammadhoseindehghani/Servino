@@ -1,13 +1,13 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Providers_Services;
-using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.HomeServiceAgg;
 using app.Application.Contracts.DTOs.HomeServiceDTOs;
 using MediatR;
 
 namespace app.Application.Features.HomeServices.Queries.GetHomeServices;
 
 public class GetHomeServicesQueryHandler(
-    IHomeServiceRepository homeServiceRepository,
+    IHomeServiceService homeServiceService,
     ICacheService cache)
     : IRequestHandler<GetHomeServicesQuery, Result<List<HomeServiceSummaryDto>>>
 {
@@ -21,7 +21,7 @@ public class GetHomeServicesQueryHandler(
 
         return await cache.GetOrSetAsync(
             key,
-            async () => await homeServiceRepository.GetAllAsync(request.Search, ct),
+            async () => await homeServiceService.GetAllAsync(request.Search, ct),
             CacheTtl.HomeServices,
             ct);
     }

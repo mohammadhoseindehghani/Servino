@@ -1,12 +1,13 @@
 ﻿using app.Application.Contracts.Contracts.Providers_Services;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.ProvinceAgg;
 using app.Application.Contracts.DTOs.LocationDTOs;
 using MediatR;
 
 namespace app.Application.Features.Province.Queries.GetProvincesForDropdown;
 
 public class GetProvincesForDropdownQueryHandler(
-    IProvinceRepository provinceRepository,
+    IProvinceService provinceService,
     ICacheService cache) : IRequestHandler<GetProvincesForDropdownQuery, List<SelectListDto>>
 {
 
@@ -14,7 +15,7 @@ public class GetProvincesForDropdownQueryHandler(
     {
         return await cache.GetOrSetAsync(
             CacheKeys.ProvincesForDropdown,
-            () => provinceRepository.GetAllForDropdownAsync(ct),
+            () => provinceService.GetAllForDropdownAsync(ct),
             CacheTtl.Provinces,
             ct);
     }

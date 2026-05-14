@@ -1,11 +1,12 @@
 ﻿using app.Application.Contracts.Contracts.Providers_Services;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.CityAgg;
 using app.Application.Contracts.DTOs.LocationDTOs;
 using MediatR;
 
 namespace app.Application.Features.City.Queries.GetCitiesByProvince;
 
-public class GetCitiesByProvinceQueryHandler(ICityRepository cityRepository, ICacheService cache)
+public class GetCitiesByProvinceQueryHandler(ICityService cityService, ICacheService cache)
     : IRequestHandler<GetCitiesByProvinceQuery, List<SelectListDto>>
 {
 
@@ -15,7 +16,7 @@ public class GetCitiesByProvinceQueryHandler(ICityRepository cityRepository, ICa
 
         return await cache.GetOrSetAsync(
             key,
-            async () => await cityRepository.GetCitiesByProvinceIdAsync(request.ProvinceId, ct),
+            async () => await cityService.GetCitiesByProvinceIdAsync(request.ProvinceId, ct),
             CacheTtl.Cities,
             ct);
     }

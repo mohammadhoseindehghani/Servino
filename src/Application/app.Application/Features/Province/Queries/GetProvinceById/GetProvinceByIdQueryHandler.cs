@@ -1,6 +1,7 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Providers_Services;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.ProvinceAgg;
 using app.Application.Contracts.DTOs.LocationDTOs;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -8,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.Province.Queries.GetProvinceById;
 
 public class GetProvinceByIdQueryHandler(
-    IProvinceRepository provinceRepository,
+    IProvinceService provinceService,
     ICacheService cache,
     ILogger<GetProvinceByIdQueryHandler> logger)
     : IRequestHandler<GetProvinceByIdQuery, Result<ProvinceDto>>
@@ -22,7 +23,7 @@ public class GetProvinceByIdQueryHandler(
 
             var province = await cache.GetOrSetAsync(
                 key,
-                async () => await provinceRepository.GetByIdAsync(request.Id, ct),
+                async () => await provinceService.GetByIdAsync(request.Id, ct),
                 CacheTtl.ProvinceDetails,
                 ct);
 

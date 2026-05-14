@@ -1,6 +1,6 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Providers_Services;
-using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.CityAgg;
 using app.Application.Contracts.DTOs.LocationDTOs;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.City.Queries.GetCityById;
 
 public class GetCityByIdQueryHandler(
-    ICityRepository cityRepository,
+    ICityService cityService,
     ICacheService cache,
     ILogger<GetCityByIdQueryHandler> logger)
     : IRequestHandler<GetCityByIdQuery, Result<CityDto>>
@@ -22,7 +22,7 @@ public class GetCityByIdQueryHandler(
 
             var city = await cache.GetOrSetAsync(
                 key,
-                async () => await cityRepository.GetByIdAsync(request.Id, ct),
+                async () => await cityService.GetByIdAsync(request.Id, ct),
                 CacheTtl.CityDetails,
                 ct);
 

@@ -1,6 +1,6 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Providers_Services;
-using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.CategoryAgg;
 using app.Application.Contracts.DTOs.CategoryDTOs;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.Categories.Queries.GetCategories;
 
 public class GetCategoriesQueryHandler(
-    ICategoryRepository categoryRepository,
+    ICategoryService categoryService,
     ICacheService cache,
     ILogger<GetCategoriesQueryHandler> logger) 
     : IRequestHandler<GetCategoriesQuery, List<CategorySummaryDto>>
@@ -24,7 +24,7 @@ public class GetCategoriesQueryHandler(
         };
         return await cache.GetOrSetAsync(
             key,
-            async () => await categoryRepository.GetAllAsync(dto, ct), CacheTtl.Categories, ct);
+            async () => await categoryService.GetAllAsync(dto, ct), CacheTtl.Categories, ct);
     }
     private static class CacheKeys
     { 

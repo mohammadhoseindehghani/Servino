@@ -1,12 +1,13 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.UserAgg;
 using app.Application.Contracts.DTOs.UserDTOs;
 using FluentValidation;
 using MediatR;
 
 namespace app.Application.Features.Users.Queries.GetUserProfile;
 
-public class GetUserProfileQueryHandler(IUserRepository userRepository, IValidator<GetUserProfileQuery> validator)
+public class GetUserProfileQueryHandler(IUserService userService, IValidator<GetUserProfileQuery> validator)
     : IRequestHandler<GetUserProfileQuery, Result<UserDetailDto>>
 {
 
@@ -17,7 +18,7 @@ public class GetUserProfileQueryHandler(IUserRepository userRepository, IValidat
         if (!resultValidation.IsValid)
             throw new ValidationException(resultValidation.Errors);
 
-        var profile = await userRepository.GetByIdAsync(request.UserId, ct);
+        var profile = await userService.GetByIdAsync(request.UserId, ct);
 
         return profile == null
             ? Result<UserDetailDto>.Failure("کاربر یافت نشد.", "404")

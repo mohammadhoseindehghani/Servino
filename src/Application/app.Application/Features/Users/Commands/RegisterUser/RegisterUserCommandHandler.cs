@@ -1,6 +1,7 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Providers_Services;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.UserAgg;
 using app.Application.Contracts.DTOs.UserDTOs;
 using FluentValidation;
 using MediatR;
@@ -8,7 +9,7 @@ using MediatR;
 namespace app.Application.Features.Users.Commands.RegisterUser;
 
 public class RegisterUserCommandHandler(
-    IUserRepository userRepository,
+    IUserService userService,
     IExpertRepository expertRepository,
     ICustomerRepository customerRepository,
     IIdentityService identityService,
@@ -24,9 +25,9 @@ public class RegisterUserCommandHandler(
             throw new ValidationException(resultValidation.Errors);
 
         var c = request.Command;
-        if (await userRepository.IsEmailExistAsync(c.Email, ct))
+        if (await userService.IsEmailExistAsync(c.Email, ct))
             return Result<bool>.Failure("این ایمیل قبلاً در سیستم ثبت شده است.");
-        if (await userRepository.IsMobileExistAsync(c.PhoneNumber, ct))
+        if (await userService.IsMobileExistAsync(c.PhoneNumber, ct))
             return Result<bool>.Failure("این شماره قبلاً در سیستم ثبت شده است.");
         if (c.Password.Length < 6)
             return Result<bool>.Failure("پسورد باید حداقل ۶ کاراکتر داشته باشد.");
@@ -50,10 +51,10 @@ public class RegisterUserCommandHandler(
                 IdentityId = identityId
             };
 
-            if (!await userRepository.CreateAsync(createUserDto, ct))
+            if (!await userService.CreateAsync(createUserDto, ct))
                 throw new Exception("خطا در ذخیره اطلاعات کاربر.");
 
-            userId = await userRepository.GetIdByIdentityIdAsync(identityId, ct);
+            userId = await userService.GetIdByIdentityIdAsync(identityId, ct);
             bool roleCreated = c.Role switch
             {
                 "Customer" => await customerRepository.CreateAsync(userId, ct),
@@ -72,7 +73,7 @@ public class RegisterUserCommandHandler(
             {
                 if (c.Role == "Customer") await customerRepository.HardDeleteByUserIdAsync(userId, ct);
                 if (c.Role == "Expert") await expertRepository.HardDeleteByUserIdAsync(userId, ct);
-                await userRepository.HardDeleteAsync(userId, ct);
+                await userService.HardDeleteAsync(userId, ct);
             }
 
             if (!string.IsNullOrWhiteSpace(identityId))

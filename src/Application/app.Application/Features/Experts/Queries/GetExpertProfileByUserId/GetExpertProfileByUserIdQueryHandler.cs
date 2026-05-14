@@ -1,5 +1,6 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.UserAgg;
 using app.Application.Contracts.DTOs.UserDTOs;
 using FluentValidation;
 using MediatR;
@@ -8,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.Experts.Queries.GetExpertProfileByUserId;
 
 public class GetExpertProfileByUserIdQueryHandler(
-    IExpertRepository expertRepository,
+    IExpertService expertService,
     ILogger<GetExpertProfileByUserIdQueryHandler> logger,
     IValidator<GetExpertProfileByUserIdQuery> validator)
     : IRequestHandler<GetExpertProfileByUserIdQuery, Result<ExpertProfileDto>>
@@ -24,7 +25,7 @@ public class GetExpertProfileByUserIdQueryHandler(
 
         try
         {
-            var profile = await expertRepository.GetByUserIdAsync(request.UserId, ct);
+            var profile = await expertService.GetByUserId(request.UserId, ct);
 
             return profile == null
                 ? Result<ExpertProfileDto>.Failure("پروفایلی یافت نشد")

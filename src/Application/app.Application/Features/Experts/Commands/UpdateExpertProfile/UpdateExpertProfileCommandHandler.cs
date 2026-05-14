@@ -1,11 +1,11 @@
 ﻿using app.Application.Contracts.Common;
-using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.UserAgg;
 using FluentValidation;
 using MediatR;
 
 namespace app.Application.Features.Experts.Commands.UpdateExpertProfile;
 
-public class UpdateExpertProfileCommandHandler(IExpertRepository expertRepository, IValidator<UpdateExpertProfileCommand> validator)
+public class UpdateExpertProfileCommandHandler(IExpertService expertService, IValidator<UpdateExpertProfileCommand> validator)
     : IRequestHandler<UpdateExpertProfileCommand, Result<bool>>
 {
     public async Task<Result<bool>> Handle(
@@ -17,7 +17,7 @@ public class UpdateExpertProfileCommandHandler(IExpertRepository expertRepositor
         if (!resultValidation.IsValid)
             throw new ValidationException(resultValidation.Errors);
 
-        var result = await expertRepository.UpdateProfile(request.Profile, ct);
+        var result = await expertService.UpdateProfile(request.Profile, ct);
 
         return !result
             ? Result<bool>.Failure("عملیات آپدیت با شکست مواجه شد")

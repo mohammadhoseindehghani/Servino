@@ -1,4 +1,5 @@
-﻿using app.Application.Contracts.DTOs.UserDTOs;
+﻿using app.Application.Contracts.DTOs.HomeServiceDTOs;
+using app.Application.Contracts.DTOs.UserDTOs;
 
 namespace app.Application.Contracts.Contracts.Services.UserAgg;
 
@@ -10,4 +11,6 @@ public interface IExpertService
     Task<int> GetExpertIdByUserIdAsync(int userId, CancellationToken ct);
     Task<ExpertProfileDto?> GetByExpertIdAsync(int userId, CancellationToken ct);
     Task<bool> HardDeleteByUserIdAsync(int userId, CancellationToken ct);
+    Task<ExpertProfileDto?> GetByUserIdAsync(int userId, CancellationToken ct);
+    Task<int> GetIdByUserIdAsync(int userId, CancellationToken ct);
 }

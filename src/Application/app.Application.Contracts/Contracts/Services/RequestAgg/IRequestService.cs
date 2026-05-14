@@ -9,6 +9,7 @@ public interface IRequestService
     Task<decimal> GetBasePriceByRequestIdAsync(int requestId, CancellationToken ct);
     Task<int> CreateAsync(CreateRequestDto command, CancellationToken ct);
     Task<bool> UpdateAsync(UpdateRequestDto command, CancellationToken ct);
+    Task<bool> DeleteAsync(int id, CancellationToken ct);
     Task<RequestFullDto?> GetByIdAsync(int id, CancellationToken ct);
     Task<RequestDetailDto?> GetDetailsByIdAsync(int id, CancellationToken ct);
     Task<List<RequestSummaryDto>> GetAllAsync(PaginationRequestDto search, int? categoryId, int? cityId, CancellationToken ct);

@@ -1,5 +1,8 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.RequestAgg;
+using app.Application.Contracts.Contracts.Services.Suggestion;
+using app.Application.Contracts.Contracts.Services.UserAgg;
 using app.Application.Contracts.DTOs.RequestDTOs;
 using app.Application.Contracts.DTOs.SuggestionDTOs;
 using app.Domain.SuggestionAgg.Enums;
@@ -9,9 +12,9 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.Requests.Commands.SelectExpert;
 
 public class SelectExpertCommandHandler(
-    IRequestRepository requestRepository,
-    ISuggestionRepository suggestionRepository,
-    IUserRepository userRepository,
+    IRequestService requestService,
+    ISuggestionService suggestionService,
+    IUserService userService,
     ILogger<SelectExpertCommandHandler> logger)
     : IRequestHandler<SelectExpertCommand, Result<bool>>
 {
@@ -19,24 +22,24 @@ public class SelectExpertCommandHandler(
     {
         try
         {
-            var request = await requestRepository.GetByIdAsync(command.RequestId, ct);
+            var request = await requestService.GetByIdAsync(command.RequestId, ct);
             if (request == null) return Result<bool>.Failure("درخواست یافت نشد.");
 
             if (request.CustomerUserId != command.CustomerId)
                 return Result<bool>.Failure("دسترسی غیرمجاز.");
 
-            var suggestion = await suggestionRepository.GetByIdAsync(command.SuggestionId, ct);
+            var suggestion = await suggestionService.GetByIdAsync(command.SuggestionId, ct);
             if (suggestion == null)
                 return Result<bool>.Failure("پیشنهاد یافت نشد.");
 
-            var user = await userRepository.GetByIdAsync(request.CustomerUserId, ct);
+            var user = await userService.GetByIdAsync(request.CustomerUserId, ct);
 
             if (user.BalanceAmount < suggestion.SuggestedPrice)
                 return Result<bool>.Failure("موجودی کافی نیست.");
 
             suggestion.Status = SuggestionStatus.Accepted;
 
-            await suggestionRepository.UpdateAsync(new UpdateSuggestionDto
+            await suggestionService.UpdateAsync(new UpdateSuggestionDto
             {
                 Id = suggestion.Id,
                 Status = SuggestionStatus.Accepted,
@@ -46,7 +49,7 @@ public class SelectExpertCommandHandler(
                 Note = suggestion.Note
             }, ct);
 
-            await requestRepository.UpdateAsync(new UpdateRequestDto
+            await requestService.UpdateAsync(new UpdateRequestDto
             {
                 Id = request.Id,
                 Title = request.Title,

@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace app.Application.Features.Admins.Queries;
+namespace app.Application.Features.Admins.Queries.GetAdminProfileByUserId;
 
 public class GetAdminProfileByUserIdQueryValidator
     : AbstractValidator<GetAdminProfileByUserIdQuery>

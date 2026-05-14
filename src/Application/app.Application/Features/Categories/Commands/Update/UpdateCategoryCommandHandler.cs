@@ -1,6 +1,6 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Providers_Services;
-using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.CategoryAgg;
 using app.Application.Contracts.DTOs.CategoryDTOs;
 using FluentValidation;
 using MediatR;
@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.Categories.Commands.Update;
 
 public class UpdateCategoryCommandHandler(
-    ICategoryRepository categoryRepository,
+    ICategoryService categoryService,
     ICacheService cache,
     ILogger<UpdateCategoryCommandHandler> logger,
     IValidator<UpdateCategoryCommand> validator,
@@ -22,7 +22,7 @@ public class UpdateCategoryCommandHandler(
         if (!result.IsValid)
             throw new ValidationException(result.Errors);
 
-        var category = await categoryRepository.GetByIdAsync(request.Id, ct);
+        var category = await categoryService.GetByIdAsync(request.Id, ct);
         if (category == null)
             return Result.Failure("دسته بندی یافت نشد.", "NOT_FOUND");
 
@@ -43,7 +43,7 @@ public class UpdateCategoryCommandHandler(
 
         try
         {
-            await categoryRepository.UpdateAsync(dto, ct);
+            await categoryService.UpdateAsync(dto, ct);
 
             await cache.RemoveAsync(CacheKeys.CategoryDetails(dto.Id), ct);
             await cache.BumpStampAsync(CacheKeys.StampAllRequests, CacheTtl.Stamps, ct);

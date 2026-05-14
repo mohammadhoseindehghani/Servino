@@ -1,5 +1,8 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.ExpertHomeServiceAgg;
+using app.Application.Contracts.Contracts.Services.HomeServiceAgg;
+using app.Application.Contracts.Contracts.Services.UserAgg;
 using app.Application.Contracts.DTOs.UserDTOs;
 using FluentValidation;
 using MediatR;
@@ -7,9 +10,9 @@ using MediatR;
 namespace app.Application.Features.Experts.Queries.GetExpertServicesForEdit;
 
 public class GetExpertServicesForEditQueryHandler(
-    IExpertRepository expertRepository,
-    IHomeServiceRepository homeServiceRepository,
-    IExpertHomeServiceRepository expertHomeServiceRepository,
+    IExpertService expertService,
+    IHomeServiceService homeServiceService,
+    IExpertHomeServiceService expertHomeServiceService,
     IValidator<GetExpertServicesForEditQuery> validator)
     : IRequestHandler<GetExpertServicesForEditQuery, Result<List<ExpertServiceItemDto>>>
 {
@@ -23,14 +26,14 @@ public class GetExpertServicesForEditQueryHandler(
         if (!resultValidation.IsValid)
             throw new ValidationException(resultValidation.Errors);
 
-        var expertId = await expertRepository.GetIdByUserIdAsync(request.UserId, ct);
+        var expertId = await expertService.GetIdByUserIdAsync(request.UserId, ct);
         if (expertId == 0)
             return Result<List<ExpertServiceItemDto>>
                 .Failure("اکسپرت یافت نشد.");
 
-        var allServices = await homeServiceRepository.GetAllActiveServicesAsync(ct);
+        var allServices = await homeServiceService.GetAllActiveServicesAsync(ct);
         var selectedServiceIds =
-            await expertHomeServiceRepository.GetServiceIdsByExpertIdAsync(expertId, ct);
+            await expertHomeServiceService.GetServiceIdsByExpertIdAsync(expertId, ct);
 
         var mapped = allServices.Select(s => new ExpertServiceItemDto
         {

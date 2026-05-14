@@ -1,5 +1,5 @@
 ﻿using app.Application.Contracts.Common;
-using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.UserAgg;
 using app.Application.Contracts.DTOs.UserDTOs;
 using FluentValidation;
 using MediatR;
@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.Customers.Queries.GetCustomerProfileByUserId;
 
 public class GetCustomerProfileByUserIdQueryHandler(
-    ICustomerRepository customerRepository,
+    ICustomerService customerService,
     ILogger<GetCustomerProfileByUserIdQueryHandler> logger,
     IValidator<GetCustomerProfileByUserIdQuery> validator)
     : IRequestHandler<GetCustomerProfileByUserIdQuery, Result<CustomerProfileDto>>
@@ -24,7 +24,7 @@ public class GetCustomerProfileByUserIdQueryHandler(
 
         try
         {
-            var profile = await customerRepository.GetByUserIdAsync(request.UserId, ct);
+            var profile = await customerService.GetByUserIdAsync(request.UserId, ct);
 
             return profile == null
                 ? Result<CustomerProfileDto>.Failure("اطلاعات یافت نشد.")

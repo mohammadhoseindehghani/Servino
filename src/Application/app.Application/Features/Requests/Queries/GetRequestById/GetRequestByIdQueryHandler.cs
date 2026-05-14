@@ -1,5 +1,6 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.RequestAgg;
 using app.Application.Contracts.DTOs.RequestDTOs;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -7,7 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace app.Application.Features.Requests.Queries.GetRequestById;
 
 public class GetRequestByIdQueryHandler(
-    IRequestRepository requestRepository,
+    IRequestService requestService,
     ILogger<GetRequestByIdQueryHandler> logger)
     : IRequestHandler<GetRequestByIdQuery, Result<RequestFullDto>>
 {
@@ -16,7 +17,7 @@ public class GetRequestByIdQueryHandler(
     {
         try
         {
-            var request = await requestRepository.GetByIdAsync(query.Id, ct);
+            var request = await requestService.GetByIdAsync(query.Id, ct);
 
             return request == null
                 ? Result<RequestFullDto>.Failure("درخواست یافت نشد.", "404")

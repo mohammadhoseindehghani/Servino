@@ -1,12 +1,13 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Providers_Services;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.CityAgg;
 using FluentValidation;
 using MediatR;
 
 namespace app.Application.Features.City.Commands.CreateCity;
 
-public class CreateCityCommandHandler(ICityRepository cityRepository, ICacheService cache, IValidator<CreateCityCommand> validator)
+public class CreateCityCommandHandler(ICityService cityService, ICacheService cache, IValidator<CreateCityCommand> validator)
     : IRequestHandler<CreateCityCommand, Result<bool>>
 {
     public async Task<Result<bool>> Handle(CreateCityCommand request, CancellationToken ct)
@@ -16,7 +17,7 @@ public class CreateCityCommandHandler(ICityRepository cityRepository, ICacheServ
         if (!result.IsValid)
             throw new ValidationException(result.Errors);
 
-        var resultOp = await cityRepository.CreateAsync(request.Title, request.ProvinceId, ct);
+        var resultOp = await cityService.CreateAsync(request.Title, request.ProvinceId, ct);
 
         if (resultOp)
         {

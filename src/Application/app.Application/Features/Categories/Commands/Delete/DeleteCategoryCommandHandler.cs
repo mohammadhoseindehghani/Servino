@@ -1,13 +1,14 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Providers_Services;
 using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Services.CategoryAgg;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace app.Application.Features.Categories.Commands.Delete;
 
 public class DeleteCategoryCommandHandler(
-    ICategoryRepository categoryRepository,
+    ICategoryService categoryService,
     ICacheService cache,
     ILogger<DeleteCategoryCommandHandler> logger,
     IFileService fileService) : IRequestHandler<DeleteCategoryCommand, Result>
@@ -17,7 +18,7 @@ public class DeleteCategoryCommandHandler(
         try
         {
 
-            var category = await categoryRepository.GetByIdAsync(request.Id, ct);
+            var category = await categoryService.GetByIdAsync(request.Id, ct);
 
             if (category == null)
                 return Result.Failure("دسته بندی یافت نشد.", "NOT_FOUND");
@@ -25,7 +26,7 @@ public class DeleteCategoryCommandHandler(
             if (category.ImagePath != null)
                 await fileService.DeleteFileAsync(category.ImagePath, ct);
 
-            await categoryRepository.DeleteAsync(request.Id, ct);
+            await categoryService.DeleteAsync(request.Id, ct);
 
             await cache.RemoveAsync(CacheKeys.CategoryDetails(request.Id), ct);
             await cache.BumpStampAsync(CacheKeys.StampAllRequests, CacheTtl.Stamps, ct);
