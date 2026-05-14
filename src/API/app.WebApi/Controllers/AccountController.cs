@@ -1,4 +1,4 @@
-﻿using app.Application.DTOs.IdentityDTOs;
+﻿using app.Application.Contracts.DTOs.IdentityDTOs;
 using app.Application.Features.Users.Commands.LoginWithPassword;
 using app.Application.Features.Users.Commands.RegisterUser;
 using app.Application.Features.Users.Commands.SendOtpCommand;

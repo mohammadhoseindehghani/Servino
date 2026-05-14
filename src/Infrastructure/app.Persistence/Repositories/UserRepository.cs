@@ -1,6 +1,6 @@
-﻿using app.Application.Common;
-using app.Application.Contracts.Repositories;
-using app.Application.DTOs.UserDTOs;
+﻿using app.Application.Contracts.Common;
+using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.DTOs.UserDTOs;
 using app.Domain.UserAgg.Entities;
 using Microsoft.EntityFrameworkCore;
 

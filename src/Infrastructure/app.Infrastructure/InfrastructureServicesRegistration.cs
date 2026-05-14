@@ -1,6 +1,4 @@
-﻿using app.Application.Contracts.Services;
-using app.Application.Models;
-using app.Infrastructure.Cache;
+﻿using app.Infrastructure.Cache;
 using app.Infrastructure.File;
 using app.Infrastructure.Identity.Service;
 using app.Infrastructure.Mail;
@@ -11,6 +9,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using app.Application.Contracts.Contracts.Services;
+using app.Application.Contracts.Models;
 
 namespace app.Infrastructure;
 

@@ -1,7 +1,6 @@
-﻿
-using System.Net;
-using app.Application.Contracts.Services;
-using app.Application.Models;
+﻿using System.Net;
+using app.Application.Contracts.Contracts.Services;
+using app.Application.Contracts.Models;
 using Microsoft.Extensions.Options;
 using SendGrid;
 using SendGrid.Helpers.Mail;

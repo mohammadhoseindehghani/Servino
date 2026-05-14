@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using app.Application.Contracts.Services;
+using app.Application.Contracts.Contracts.Services;
 using Microsoft.Extensions.Caching.Distributed;
 
 namespace app.Infrastructure.Cache;

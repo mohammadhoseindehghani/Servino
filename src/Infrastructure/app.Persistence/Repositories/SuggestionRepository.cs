@@ -1,5 +1,5 @@
-﻿using app.Application.Contracts.Repositories;
-using app.Application.DTOs.SuggestionDTOs;
+﻿using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.DTOs.SuggestionDTOs;
 using app.Domain.SuggestionAgg.Entities;
 using app.Domain.SuggestionAgg.Enums;
 using Microsoft.EntityFrameworkCore;

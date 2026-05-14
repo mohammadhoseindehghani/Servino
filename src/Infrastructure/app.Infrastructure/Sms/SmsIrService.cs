@@ -1,4 +1,4 @@
-﻿using app.Application.Contracts.Services;
+﻿using app.Application.Contracts.Contracts.Services;
 using IPE.SmsIrClient;
 using IPE.SmsIrClient.Exceptions;
 using IPE.SmsIrClient.Models.Requests;

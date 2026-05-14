@@ -1,6 +1,6 @@
-﻿using app.Application.Common;
-using app.Application.Contracts.Repositories;
-using app.Application.DTOs.RequestDTOs;
+﻿using app.Application.Contracts.Common;
+using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.DTOs.RequestDTOs;
 using app.Domain.RequestAgg.Entities;
 using app.Domain.SuggestionAgg.Enums;
 using Microsoft.EntityFrameworkCore;

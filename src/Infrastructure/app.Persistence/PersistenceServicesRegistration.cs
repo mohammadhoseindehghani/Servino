@@ -1,5 +1,4 @@
-﻿using app.Application.Contracts.Repositories;
-using app.Application.Contracts.Services;
+﻿using app.Application.Contracts.Contracts.Repositories;
 using app.Infrastructure.Identity.Service;
 using app.Persistence.Repositories;
 using Microsoft.AspNetCore.Identity;

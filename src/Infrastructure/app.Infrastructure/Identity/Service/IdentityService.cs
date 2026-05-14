@@ -1,7 +1,6 @@
-﻿using app.Application.Common;
-using app.Application.Contracts.Repositories;
-using app.Application.Contracts.Services;
-using app.Application.DTOs.IdentityDTOs;
+﻿using app.Application.Contracts.Common;
+using app.Application.Contracts.Contracts.Services;
+using app.Application.Contracts.DTOs.IdentityDTOs;
 using IPE.SmsIrClient.Models.Requests;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;

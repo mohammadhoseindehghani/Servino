@@ -1,6 +1,6 @@
-﻿using app.Application.Common;
-using app.Application.Contracts.Repositories;
-using app.Application.DTOs.CommentDTOs;
+﻿using app.Application.Contracts.Common;
+using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.DTOs.CommentDTOs;
 using app.Domain.CommentAgg.Entities;
 using Microsoft.EntityFrameworkCore;
 

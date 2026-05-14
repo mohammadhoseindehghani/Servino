@@ -1,6 +1,6 @@
-﻿using app.Application.Common;
-using app.Application.Contracts.Repositories;
-using app.Application.DTOs.HomeServiceDTOs;
+﻿using app.Application.Contracts.Common;
+using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.DTOs.HomeServiceDTOs;
 using app.Domain.HomeServiceAgg.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

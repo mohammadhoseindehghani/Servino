@@ -3,9 +3,12 @@
   <Folder Name="/src/API/">
     <Project Path="src/API/app.WebApi/app.WebApi.csproj" Id="bf5ce551-370f-415a-9505-c5842c77783f" />
   </Folder>
-  <Folder Name="/src/Core/">
-    <Project Path="src/Core/app.Application/app.Application.csproj" Id="f08e9dc9-834a-4e2e-80e5-70f7ed63c791" />
-    <Project Path="src/Core/app.Domain/app.Domain.csproj" Id="da65a873-203e-40f0-8ed6-7348374696df" />
+  <Folder Name="/src/Application/">
+    <Project Path="src/Application/app.Application.Contracts/app.Application.Contracts.csproj" Id="e921d755-8a66-4661-bec6-fe3b479cc5fc" />
+    <Project Path="src/Application/app.Application/app.Application.csproj" Id="951aa977-2680-4c20-a10d-4d0af2403acf" />
+  </Folder>
+  <Folder Name="/src/Domain/">
+    <Project Path="src/Domain/app.Domain/app.Domain.csproj" Id="0c963f93-719d-435a-a429-d576a258a8a1" />
   </Folder>
   <Folder Name="/src/Infrastructure/">
     <Project Path="src/Infrastructure/app.Identity/app.Identity.csproj" Id="42b400a6-6aac-4b09-bb09-84b95c017d23" />

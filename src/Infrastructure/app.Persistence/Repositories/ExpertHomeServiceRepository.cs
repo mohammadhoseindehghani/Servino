@@ -1,5 +1,5 @@
-﻿using app.Application.Contracts.Repositories;
-using app.Application.DTOs.UserDTOs;
+﻿using app.Application.Contracts.Contracts.Repositories;
+using app.Application.Contracts.DTOs.UserDTOs;
 using app.Domain.ExpertHomeServiceAgg.Entities;
 using Microsoft.EntityFrameworkCore;
 

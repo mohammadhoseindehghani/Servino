@@ -1,5 +1,5 @@
 ﻿using System.Security.Claims;
-using app.Application.Contracts.Repositories;
+using app.Application.Contracts.Contracts.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
