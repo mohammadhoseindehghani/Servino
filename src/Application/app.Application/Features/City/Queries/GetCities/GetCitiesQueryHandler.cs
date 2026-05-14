@@ -1,5 +1,5 @@
-﻿using app.Application.Contracts.Contracts.Repositories;
-using app.Application.Contracts.Contracts.Services;
+﻿using app.Application.Contracts.Contracts.Providers_Services;
+using app.Application.Contracts.Contracts.Repositories;
 using app.Application.Contracts.DTOs.LocationDTOs;
 using MediatR;
 

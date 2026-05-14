@@ -20,4 +20,12 @@
     <ProjectReference Include="..\app.Application.Contracts\app.Application.Contracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Admins\Mappings\" />
+    <Folder Include="Features\City\Mappings\" />
+    <Folder Include="Features\Customers\Mappings\" />
+    <Folder Include="Features\Experts\Mappings\" />
+    <Folder Include="Features\Province\Mappings\" />
+  </ItemGroup>
+
 </Project>

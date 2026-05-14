@@ -1,5 +1,4 @@
-﻿
-using app.Application.Contracts.Common;
+﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.Contracts.Repositories;
 using FluentValidation;
 using MediatR;

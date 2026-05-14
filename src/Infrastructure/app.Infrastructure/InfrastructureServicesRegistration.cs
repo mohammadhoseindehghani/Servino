@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using app.Application.Contracts.Contracts.Services;
+using app.Application.Contracts.Contracts.Providers_Services;
 using app.Application.Contracts.Models;
 
 namespace app.Infrastructure;

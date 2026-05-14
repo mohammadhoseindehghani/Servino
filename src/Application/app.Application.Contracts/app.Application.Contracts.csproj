@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Common\Behaviors\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="IPE.SmsIr" Version="1.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
   </ItemGroup>

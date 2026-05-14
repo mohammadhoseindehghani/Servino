@@ -1,7 +1,7 @@
 ﻿using app.Application.Contracts.Common;
 using app.Application.Contracts.DTOs.IdentityDTOs;
 
-namespace app.Application.Contracts.Contracts.Services;
+namespace app.Application.Contracts.Contracts.Providers_Services;
 
 public interface IIdentityService
 {

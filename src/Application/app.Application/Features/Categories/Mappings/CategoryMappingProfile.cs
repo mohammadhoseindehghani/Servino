@@ -2,7 +2,7 @@
 using app.Domain.CategoryAgg.Entities;
 using AutoMapper;
 
-namespace app.Application.MappingProfiles;
+namespace app.Application.Features.Categories.Mappings;
 
 public class CategoryMappingProfile : Profile
 {

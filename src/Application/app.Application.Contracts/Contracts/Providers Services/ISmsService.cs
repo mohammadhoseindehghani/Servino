@@ -1,7 +1,7 @@
 ﻿using IPE.SmsIrClient.Models.Requests;
 using IPE.SmsIrClient.Models.Results;
 
-namespace app.Application.Contracts.Contracts.Services;
+namespace app.Application.Contracts.Contracts.Providers_Services;
 
 public interface ISmsService
 {

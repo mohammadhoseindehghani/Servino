@@ -1,6 +1,6 @@
 ﻿using app.Application.Contracts.Common;
+using app.Application.Contracts.Contracts.Providers_Services;
 using app.Application.Contracts.Contracts.Repositories;
-using app.Application.Contracts.Contracts.Services;
 using app.Application.Contracts.DTOs.CategoryDTOs;
 using FluentValidation;
 using MediatR;

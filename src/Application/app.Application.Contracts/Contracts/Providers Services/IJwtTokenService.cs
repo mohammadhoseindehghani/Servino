@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace app.Application.Contracts.Contracts.Services;
+namespace app.Application.Contracts.Contracts.Providers_Services;
 
 
 public interface IJwtTokenService

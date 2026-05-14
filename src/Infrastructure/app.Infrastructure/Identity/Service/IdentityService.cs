@@ -1,5 +1,5 @@
 ﻿using app.Application.Contracts.Common;
-using app.Application.Contracts.Contracts.Services;
+using app.Application.Contracts.Contracts.Providers_Services;
 using app.Application.Contracts.DTOs.IdentityDTOs;
 using IPE.SmsIrClient.Models.Requests;
 using Microsoft.AspNetCore.Identity;

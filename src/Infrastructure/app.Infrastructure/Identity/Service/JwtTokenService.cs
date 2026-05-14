@@ -3,7 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using app.Application.Contracts.Contracts.Services;
+using app.Application.Contracts.Contracts.Providers_Services;
 
 namespace app.Infrastructure.Identity.Service;
 
